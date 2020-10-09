@@ -217,6 +217,12 @@
 			}
 		}
 	}
+	else{
+		_version = file_read(path_version);
+		if(!is_undefined(_version)){
+			global.version = _version;
+		}
+	}
 	
 	 // Retrieve GitHub Version:
 	try{
