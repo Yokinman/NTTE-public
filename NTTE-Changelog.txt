@@ -1,0 +1,238 @@
+2.0 ~ Heart to Heart
+	
+	  @(sprite:menu/banners/sprHeartMain.png:1)
+	GENERAL
+	+	New area: @(sprite:areas/Crystal/sprRedText.png:12:-0.8)
+	+	New crowns: @bBONUS @s+ @rRED
+	+	New mutations: @wCOMPASSION @s+ SILVER TONGUE
+	+	Brand new level-modifying @wEvents
+	+	Unlockable skin for @pCrystal
+	+	Desert @wBlocked Rooms
+	+	Desert @wWall Bandits
+	+	Scrapyards @gSludge Pools
+	+	Arctic Seal @wIgloos
+	+	Labs @wFreak Chambers
+	+	The Crown Vault @yFlower @(sprite:skills/Reroll/sprSkillRerollHUD.png:1:0:16:12)
+	+	@bI.D.P.D. H.Q. @wElevators
+	+	@bI.D.P.D. H.Q. @wSecurity
+	+	Overhauled @bBonus Ammo @s& @bHP @bPickups
+	+	@bBonus @wChests
+	+	@yOrchid @wChests
+	+	@pHammerhead @wPickups
+	+	@rCrystal Hearts
+	+	Miner Bandits @(sprite:enemies/MinerBandit/sprMinerBanditIdle.png:4:-0.4:-1:12)
+	+	@wChangelog @sViewer
+	+	@wAuto Updating @sSystem
+	@d+	Try skipping big weapon chests
+	
+	  @(sprite:menu/banners/sprHeartEvents.png:1)
+	EVENTS
+	+	@wBandit Camp
+	+	@pScorpion City
+	+	@wMaggot Park, @sNew & Improved
+	+	@wBounty Hunter Den
+	+	@gSewer Pool
+	+	@rFire Pit
+	+	@sRaven @wArena @(sprite:sprRavenFly:0:-0.3:-1:12)
+	+	@wEel Grave
+	+	@wSeal Plaza         @(sprite:enemies/Seal/sprSealWalk5.png:6:-0.35:-1:12)@q@r!!!
+	+	@gMutant Vats
+	+	@pPalace Shrines
+	+	@wSuper Ambush
+	-	Removed old "events", which mainly increased enemy spawns
+	
+	  @(sprite:menu/banners/sprHeartPets.png:1)
+	PETS
+	+	Pet for @wScrapyards
+	+	Pet for @yCrown Vault
+	+	Pet for @wGeneral Areas
+	+	Pet for @(sprite:areas/Crystal/sprRedText.png:12:-0.8)
+	+	@wSpider @shas a special interaction with @yCursed Caves
+	+	@pPrism @scan dupe thrown @wBones & Weapons, @sat a @q@pcost
+	~	Pet @rHP @snow scales by @w+50% @sper loop
+	~	Pets are now revived through a @wPrompt, @sinstead of just contact
+	~	Getting @wSilver Scorpion @sis no longer based on @wRNG
+	~	@wParrot @spet now nicely perches on all modded mutants and skins
+	~	Revised @bOcto's @sidle/walk sprite @(sprite:pets/Trench/sprPetOctoIdle.png:16:-0.4:-1:12)
+	~	Untamed pets now get sucked into portals
+	~	Stats menu pet icons now align to the center column instead of the left
+	*	Fixed pets causing @wBig Lag @sif they couldn't find a path to the player
+	*	Fixed pets on the loading screen affecting level gen
+	*	Fixed the @pPizza Sewers @scave-in causing pets it killed to become @wImmortal @sfor the rest of the level
+	
+	  @(sprite:menu/banners/sprHeartWeapons.png:2:0)@(sprite:menu/banners/sprHeartWeapons.png:2:1)
+	WEAPONS
+	+	Clam Shield
+	+	Bubble Bat
+	+	@gEnergy Bat
+	+	@pTeleport Gun
+	+	@rAnnihilator
+	+	@rTunneller
+	~	Revised @wQuasar Cannon's @ssprite @(sprite:weps/sprQuasarCannon.png:1:0:-1:12)
+	~	@wBone @sthrowing speed is now increased by @bLong Arms
+	~	@wBubble Bombs @sare better at holding projectiles
+	
+	                @(sprite:menu/banners/sprHeartPolish.png:4)
+	POLISH & IMPROVEMENT
+	+	Various @wPerformance Improvements
+	+	Added a @wBoss Intro @sfor @bBIG FISH
+	+	@wDeflected @sprojectiles visually change:
+	 	@(sprite:sprEnemyBullet1:0:1) -> @(sprite:sprAllyBullet:0:1)
+	 	@(sprite:sprBullet2:0:1) -> @(sprite:sprEBullet3:0:1)
+	+	Neat @wAlert Indicators @sfor various situations, such as offscreen van portals @(sprite:alerts/sprVanAlert.png:1) and seal spawns @(sprite:alerts/sprSealAlert.png:1)
+	+	NT:TE's @yGolden Weapons @sare now stored on the loadout manually
+	+	New @wUnlock Icons @sfor NT:TE's stats screen
+	+	@pMom @sgets her very own nest in @gLoop Sewers
+	+	Special loading screen for @pPizza Sewers
+	+	The @wTurtles @sbought a new @wRug
+	+	@wBolts @scan now stick in @wSeal Shields
+	+	@wSeals @sget necromanced into @wSkeletal Seals
+	+	@yYV's Car @sspawns in a @w3x3 @sroom so it doesn't overlap chests or props
+	+	Walltop ravens now support @wtelekinesis, sharp teeth, anomaly, @setc.
+	+	Gave the @wThrone Room @ssome working @wStairs, @sthe carpet is now fully walkable
+	+	@gCat Chests @snow synergize with @yCrown of Love
+	+	Backpacks have new @wSkeletons @sand @wWeapon Debris
+	+	@wGuitar & Black Sword @sspawn stuck in the ground
+	+	Gave @bPit Squid's @stentacles a new death sprite
+	+	Implemented some more @bUnderwater @sarea polish
+	+	Gave @wShadows @sto:
+			Big Wall Decals
+			The Throne
+			Eyes' Maggot Friend  @(sprite:sprEyesMenu:0:-0.4:-1:12)
+			Captain's Desk/TV
+			Cuz's Couch/TV
+	+	Gave @wRobot @sspecial interactions for eating certain NT:TE guns
+	+	Some visual improvements to @wBuried Vaults
+	+	All of NT:TE's visuals now support @w>1x Pixel Scaling
+	~	@yLair's @snormal chests are now shop chests, instead of the bosses dropping them
+	~	@wCrown of Crime @snow unlocks when you @wopen @sthe @yLair
+	~	@yTreasure Chests @smoved to sea & drop better loot
+	~	@bSunken Chests @sspawn in a room instead of on walls
+	~	@wSpider Walls @srelease @wSpiderlings @swith a bounce to make them more obvious
+	~	Reduced loop scaling for @wSpider Walls @sand made them more performant
+	~	Reduced mortar plasma's impact intensity
+	~	Gave playable @wBig Dog @sa bigger @sunderwater bubble
+	~	The @wWater Quality @soption is now @wVisual Quality @sand affects much more
+	~	Merged Disc Gun projectiles now use @rEnemy @ssprites
+	~	@bCoast @snow only spawns sea mines on @(sprite:sprInterfaceIcons)@w1-3
+	~	Slightly increased @bCoast @sand @yLair's @smusic volumes
+	~	@wSeal King @snow plays their boss music for the initial wave of seals
+	~	@yShop Chests @snow automatically select an item if opened by a portal
+	~	@ySpirit Pickups @sturn into health pickups on dissipation
+	~	@gVenom Pellets @shave new sprites and can pierce
+	~	Big Bat's @gVenom Flak @sprojectiles now blow up if deflected while charging
+	~	@rCharm @sis a bit better at giving enemies @gGreen @seyes
+	~	@wBuried Vaults @sare rarer, but have a clearer hint
+	~	Made the @wThrone's @slegs break walls as they extend, instead of all at once
+	~	Gave the @wThrone @sa smaller cause-of-death sprite
+	~	Walltop shadows are @w10% @smore transparent @q@w!!!
+	*	Going to @pPizza Sewers @snow unlocks @bEyes B @(sprite:sprMapIcon:0:5:-1:12)
+	*	Fixed @pPizza Sewers @sdoors becoming a partial wall
+	*	Fixed the opened @gSewers @smanhole leaving empty chests and partial scorchmarks above it
+	*	Fixed @yLair's @sroom placement being slightly biased towards the east
+	*	Fixed Big Bat rarely creating a permanent @w9999 @shealth bat when transforming
+	*	Fixed @wRain Splashes @(sprite:sprRainSplash:0:-0.3) @sappearing below walls when outside the level
+	*	Fixed @wSawblade Trap @sexplosions not setting a cause-of-death on game over
+	*	Fixed @wSpiderlings @snot being capturable in bubble bombs
+	*	Fixed @bCoast @slagging to death from firing certain merged weapons a lot
+	*	Fixed pickups out in @bCoast's @socean getting pushed back to shore crazy fast
+	*	Fixed an error from @bBIG FISH @sbeing charmed when all players are dead
+	*	Fixed the @wThrone's @storches vanishing when activated
+	*	Fixed @wBuried Vaults @shaving softlock potential
+	*	Incomplete @wBuried Vaults @soccur far less often
+	*	@wBuried Vaults @sshouldn't open instantly at the start of the level anymore
+	*	Fixed the walltop @gRad Maggot Canister @ssoftlock
+	*	Fixed walltop enemies jumping into little baby jails
+	*	Fixed playable @wBig Dog @snot being able to interact with any of NT:TE's prompts
+	*	@ySpirit Pickups @snow correctly play disappear effects for their extra @wHaste @shalo
+	*	Fixed the base game's @wWall Decals @ssometimes getting destroyed around the spawn
+	*	NT:TE's areas shouldn't create any props right next to the spawn anymore
+	*	Fixed certain things occurring multiple times for every extra co-op player
+	-	@bTrench's @sweapon chest can no longer get replaced by a @bSunken Chest
+	-	Removed/reduced a number of walltop enemy & prop spawns in favor of new additions
+	
+	BALANCE
+	+	@wAlbino Gators @sthrow @rQuasar Nades
+	+	@wArctic Seal Discs @shave custom sprites and red trails for visibility @(sprite:enemies/Seal/sprSealDisc.png:2:0:-1:12)
+	+	Gave @bPit Squid's @stentacles some neat energy outlines for visibility
+	~	@wBig Maggot Nests @semit less maggots and have had their @rHP @sreduced from @w50 @sto @w42
+	~	Reduced Scrapyard @wSawblade Trap @sspawns by @w50% @sand removed them for @wBig Dog
+	~	Reduced @rHP @sof various @bCoast @senemies:
+			Pelican   	 @w50 @s-> @w45
+			Diver     	  @w12 @s-> @w10
+			Seal      	  @w12 @s-> @w10
+			Heavy Seal	 @w40 @s-> @w32
+			Seal King 	@w300 @s-> @w260
+	~	@wSeal King @sspawns more @wGrunt Seals, @sless @wShielder @sand @wBlunderbuss Seals
+	~	@wShielder Seals @sshould be much easier
+		(smaller shield hitbox, won't always face you, etc.)
+	~	@bJellyfish @sspeed increased and contact damage upped from @w3 @sto @w4
+	~	@bEels @smove a little faster
+	~	Gave @yCrystal Mortars @sa bigger hitbox
+	~	@pPortal Guardians @sare much scarier
+	~	@ySpirit Pickups @sfade significantly faster and only drop from boss enemies
+	*	Fixed eating a stack of bones as @wRobot @sonly counting as one
+	*	Fixed @wThrone 2's @sarena rarely having invisible walls over floors
+	*	@bPit Squid's @seye lasers should no longer hit the player through walls
+	*	Fixed @bPit Squid's @stentacles not being hittable while retracting or extending
+	-	@yLair's @sdoors no longer block enemy line of sight
+	-	Removed big @gRad Canister @sloot from @wBuried Vaults
+	-	Disabled the Jungle's @gLast Wish @sreroll for future reasons, now done by another @yFlower
+	
+	@dThank you for playing! ~Team TE
+	
+1.1 ~ Polish & Bug Squashing
+	
+	+	Top enemies now support telekinesis, sharp teeth, brain capacity, anomaly, etc.
+	+	Charm now supports all non-NT:TE modded enemies automatically (hopefully)
+	+	Weapons now exist in the loading screen portal
+	+	Opening IDPD chests now closes the portal, just cause
+	+	Bonus ammo now supports pop pop
+	+	Variant scrapyards wall car
+	+	Big Shots venom flak can now drop pickups
+	+	Gave normal water mines the coast water mine's explosion
+	+	Seal King music
+	+	Seal King now smacks pickups away
+	+	Buried vaults look a bit more natural
+	~	Top enemy optimizations
+	~	Top enemies are a bit more inclined to jump off the wall
+	~	Crown of Crime now picks between replacing all weapon chests vs all ammo chests instead of a 66% chance per chest
+	~	Minor change to how charmed enemies target things, they'll attack somewhat more often
+	~	Increased Sawblade Gun's spawn area from 2-1 to 3-2
+	~	Renamed Parrot's description to make their active more obvious
+	~	Renamed the Slaughter skull's "CHUNK" prompt to "SHARE"
+	~	Pet Mimic now holds their weapon in place so it doesn't get pushed away
+	~	Pet Mimic's indicator now says "DROP" when they don't have a weapon
+	~	Optimizations to Hyper Bubbler's hitscan
+	~	Made squid tentacles a stronger light source
+	*	Fixed the god mode bat
+	*	Pet Octo no longer zaps vault statues and other important things
+	*	Pets no longer attack the Pizza Sewers squad on-sight
+	*	Fixed seals being able to attack during Seal King's intro sometimes
+	*	Fixed charm green eyes not appearing in coast's water
+	*	Fixed charmed heavy seals flailing a bit slowly sometimes
+	*	Fixed vaults not playing their music in NT:TE areas
+	*	Fixed buried vaults occasionally spawning close enough to instantly open
+	*	Fixed buried vaults sometimes spawning disjointed (probably)
+	*	Fixed bubble vents rarely exploding on the player entering the level
+	*	Fixed players getting rotated for the rest of the level if in range of a portal that gets closed (by opening the Lair or similar)
+	*	Fixed the heavy seal's mine overlapping things like Seal King
+	*	Fixed elite jellies not giving off light
+	*	Fixed an error from player sawblade discs
+	*	Fixed an error from harpoon ropes
+	-	Seal King no longer charms newly spawned seals when he's charmed (caused big lag)
+	-	Removed bone duplication
+	
+1.02 ~ Hotfix 2
+	
+	*	Fixed a rare heavy seal anchor error
+	*	Fixed a hard crash sometimes caused by ally-sprited charmed enemy projectiles
+	*	Fixed bonus spirit halos not appearing when in coast's water
+	*	Fixed buried vaults being able to mess up the pizza drain hallway
+	*	Buried vaults should be closer to 100% consistent with giving loot
+	
+1.01 ~ Hotfix 1
+	
+	*	Fixed charmed laser crystals erroring
+	
+1.0 ~ RELEASE
