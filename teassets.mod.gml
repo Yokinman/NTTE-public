@@ -1,5 +1,5 @@
 #define init
-	ntte_version = 2.0;
+	ntte_version = 2.01;
 	
 	 // Debug Lag:
 	lag = false;
@@ -1570,6 +1570,25 @@
 						["MenuSelected", 10, 16,  16, false],
 						["Feather",       1,  3,   4, true],
 						["FeatherHUD",    1,  5,   5, false]
+					]
+				},
+					
+				"???" : {
+					skin : 2,
+					sprt : [
+						["Loadout",   2, 16,  16, true],
+						["Map",       1, 10,  10, true],
+						["Portrait",  1, 40, 243, true],
+						["Select",    2,  0,   0, false],
+						["UltraIcon", 2, 12,  16, false],
+						["UltraHUDA", 1,  8,   9, false],
+						["UltraHUDB", 1,  8,   9, false],
+						["Idle",      8, 12,  12, true],
+						["Walk",      6, 12,  12, true],
+						["Hurt",      3, 12,  12, true],
+						["Dead",      6, 12,  12, true],
+						["GoSit",     3, 12,  12, true],
+						["Sit",       1, 12,  12, true]
 					]
 				}
 			};

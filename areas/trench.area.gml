@@ -118,9 +118,6 @@
 	 // Tunnel Spawn:
 	safespawn += 2;
 	
-	 // Remember:
-	variable_instance_set(GameCont, "ntte_visits_" + mod_current, area_visits + 1);
-	
 #define area_setup_floor
 	if(styleb){
 		 // Fix Depth:
@@ -211,6 +208,9 @@
 	}
 	
 #define area_finish
+	 // Remember:
+	variable_instance_set(GameCont, "ntte_visits_" + mod_current, area_visits + 1);
+	
 	 // Next Subarea:
 	if(subarea < area_subarea()){
 		subarea++;
@@ -505,14 +505,22 @@
 		}
 		
 		 // Stuff Falling Into Pits:
-		if(instance_exists(Corpse) && (instance_exists(enemy) || instance_exists(Portal))){
-			var _inst = instances_matching_ne(instances_matching(instances_matching(Corpse, "trenchpit_check", null), "image_speed", 0), "sprite_index", sprPStatDead);
+		if(instance_exists(Corpse)){
+			var _inst = instances_matching_ne(instances_matching(instances_matching(Corpse, "trenchpit_check", null), "image_speed", 0), "sprite_index", mskNone, sprPStatDead);
 			if(array_length(_inst)) with(_inst){
 				if(speed <= 0){
 					trenchpit_check = true;
 				}
 				if(pit_get(x, y)){
 					pit_sink(x, y, sprite_index, image_index, image_xscale, image_yscale, image_angle, direction, speed, orandom(0.6))
+					
+					 // Safety Corpse:
+					if(!instance_exists(enemy) && !instance_exists(Portal)){
+						with(instance_create(x, y, Corpse)){
+							sprite_index = mskNone;
+						}
+					}
+					
 					instance_destroy();
 				}
 			}

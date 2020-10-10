@@ -125,9 +125,6 @@
 	 // Reset 'area_pop_enemies' Counter:
 	global.pop_enemies_wait = 0;
 	
-	 // Remember:
-	variable_instance_set(GameCont, "ntte_visits_" + mod_current, area_visits + 1);
-	
 #define area_setup_floor
 	 // Footsteps:
 	material = 1;
@@ -225,6 +222,9 @@
 	unlock_set("race:parrot", true);
 	
 #define area_finish
+	 // Remember:
+	variable_instance_set(GameCont, "ntte_visits_" + mod_current, area_visits + 1);
+	
 	 // Next Subarea:
 	if(subarea < area_subarea()){
 		subarea++;
@@ -245,11 +245,6 @@
 	mod_variable_set("mod", "ntte", "area_update", true);
 	
 	 // There Ain't No More Water:
-	with(ds_map_values(global.sea_bind)){
-		if(instance_exists(id)){
-			id.visible = false;
-		}
-	}
 	with(instances_matching_ne(instances_matching(GameObject, "persistent", true), "wading", null)){
 		wading = 0;
 	}
@@ -753,6 +748,13 @@
 					}
 				}
 			}
+		}
+	}
+	
+	 // Disable Sea:
+	else with(ds_map_values(global.sea_bind)){
+		if(instance_exists(id)){
+			id.visible = false;
 		}
 	}
 	

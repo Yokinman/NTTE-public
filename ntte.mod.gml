@@ -330,9 +330,11 @@
 			 // Spawn Hearts:
 			if(array_length(_spawnFloor) > 0){
 				 // Visited Warp Zone, Only Chaos Hearts:
-				if(_heartNum > 0 && variable_instance_get(GameCont, "ntte_visits_red", 0) > GameCont.loops){
-					_chaosNum += _heartNum;
-					_heartNum = 0;
+				if(_heartNum > 0){
+					if(GameCont.area == "red" || variable_instance_get(GameCont, "ntte_visits_red", 0) > GameCont.loops){
+						_chaosNum += _heartNum;
+						_heartNum = 0;
+					}
 				}
 				
 				 // Create:

@@ -256,9 +256,6 @@
 	room_list = [];
 	if(room_debug) script_bind_draw(room_debug_draw, 0);
 	
-	 // Remember:
-	variable_instance_set(GameCont, "ntte_visits_" + mod_current, area_visits + 1);
-	
 #define area_setup_floor
 	 // Fix Depth:
 	if(styleb) depth = 8;
@@ -280,6 +277,9 @@
 	}
 	
 #define area_finish
+	 // Remember:
+	variable_instance_set(GameCont, "ntte_visits_" + mod_current, area_visits + 1);
+	
 	 // Next Subarea:
 	if(subarea < area_subarea()){
 		subarea++;
