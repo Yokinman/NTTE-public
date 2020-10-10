@@ -1,3 +1,8 @@
+2.01 ~ Time to Fix
+	* Fixed corpses awkwardly floating above pits at the end of the level in Trench
+	* Fixed the ocean following you back to the character selection screen from Coast
+	* Fixed Chaos hearts being a bit too common
+	
 2.0 ~ Heart to Heart
 	
 	  @(sprite:menu/banners/sprHeartMain.png:1)
