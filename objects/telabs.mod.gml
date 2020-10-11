@@ -1215,7 +1215,9 @@
 			repeat(2) instance_create(x, y, IDPDSpawn);
 			with(instance_create(x, y - 16, type)){
 				my_health = 0;
-				with(self) event_perform(ev_destroy, 0);
+				with(self){
+					event_perform(ev_destroy, 0);
+				}
 			}
 			
 			 // Quality Assurance:
@@ -1230,14 +1232,18 @@
 			
 		case "Angler":
 			with(obj_create(x, y, type)){
-				with(self) event_perform(ev_step, ev_step_normal);
+				with(self){
+					event_perform(ev_step, ev_step_normal);
+				}
 			}
 			break;
 			
 		case "CrystalHeart":
 			with(obj_create(x, y - 16, type)){
 				my_health = 0;
-				with(self) event_perform(ev_destroy, 0);
+				with(self){
+					event_perform(ev_destroy, 0);
+				}
 			}
 			break;
 			

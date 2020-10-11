@@ -275,7 +275,9 @@
 						with(SubTopCont){
 							with(instance_create(0, 0, TopCont)){
 								darkness = true;
-								event_perform(ev_other, ev_room_end);
+								with(self){
+									event_perform(ev_other, ev_room_end);
+								}
 								instance_destroy();
 							}
 							instance_destroy();
@@ -749,8 +751,12 @@
 	 // Force Spawns:
 	if(alarm1 > 0 && alarm1 <= ceil(current_time_scale)){
 		depth = 0;
-		repeat(num){
-			event_perform(ev_alarm, 1);
+		if(num > 0){
+			with(self){
+				repeat(num){
+					event_perform(ev_alarm, 1);
+				}
+			}
 			with(instance_create(x, y, PortalClear)){
 				image_xscale = 2;
 				image_yscale = image_xscale;
@@ -1230,7 +1236,9 @@
 							with(instance_create(_sx, _sy, TopSmall)){
 								if(collision_line(_x1, _y1, _x2, _y2, id, false, false)){
 									GameCont.area = other.area;
-									event_perform(ev_create, 0);
+									with(self){
+										event_perform(ev_create, 0);
+									}
 									if(!instance_exists(self)) break;
 									array_push(_tileNew, self);
 								}
@@ -3204,7 +3212,7 @@
 	else instance_destroy();
 	
 #define PetRevive_draw
-	with(creator){
+	with(creator) with(self){
 		event_perform(ev_draw, 0);
 	}
 	
@@ -3674,7 +3682,7 @@
 	
 #define PetWeaponBoss_death
 	 // Boss Win Music:
-	with(MusCont){
+	with(MusCont) with(self){
 		var _area = GameCont.area;
 		GameCont.area = -1;
 		event_perform(ev_alarm, 11);
@@ -4243,7 +4251,9 @@
 				 // Relocate:
 				x = _x;
 				y = _y;
-				event_perform(ev_create, 0);
+				with(self){
+					event_perform(ev_create, 0);
+				}
 				
 				return self;
 			}
@@ -5108,7 +5118,7 @@
 			
 			 // Description:
 			if(splash_texty <= 0){
-				_ty += max(string_height("A"), string_height(_nam));
+				_ty += string_height(_nam + " ");
 				draw_text_nt(_tx, _ty, "@s" + _txt);
 			}
 		}
@@ -5338,7 +5348,9 @@
 						zspeed    = random_range(2.5, 5);
 						speed     = random_range(1, 2.5);
 						direction = other.direction;
-						event_perform(ev_step, ev_step_end);
+						with(self){
+							event_perform(ev_step, ev_step_end);
+						}
 					}
 					
 					 // Pickup:
@@ -5347,7 +5359,9 @@
 						with(obj_create(x, y, "BackpackPickup")){
 							target    = other;
 							direction = other.direction + orandom(60);
-							event_perform(ev_step, ev_step_end);
+							with(self){
+								event_perform(ev_step, ev_step_end);
+							}
 						}
 					}
 					
@@ -5395,7 +5409,9 @@
 								zspeed = random_range(2, 4);
 								speed = random_range(1, 2.5);
 								direction = random(360);
-								event_perform(ev_step, ev_step_end);
+								with(self){
+									event_perform(ev_step, ev_step_end);
+								}
 							}
 						}
 					}
@@ -5615,7 +5631,7 @@
 					if(place_meeting(x + mask_x, y + mask_y, Floor) && (jump != 0 || grav > 0)){
 						 // Wobble:
 						if(wobble != 0 && place_meeting(x + mask_x, y + mask_y, Wall)){
-							var	_wobWest = position_meeting(bbox_left, y, Floor),
+							var	_wobWest = position_meeting(bbox_left,  y, Floor),
 								_wobEast = position_meeting(bbox_right, y, Floor);
 								
 							if(_wobWest || _wobEast){

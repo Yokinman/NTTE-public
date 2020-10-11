@@ -94,7 +94,9 @@
 			area    = area_pizza_sewers;
 			subarea = 1;
 			loops   = 0;
-			with(self) event_perform(ev_other, ev_room_start);
+			with(self){
+				event_perform(ev_other, ev_room_start);
+			}
 			
 			 // Restore Vars & Seed:
 			with(_vars){
@@ -263,8 +265,8 @@
 	}
 	
 #define area_pop_props
-	var	_x = x + 16,
-		_y = y + 16,
+	var	_x    = x + 16,
+		_y    = y + 16,
 		_west = !position_meeting(x - 16, y, Floor),
 		_east = !position_meeting(x + 48, y, Floor),
 		_nort = !position_meeting(x, y - 16, Floor),

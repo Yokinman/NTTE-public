@@ -1443,7 +1443,9 @@
 				UberCont.opt_bossintros = true;
 				
 				with(instance_create(0, 0, BanditBoss)){
-					event_perform(ev_alarm, 6);
+					with(self){
+						event_perform(ev_alarm, 6);
+					}
 					sound_stop(sndBigBanditIntro);
 					instance_delete(id);
 				}
@@ -2548,7 +2550,7 @@
 	with(UberCont) with(self){
 		var	_lastIntro = opt_bossintros,
 			_lastLoops = GameCont.loops,
-			_player = noone;
+			_player    = noone;
 			
 		 // Ensure Boss Intro Plays:
 		opt_bossintros = true;
@@ -2561,7 +2563,9 @@
 		 // Call Boss Intro:
 		with(instance_create(0, 0, GameObject)){
 			instance_change(BanditBoss, false);
-			event_perform(ev_alarm, 6);
+			with(self){
+				event_perform(ev_alarm, 6);
+			}
 			sound_stop(sndBigBanditIntro);
 			instance_delete(id);
 		}
@@ -2658,12 +2662,16 @@
 		
 		 // No Duplicates:
 		with(BackCont){
-			event_perform(ev_other, ev_room_end);
+			with(self){
+				event_perform(ev_other, ev_room_end);
+			}
 			instance_destroy();
 		}
 		with(TopCont){
 			darkness = true;
-			event_perform(ev_other, ev_room_end);
+			with(self){
+				event_perform(ev_other, ev_room_end);
+			}
 			instance_destroy();
 		}
 		with(SubTopCont){
@@ -2749,7 +2757,9 @@
 			}
 			
 			 // Populate Level:
-			with(KeyCont) event_perform(ev_create, 0); // reset player counter
+			with(KeyCont) with(self){
+				event_perform(ev_create, 0); // reset player counter
+			}
 			event_perform(ev_alarm, 0);
 			if(!_setArea){
 				with(WantPopo) instance_delete(id);
@@ -3267,7 +3277,9 @@
 			with(instances_matching_gt(FloorNormal, "bbox_bottom", _y)){
 				with(obj_create(x + 16, _y, "PizzaRubble")){
 					inst = _caveInst;
-					event_perform(ev_step, ev_step_normal);
+					with(self){
+						event_perform(ev_step, ev_step_normal);
+					}
 				}
 				
 				 // Fix Potential Softlockyness:
@@ -5460,35 +5472,37 @@
 				}
 				
 				 // TopSmalls:
-				else if(instance_is(target, prop)) with(target){
-					var _xsc = image_xscale;
-					image_xscale = sign(image_xscale * variable_instance_get(self, "right", 1));
-					
-					var	_west = bbox_left - 8,
-						_east = bbox_right + 1 + 8,
-						_nort = y - 8,
-						_sout = bbox_bottom + 1 + 8,
-						_shad = ((other.spr_shadow != -1) ? other.spr_shadow : spr_shadow),
-						_chance = 4/5;
+				else if(instance_is(target, prop)){
+					with(target){
+						var _xsc = image_xscale;
+						image_xscale = sign(image_xscale * variable_instance_get(self, "right", 1));
 						
-					if(sprite_get_bbox_right(_shad) - sprite_get_bbox_left(_shad) > 64){
-						_chance = 1;
-					}
-					
-					for(var _ox = _west; _ox < _east; _ox += 16){
-						for(var _oy = _nort; _oy < _sout; _oy += 16){
-							if(chance(_chance, 1)){
-								var	_sx = pfloor(_ox, 16),
-									_sy = pfloor(_oy, 16);
-									
-								if(!position_meeting(_sx, _sy, Floor) && !position_meeting(_sx, _sy, Wall) && !position_meeting(_sx, _sy, TopSmall)){
-									instance_create(_sx, _sy, TopSmall);
+						var	_west = bbox_left - 8,
+							_east = bbox_right + 1 + 8,
+							_nort = y - 8,
+							_sout = bbox_bottom + 1 + 8,
+							_shad = ((other.spr_shadow != -1) ? other.spr_shadow : spr_shadow),
+							_chance = 4/5;
+							
+						if(sprite_get_bbox_right(_shad) - sprite_get_bbox_left(_shad) > 64){
+							_chance = 1;
+						}
+						
+						for(var _ox = _west; _ox < _east; _ox += 16){
+							for(var _oy = _nort; _oy < _sout; _oy += 16){
+								if(chance(_chance, 1)){
+									var	_sx = pfloor(_ox, 16),
+										_sy = pfloor(_oy, 16);
+										
+									if(!position_meeting(_sx, _sy, Floor) && !position_meeting(_sx, _sy, Wall) && !position_meeting(_sx, _sy, TopSmall)){
+										instance_create(_sx, _sy, TopSmall);
+									}
 								}
 							}
 						}
+						
+						image_xscale = _xsc;
 					}
-					
-					image_xscale = _xsc;
 				}
 				
 				
@@ -5509,7 +5523,9 @@
 				}
 			}
 			
-			with(self) event_perform(ev_step, ev_step_end);
+			with(self){
+				event_perform(ev_step, ev_step_end);
+			}
 			
 			return self;
 		}
@@ -5621,7 +5637,9 @@
 			_partner = id;
 			
 			 // Ensure LoS Wall Creation:
-			with(self) event_perform(ev_step, ev_step_normal);
+			with(self){
+				event_perform(ev_step, ev_step_normal);
+			}
 			
 			array_push(_inst, id);
 		}
@@ -5639,7 +5657,9 @@
 			p = _index;
 			canrevive = true;
 			event_perform(ev_collision, Player);
-			event_perform(ev_alarm, 0);
+			with(self){
+				event_perform(ev_alarm, 0);
+			}
 		}
 		instance_destroy();
 	}
@@ -5995,16 +6015,18 @@
 					 // Normal:
 					if(is_real(_newObj)){
 						if(object_exists(_newObj)){
-							instance_change(_newObj, false);
-							event_perform(ev_create, 0);
-							variable_instance_set_list(self, _varList);
-							
-							 // Object-Specifics:
-							switch(_obj){
-								case EnemyBullet3:
-								case PopoSlug:
-									bonus = false;
-									break;
+							with(self){
+								instance_change(_newObj, false);
+								event_perform(ev_create, 0);
+								variable_instance_set_list(self, _varList);
+								
+								 // Object-Specifics:
+								switch(_obj){
+									case EnemyBullet3:
+									case PopoSlug:
+										bonus = false;
+										break;
+								}
 							}
 						}
 					}

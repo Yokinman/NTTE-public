@@ -1,5 +1,5 @@
 #define init
-	ntte_version = 2.01;
+	ntte_version = 2.011;
 	
 	 // Debug Lag:
 	lag = false;
@@ -3133,10 +3133,10 @@ var _shine = argument_count > 4 ? argument[4] : shnNone;
 		draw_set_halign(fa_center);
 		draw_set_valign(fa_middle);
 		
-		var	_text = weapon_get_name(_stock) + " + " + weapon_get_name(_front),
+		var	_text     = weapon_get_name(_stock) + " + " + weapon_get_name(_front),
 			_topSpace = 2,
-			_surfW = string_width(_text) + 4,
-			_surfH = string_height(_text) + 2 + _topSpace;
+			_surfW    = string_width(_text) + 4,
+			_surfH    = string_height(_text) + 2 + _topSpace;
 			
 		with(surface_setup("sprMergeText", _surfW, _surfH, 1)){
 			surface_set_target(surf);

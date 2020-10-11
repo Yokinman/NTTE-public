@@ -2500,7 +2500,9 @@
 								
 								 // Fast Forward:
 								repeat(irandom_range(25, 40)){
-									with(self) event_perform(ev_step, ev_step_normal);
+									with(self){
+										event_perform(ev_step, ev_step_normal);
+									}
 								}
 							}
 						}
@@ -2536,7 +2538,9 @@
 							
 							 // Fast Forward:
 							repeat(irandom(10)){
-								with(self) event_perform(ev_step, ev_step_normal);
+								with(self){
+									event_perform(ev_step, ev_step_normal);
+								}
 							}
 						}
 					}
@@ -2549,7 +2553,9 @@
 						
 						 // Fast Forward:
 						repeat(irandom_range(8, 12)){
-							with(self) event_perform(ev_step, ev_step_normal);
+							with(self){
+								event_perform(ev_step, ev_step_normal);
+							}
 						}
 					}
 					
@@ -2580,7 +2586,9 @@
 							
 							 // Fast Forward:
 							repeat(irandom_range(8, 12)){
-								with(self) event_perform(ev_step, ev_step_normal);
+								with(self){
+									event_perform(ev_step, ev_step_normal);
+								}
 							}
 						}
 					}
@@ -2607,7 +2615,9 @@
 					
 					 // Fast Forward:
 					repeat(irandom_range(12, 48)){
-						with(self) event_perform(ev_step, ev_step_normal);
+						with(self){
+							event_perform(ev_step, ev_step_normal);
+						}
 					}
 				}
 			}
@@ -3169,7 +3179,9 @@
 	if(!instance_exists(global.map_bind[? "pause"]) && !_start){
 		with(script_bind_draw(ntte_map_pause, UberCont.depth - 1)){
 			global.map_bind[? "pause"] = id;
-			event_perform(ev_draw, 0);
+			with(self){
+				event_perform(ev_draw, 0);
+			}
 		}
 	}
 	
@@ -4345,7 +4357,9 @@
 					
 					 // Update MusCont:
 					if(_area != global.mus_area){
-						event_perform(ev_alarm, 11);
+						with(self){
+							event_perform(ev_alarm, 11);
+						}
 					}
 					
 					_mus = mod_script_call_self("area", _area, "area_music");

@@ -821,7 +821,9 @@
 								}
 								if(visible){
 									 // Self:
-									with(self) event_perform(ev_draw, 0);
+									with(self){
+										event_perform(ev_draw, 0);
+									}
 									
 									 // Appearing Visual:
 									if(other.appear > 0){
@@ -1027,7 +1029,9 @@
 						area    = other.area;
 						subarea = other.subarea;
 						loops   = other.loops;
-						event_perform(ev_step, ev_step_normal);
+						with(self){
+							event_perform(ev_step, ev_step_normal);
+						}
 					}
 				}
 			}
@@ -3149,7 +3153,9 @@
 	with(portal) if(anim_end){
 		if(array_exists(instance_is(self, BigPortal) ? [sprBigPortalDisappear] : [sprPortalDisappear, sprProtoPortalDisappear, sprPopoPortalDisappear], sprite_index)){
 			area_set("red", 0, GameCont.loops);
-			event_perform(ev_other, ev_animation_end);
+			with(self){
+				event_perform(ev_other, ev_animation_end);
+			}
 		}
 	}
 	

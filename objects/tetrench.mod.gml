@@ -440,7 +440,9 @@
 			}
 			with(projectile_create(x, y, EnemyLightning, _dir, 0)){
 				ammo = 6 + random(2);
-				event_perform(ev_alarm, 0);
+				with(self){
+					event_perform(ev_alarm, 0);
+				}
 			}
 		}
 		
@@ -1264,7 +1266,9 @@
 			
 		with(projectile_create(_x, _y, (is_enemy ? EnemyLightning : Lightning), point_direction(_x, _y, _tx, _ty) + orandom(12), 0)){
 			ammo = min(30, other.image_xscale + random(other.image_xscale * 2));
-			event_perform(ev_alarm, 0);
+			with(self){
+				event_perform(ev_alarm, 0);
+			}
 		}
 		
 		 // Effects:

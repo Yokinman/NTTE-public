@@ -98,13 +98,15 @@
 			text = _text;
 			alarm1 = 15;
 			alarm2 = -1;
-			event_perform(ev_alarm, 2);
+			with(self){
+				event_perform(ev_alarm, 2);
+			}
 			if(_col != c_white || _lvl >= array_length(c)){
 				text = `@(color:${_col})#` + text;
 			}
 			
 			x = _x;
-			y = _y - (string_height(text) - 8);
+			y = _y - (string_height(string_replace_all(text, "#", chr(13) + chr(10))) - 8);
 			speed = 0;
 		}
 		
@@ -548,7 +550,9 @@
 	 // Wep Depth Fix:
 	if(place_meeting(x, y, WepPickup)){
 		with(WepPickup) if(place_meeting(x, y, other)){
-			event_perform(ev_draw, 0);
+			with(self){
+				event_perform(ev_draw, 0);
+			}
 		}
 	}
 
@@ -1243,13 +1247,15 @@
 			if(array_length(_inst) <= 0){
 				_inst = instance_create(x, y, CustomObject);
 				with(_inst){
-					name = "SalamanderCanSpec";
-					alive = true;
-					creator = other;
-					canspec = other.canspec;
+					name        = "SalamanderCanSpec";
+					alive       = true;
+					creator     = other;
+					canspec     = other.canspec;
 					on_end_step = script_ref_create(Salamander_canspec_end_step);
-					on_cleanup = script_ref_create(Salamander_canspec_cleanup);
-					event_perform(ev_step, ev_step_end);
+					on_cleanup  = script_ref_create(Salamander_canspec_cleanup);
+					with(self){
+						event_perform(ev_step, ev_step_end);
+					}
 				}
 			}
 			with(_inst) alive = true;
@@ -2328,12 +2334,16 @@
 														instance_delete(_laserList[array_length(_laserList) - 1]);
 													}
 													image_xscale = 1;
-													event_perform(ev_alarm, 0);
+													with(self){
+														event_perform(ev_alarm, 0);
+													}
 													break;
 													
 												case Lightning:
 												case EnemyLightning:
-													event_perform(ev_alarm, 0);
+													with(self){
+														event_perform(ev_alarm, 0);
+													}
 													break;
 											}
 										}
@@ -2885,7 +2895,7 @@
 					
 					 // Duplicate:
 					if(!_cursed || variable_instance_get(self, "name") != "Trident"){
-						var	_clone = instance_clone(),
+						var	_clone    = instance_clone(),
 							_accuracy = variable_instance_get(other.leader, "accuracy", 1);
 							
 						 // LWO Weapon Fix:
@@ -2906,7 +2916,9 @@
 									xstart = x;
 									ystart = y;
 									image_angle += orandom(20 * _accuracy);
-									event_perform(ev_alarm, 0);
+									with(self){
+										event_perform(ev_alarm, 0);
+									}
 								}
 								
 								break;
@@ -2937,7 +2949,9 @@
 										];
 										
 									ammo = min(30, ammo);
-									event_perform(ev_alarm, 0);
+									with(self){
+										event_perform(ev_alarm, 0);
+									}
 									with(instances_matching_gt(Lightning, "id", id)){
 										prism_duplicate = true;
 										with(_varCopy){

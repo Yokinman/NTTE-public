@@ -418,7 +418,9 @@
 				var _inst = instance_create(0, 0, Crown);
 				with(_inst){
 					alarm0 = -1;
-					event_perform(ev_alarm, 0);
+					with(self){
+						event_perform(ev_alarm, 0);
+					}
 					
 					 // Place by Last Played Character:
 					for(var i = 0; i < maxp; i++){
@@ -958,21 +960,23 @@
 					 // Selection:
 					if(instance_exists(inst)){
 						if(player_is_active(_p)){
-							with(UberCont) if(position_meeting(mouse_x[_p], mouse_y[_p], other.inst)){
-								with(other){
-									 // Select:
-									if(!locked && button_pressed(_p, "fire")){
-										if(_crown.custom.slct != -1 && crwn == _crown.slct){
-											sound_play(sndMenuCrown);
+							with(UberCont){
+								if(position_meeting(mouse_x[_p], mouse_y[_p], other.inst)){
+									with(other){
+										 // Select:
+										if(!locked && button_pressed(_p, "fire")){
+											if(_crown.custom.slct != -1 && crwn == _crown.slct){
+												sound_play(sndMenuCrown);
+											}
+											_crown.slct = crwn;
+											_crown.custom.slct = -1;
 										}
-										_crown.slct = crwn;
-										_crown.custom.slct = -1;
-									}
-									
-									 // Hovering Over Button:
-									if(crwn != _crown.slct || _crown.custom.slct != -1){
-										_y -= 1;
-										_col = merge_color(c_gray, c_white, 0.6);
+										
+										 // Hovering Over Button:
+										if(crwn != _crown.slct || _crown.custom.slct != -1){
+											_y -= 1;
+											_col = merge_color(c_gray, c_white, 0.6);
+										}
 									}
 								}
 							}
@@ -1163,7 +1167,9 @@
 						draw_set_color(c_black);
 						draw_rectangle(_x - 16, _y - 16, _x + 16, _y + 16, false);
 					}
-					with(self) event_perform(ev_draw, 0);
+					with(self){
+						event_perform(ev_draw, 0);
+					}
 					draw_set_blend_mode(bm_normal);
 					
 					 // Draw Manually:
@@ -2219,7 +2225,7 @@
 										draw_text_bn(
 											_vx + 28 + (2 * max(0, (_appear + 1) - _pop)),
 											_vy + 46,
-											(_pet != null ? (_pet.avail ? _pet.name : "UNKNOWN") : "NONE"),
+											((_pet != null) ? (_pet.avail ? _pet.name : "UNKNOWN") : "NONE"),
 											1.5
 										);
 									}
@@ -2256,7 +2262,7 @@
 												 // Title:
 												if(i < 0){
 													if(is_real(_name) && sprite_exists(_name)){
-														_name = `@(${s}:-0.4)# `;
+														_name = `@(${s}:-0.4)${chr(13) + chr(10)} `;
 													}
 													_stat.name = string(_name);
 												}

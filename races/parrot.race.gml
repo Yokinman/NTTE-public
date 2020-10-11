@@ -1097,7 +1097,9 @@
 									 // Call Alarm Event:
 									try{
 										alarm_set(_alarmNum, 0);
-										event_perform(ev_alarm, _alarmNum);
+										with(self){
+											event_perform(ev_alarm, _alarmNum);
+										}
 									}
 									catch(_error){
 										trace_error(_error);
@@ -1178,7 +1180,9 @@
 										
 										 // Speed Up 'canmelee' Reset:
 										if(alarm11 > 0 && alarm11 < 26){
-											event_perform(ev_alarm, 11);
+											with(self){
+												event_perform(ev_alarm, 11);
+											}
 										}
 										
 										 // Collision:

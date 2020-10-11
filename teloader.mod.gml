@@ -68,7 +68,7 @@
 			["weps/super teleport gun.wep.gml",       1],
 			["weps/energy bat.wep.gml",               1],
 			["weps/annihilator.wep.gml",              1],
-			//["weps/entangler.wep.gml",                1],
+		//	["weps/entangler.wep.gml",                1],
 			["weps/tunneller.wep.gml",                1],
 			["weps/bat disc launcher.wep.gml",        1],
 			["weps/bat disc cannon.wep.gml",          1],
@@ -323,7 +323,7 @@
 	}
 	
 	 // Force Update:
-	if(global.version == ""){
+	if(global.version == "" && git_version != ""){
 		global.load.type = load_type_updating;
 	}
 	
@@ -2086,7 +2086,7 @@
 							
 							 // Group Lines Within Offset Height:
 							for(var j = i + 1; j < _lineMax; j++){
-								if(string_height(_line + "#" + _lineList[j] + " ") <= _lines.offset){
+								if(string_height(_line + chr(13) + chr(10) + _lineList[j] + " ") <= _lines.offset){
 									_line += "#" + _lineList[j];
 									i = j;
 								}

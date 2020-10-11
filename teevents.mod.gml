@@ -116,7 +116,9 @@
 				 // Grab Nearest Chest:
 				target = instance_nearest_array(x, y, _chest);
 				_chest = array_delete_value(_chest, target);
-				event_perform(ev_step, ev_step_begin);
+				with(self){
+					event_perform(ev_step, ev_step_begin);
+				}
 			}
 		}
 		
@@ -707,7 +709,7 @@
 #define BlockedRoom_cleanup
 	 // Play B-Theme on Next Level:
 	if(type == "Dummy" && dummy_spawn <= 0){
-		with(MusCont){
+		with(MusCont) with(self){
 			var _lastArea = GameCont.area;
 			GameCont.area = -1;
 			event_perform(ev_alarm, 11);
@@ -864,7 +866,9 @@
 			
 			 // Cactus Fix:
 			else with(instance_rectangle(bbox_left, bbox_top, bbox_right + 1, bbox_bottom + 1, Cactus)){
-				event_perform(ev_create, 0);
+				with(self){
+					event_perform(ev_create, 0);
+				}
 			}
 		}
 		
@@ -1445,12 +1449,14 @@
 						_sideY = ((_y <= y1 || _y >= y2 - 16) ? sign(_cy - y) : 0);
 						
 					if(_sideX != 0 || _sideY != 0){
-						if(position_meeting(_cx + (16 * _sideX), _cy + (16 * _sideY), Wall)){
-							var	_cornerX = ((_cx < x) ? x1 : x2 - 32),
-								_cornerY = ((_cy < y) ? y1 : y2 - 32);
-								
-							if(!collision_rectangle(_cornerX, _cornerY, _cornerX + 31, _cornerY + 31, Floor, false, false)){
-								instance_create(_x, _y, Wall);
+						with(other){
+							if(position_meeting(_cx + (16 * _sideX), _cy + (16 * _sideY), Wall)){
+								var	_cornerX = ((_cx < x) ? other.x1 : other.x2 - 32),
+									_cornerY = ((_cy < y) ? other.y1 : other.y2 - 32);
+									
+								if(!collision_rectangle(_cornerX, _cornerY, _cornerX + 31, _cornerY + 31, Floor, false, false)){
+									instance_create(_x, _y, Wall);
+								}
 							}
 						}
 					}
@@ -1459,7 +1465,7 @@
 		}
 		
 		 // Front Row Seating:
-		with(Wall) if(place_meeting(x, y, Floor) && instance_seen(bbox_center_x, bbox_center_y, other)){
+		with(Wall) if(place_meeting(x, y, Floor) && !collision_line(other.x, other.y, bbox_center_x, bbox_center_y, Wall, false, false)){
 			if(chance(1, 4)){
 				with(top_create(bbox_center_x + orandom(2), y - 8 + orandom(2), "TopRaven", 0, 0)){
 					array_push(_instTop, id);

@@ -2495,7 +2495,9 @@
 			with(obj_create(x, y, "BackpackPickup")){
 				target = chest_create(x, y, "Backpack", false);
 				direction = other.direction + orandom(10);
-				event_perform(ev_step, ev_step_end);
+				with(self){
+					event_perform(ev_step, ev_step_end);
+				}
 			}
 			repeat(5) scrFX(x, y, 4, Dust);
 			sound_play_pitchvol(sndMenuASkin, 1.2, 0.6);

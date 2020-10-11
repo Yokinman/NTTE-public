@@ -4893,8 +4893,14 @@ var _extraScale = argument_count > 1 ? argument[1] : 0.5;
 				GameCont.area = area;
 			}
 		}
-		with(instances_matching_gt(Wall, "id", _minID)) wall_tops();
-		with(instances_matching_gt(TopSmall, "id", _minID)) event_perform(ev_alarm, 0);
+		with(instances_matching_gt(Wall, "id", _minID)){
+			wall_tops();
+		}
+		with(instances_matching_gt(TopSmall, "id", _minID)){
+			with(self){
+				event_perform(ev_alarm, 0);
+			}
+		}
 		
 		 // Reveal Path:
 		var	_y    = y - 48,

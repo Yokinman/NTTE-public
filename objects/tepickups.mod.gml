@@ -211,7 +211,9 @@
 				with(obj_create(x, y, "BackpackPickup")){
 					direction = _dir;
 					target = other;
-					event_perform(ev_step, ev_step_end);
+					with(self){
+						event_perform(ev_step, ev_step_end);
+					}
 				}
 			}
 		}
@@ -1134,7 +1136,9 @@
 					false
 				);
 				
-				event_perform(ev_step, ev_step_end);
+				with(self){
+					event_perform(ev_step, ev_step_end);
+				}
 			}
 		}
 	}
@@ -1392,7 +1396,7 @@
 			
 			 // Sound/Music:
 			sound_play_pitch(sndCrownGuardianDisappear, 0.7 + random(0.2));
-			with(MusCont){
+			with(MusCont) with(self){
 				var _area = GameCont.area;
 				GameCont.area = -1;
 				event_perform(ev_alarm, 11);
@@ -2296,7 +2300,9 @@
 				motion_add(other.direction, random(s));
 			}
 			
-			event_perform(ev_step, ev_step_end);
+			with(self){
+				event_perform(ev_step, ev_step_end);
+			}
 		}
 	}
 
@@ -3508,7 +3514,9 @@
 			zfriction = 0.6;
 			zspeed    = _zspd;
 			speed     = _spd;
-			event_perform(ev_step, ev_step_end);
+			with(self){
+				event_perform(ev_step, ev_step_end);
+			}
 		}
 		
 		return id;
@@ -4210,7 +4218,9 @@
 				target    = instance_create(x, y, AmmoPickup);
 				direction = d;
 				speed     = random_range(2, 3);
-				event_perform(ev_step, ev_step_end);
+				with(self){
+					event_perform(ev_step, ev_step_end);
+				}
 			}
 		}
 	}
@@ -4794,23 +4804,26 @@
 			
 			if(!instance_exists(self)){
 				with(_t){
-					 // Effects:
-					var	_prop = (instance_is(self, prop) || instance_is(self, Nothing) || instance_is(self, Nothing2)),
-						_dis  = 24;
-						
-					repeat(3){
-						with(scrFX(
-							_x + lengthdir_x(_dis, _ang),
-							_y + lengthdir_y(_dis, _ang),
-							(_prop ? 2.5  : 0),
-							(_prop ? Dust : AllyDamage)
-						)){
-							depth = min(depth, other.depth - 1);
-						}
-					}
-					
 					 // Damage:
-					projectile_hit_raw(self, _damage, true);
+					if(instance_is(self, hitme)){
+						var	_prop = (instance_is(self, prop) || instance_is(self, Nothing) || instance_is(self, Nothing2)),
+							_dis  = 24;
+							
+						 // Effects:
+						repeat(3){
+							with(scrFX(
+								_x + lengthdir_x(_dis, _ang),
+								_y + lengthdir_y(_dis, _ang),
+								(_prop ? 2.5  : 0),
+								(_prop ? Dust : AllyDamage)
+							)){
+								depth = min(depth, other.depth - 1);
+							}
+						}
+						
+						 // Damage:
+						projectile_hit_raw(self, _damage, true);
+					}
 					
 					 // Kick:
 					with(instance_nearest_array(_x, _y, array_combine(instances_matching(Player, "wep", _wep), instances_matching(Player, "bwep", _wep)))){

@@ -422,16 +422,16 @@
 	
 	 // Underwater Details:
 	with(Floor) if(chance(1, 3)){
-		for(var a = 0; a < 360; a += 45){
+		for(var _ang = 0; _ang < 360; _ang += 45){
 			var	_x = bbox_center_x,
 				_y = bbox_center_y;
 				
-			if(chance(1, 2) && !position_meeting(_x + lengthdir_x(sprite_get_width(mask_index), a), _y + lengthdir_y(sprite_get_height(mask_index), a), Floor)){
-				var	l = random_range(32, 44),
-					d = a + orandom(20);
+			if(chance(1, 2) && !position_meeting(_x + lengthdir_x(sprite_get_width(mask_index), _ang), _y + lengthdir_y(sprite_get_height(mask_index), _ang), Floor)){
+				var	_l = random_range(32, 44),
+					_d = _ang + orandom(20);
 					
-				_x += lengthdir_x(l, d);
-				_y += lengthdir_y(l, d);
+				_x += lengthdir_x(_l, _d);
+				_y += lengthdir_y(_l, _d);
 				
 				if(!position_meeting(_x, _y, Floor)){
 					with(instance_create(_x, _y, Detail)){
