@@ -1,6 +1,8 @@
 2.01 ~ Time to Fix
 	* Fixed a few errors that occurred in the NTT beta (9942+) versions
 	* Fixed the changelog being unreadable in NTT beta (9942+) versions
+	* Fixed Lair's doors not opening properly in NTT beta (9942+) versions
+	* Fixed tires & chairs being able to spawn in the walls of Lair's garage rooms
 	* Fixed Lil Hunter getting stuck if you take a trident out of him mid-flight
 	* Fixed the mod trying to force update if you don't have internet
 	* Fixed corpses awkwardly floating above pits at the end of the level in Trench

@@ -3359,7 +3359,7 @@ var _extraScale = argument_count > 1 ? argument[1] : 0.5;
 		size         = 2;
 		team         = 0;
 		openang      = 0;
-		//my_wall      = noone;
+	//	my_wall      = noone;
 		partner      = noone;
 		partner_wall = noone;
 		
@@ -3400,6 +3400,9 @@ var _extraScale = argument_count > 1 ? argument[1] : 0.5;
 	var	_push = 0,
 		_open = false;
 		
+	if(mask_index == mskNone){
+		mask_index = mskFrogQueen;
+	}
 	if(distance_to_object(hitme) <= 0){
 		with(instances_meeting(x, y, instances_matching_ne(instances_matching_ne(hitme, "team", 0), "mask_index", mskNone))){
 			if(!instance_is(self, prop)){

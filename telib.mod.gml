@@ -2661,17 +2661,13 @@
 		}
 		
 		 // No Duplicates:
-		with(BackCont){
-			with(self){
-				event_perform(ev_other, ev_room_end);
-			}
+		with(BackCont) with(self){
+			event_perform(ev_other, ev_room_end);
 			instance_destroy();
 		}
-		with(TopCont){
+		with(TopCont) with(self){
 			darkness = true;
-			with(self){
-				event_perform(ev_other, ev_room_end);
-			}
+			event_perform(ev_other, ev_room_end);
 			instance_destroy();
 		}
 		with(SubTopCont){

@@ -1115,13 +1115,12 @@
 				}
 				
 				 // Tires:
-				repeat(irandom_range(2, 4)){
-					with(instance_create(_cx + irandom_range(24, (_w / 2) - 10), _y + irandom_range(10, _h), Tires)){
-						if(chance(1, 10)){
-							obj_create(x, y, choose("ChairFront", "ChairSide"));
-							instance_delete(id);
-						}
-					}
+				repeat(2){
+					instance_create(
+						_cx + irandom_range(24, (_w / 2) - 10),
+						_y  + irandom_range(16, _h - 24),
+						(chance(1, 10) ? choose("ChairFront", "ChairSide") : Tires)
+					);
 				}
 				
 				 // Lights:
