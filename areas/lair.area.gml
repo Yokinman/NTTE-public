@@ -666,6 +666,7 @@
 		var _inst = instances_matching(Turret, "spr_idle", spr.LairTurretAppear);
 		if(array_length(_inst)) with(_inst){
 			if(anim_end || sprite_index != spr_idle){
+				spr_idle = sprTurretAppear;
 				with(self){
 					event_perform(ev_other, ev_animation_end);
 				}
