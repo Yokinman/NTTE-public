@@ -1,14 +1,20 @@
-2.01 ~ Time to Fix
-	* Fixed a few errors that occurred in the NTT beta (9942+) versions
-	* Fixed the changelog being unreadable in NTT beta (9942+) versions
-	* Fixed Lair's turrets not having hitboxes in NTT beta (9942+) versions
-	* Fixed Lair's doors not opening properly in NTT beta (9942+) versions
-	* Fixed tires & chairs being able to spawn in the walls of Lair's garage rooms
-	* Fixed Lil Hunter getting stuck if you take a trident out of him mid-flight
-	* Fixed the mod trying to force update if you don't have internet
-	* Fixed corpses awkwardly floating above pits at the end of the level in Trench
-	* Fixed the ocean following you back to the character selection screen from Coast
-	* Fixed Chaos hearts being a bit too common
+2.01-2.014 ~ Time to Fix
+	*	Fixed a few errors that occurred in the NTT beta (9942+) versions
+	*	Fixed the changelog being unreadable in NTT beta (9942+) versions
+	*	Fixed Lair's turrets not having hitboxes in NTT beta (9942+) versions
+	*	Fixed Lair's doors not opening properly in NTT beta (9942+) versions
+	*	Fixed the fake walls in @r[REDACTED] @snot looking right in the NTT beta (9942+) versions
+	*	Fixed Ravens and Lil Hunter appearing above walls after flying in NTT beta (9942+) versions
+	*	Fixed Lil Hunter getting stuck if you take a trident out of him mid-flight
+	*	Fixed Seal King softlocking the game if playing on a lower max FPS
+	*	Fixed Water Boost from an Orchid looping its sound forever if active when you lose it
+	*	Fixed tires & chairs being able to spawn in the walls of Lair's garage rooms
+	*	Fixed corpses awkwardly floating above pits at the end of the level in Trench
+	*	Fixed the ocean following you back to the character selection screen from Coast
+	*	Fixed the Raven Arena not creating enough ravens
+	*	Fixed a weird error with @gEnergy Bat @sslashes
+	*	Fixed Chaos hearts spawning when they shouldn't
+	*	Fixed the mod trying to force update if you don't have internet
 	
 2.0 ~ Heart to Heart
 	

@@ -3198,6 +3198,12 @@
 	
 	 // Skill-Specific:
 	switch(skill){
+		case mut_throne_butt:
+			with(instances_matching_ne(Player, "roll", 0)){
+				sound_stop(sndFishTB);
+			}
+			break;
+			
 		case mut_scarier_face:
 			
 			 // Restore Enemy HP:

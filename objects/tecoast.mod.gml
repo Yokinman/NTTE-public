@@ -1696,11 +1696,11 @@
 		 // Constant Movement:
 		if(instance_exists(Floor)){
 			if(distance_to_object(Floor) > 0 && zspeed == 0){
-				var	f = instance_nearest(x - 16, y - 16, Floor),
-					d = point_direction(x, y, f.x, f.y);
+				var	_f = instance_nearest(x - 16, y - 16, Floor),
+					_d = point_direction(x, y, _f.x, _f.y);
 					
-				x += lengthdir_x(1, d);
-				y += lengthdir_y(1, d);
+				x += lengthdir_x(1, _d);
+				y += lengthdir_y(1, _d);
 			}
 		}
 	}
@@ -1754,20 +1754,27 @@
 	
 	 // Pan Intro Camera:
 	if(intro_pan > 0){
-		intro_pan -= current_time_scale;
+		intro_pan -= min(1, current_time_scale);
 		
 		 // Pan:
-		global.palanking_pan = [point_direction(x, y, intro_pan_x, intro_pan_y), point_distance(x, y, intro_pan_x, intro_pan_y) / 1.5];
+		global.palanking_pan = [
+			point_direction(x, y, intro_pan_x, intro_pan_y),
+			point_distance(x, y, intro_pan_x, intro_pan_y) / 1.5
+		];
 		
 		 // Still Camera:
 		for(var i = 0; i < maxp; i++){
 			view_object[i] = id;
 			view_pan_factor[i] = 10000;
-			if(intro_pan <= 0) view_pan_factor[i] = null;
+			if(intro_pan <= 0){
+				view_pan_factor[i] = null;
+			}
 		}
 		
 		 // Hold Off Seals:
-		with(Seal) attack_delay = 15 + random(30);
+		with(Seal){
+			attack_delay = 15 + random(30);
+		}
 		
 		 // Enable/Disable Players:
 		var _active = (intro_pan <= 0);
@@ -1779,7 +1786,9 @@
 	else{
 		global.palanking_pan = [0, 0];
 		for(var i = 0; i < maxp; i++){
-			if(view_object[i] == id) view_object[i] = noone;
+			if(view_object[i] == id){
+				view_object[i] = noone;
+			}
 		}
 	}
 	
@@ -1820,7 +1829,7 @@
 	if(tauntdelay > 0 && !instance_exists(Player)){
 		tauntdelay -= current_time_scale;
 		if(tauntdelay <= 0){
-			image_index = 0;
+			image_index  = 0;
 			sprite_index = spr_taun;
 			sound_play(snd.PalankingTaunt);
 		}
@@ -1828,18 +1837,21 @@
 	
 	 // Animate:
 	if(sprite_index != spr_burp){
-		if(sprite_index != spr_hurt && sprite_index != spr_call && sprite_index != spr_taun && sprite_index != spr_fire){
-			if(speed <= 0) sprite_index = spr_idle;
-			else sprite_index = spr_walk;
+		if(sprite_index != spr_call && sprite_index != spr_taun && sprite_index != spr_fire){
+			sprite_index = enemy_sprite;
 		}
-		else if(anim_end) sprite_index = spr_idle;
+		else if(anim_end){
+			sprite_index = spr_idle;
+		}
 	}
-	else if(anim_end) image_index = 1;
+	else if(anim_end){
+		image_index = 1;
+	}
 	
 	 // Smack Smack:
 	if(sprite_index == spr_call){
 		var _img = floor(image_index);
-		if(image_index < _img + image_speed && (_img == 4 || _img == 7)){
+		if(image_index < _img + image_speed_raw && (_img == 4 || _img == 7)){
 			sound_play_pitchvol(sndHitRock, 0.8 + orandom(0.2), 0.6);
 		}
 	}
@@ -1984,12 +1996,14 @@
 		alarm1 = 20;
 		
 		 // Enable Cinematic:
-		intro_pan = 10 + alarm0;
+		intro_pan   = 10 + alarm0;
 		intro_pan_x = x;
 		intro_pan_y = y;
 		
 		 // "Safety":
-		with(Player) instance_create(x, y, PortalShock);
+		with(Player){
+			instance_create(x, y, PortalShock);
+		}
 	}
 	else{
 		switch(phase){
@@ -2088,7 +2102,7 @@
 			if(intro_pan <= 0){
 				intro_pan_x = x;
 				intro_pan_y = y;
-				intro_pan = 10;
+				intro_pan   = 10;
 			}
 			intro_pan += alarm0;
 		}

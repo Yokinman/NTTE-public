@@ -1430,6 +1430,9 @@
 		_wepDis     = random(12),
 		_wepDir     = random(360);
 		
+	inst_top  = _instTop;
+	inst_idle = _instIdle;
+	
 	floor_set_align(null, null, 32, 32);
 	
 	with(floor_room(_spawnX, _spawnY, _spawnDis, _spawnFloor, _w, _h, _type, _dirOff, _floorDis)){
@@ -1465,10 +1468,12 @@
 		}
 		
 		 // Front Row Seating:
-		with(Wall) if(place_meeting(x, y, Floor) && !collision_line(other.x, other.y, bbox_center_x, bbox_center_y, Wall, false, false)){
-			if(chance(1, 4)){
-				with(top_create(bbox_center_x + orandom(2), y - 8 + orandom(2), "TopRaven", 0, 0)){
-					array_push(_instTop, id);
+		with(Wall){
+			if(place_meeting(x, y, Floor) && !collision_line(other.x, other.y, bbox_center_x, bbox_center_y, Wall, false, true)){
+				if(chance(1, 4)){
+					with(top_create(bbox_center_x + orandom(2), y - 8 + orandom(2), "TopRaven", 0, 0)){
+						array_push(_instTop, id);
+					}
 				}
 			}
 		}
@@ -1564,9 +1569,9 @@
 	
 	floor_reset_align();
 	
-	inst_top  = _instTop;
-	inst_idle = _instIdle;
-	with(inst_top) jump_time = -1;
+	with(inst_top){
+		jump_time = -1;
+	}
 	
 #define RavenArena_step
 	 // Hold Enemies:

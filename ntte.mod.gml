@@ -40,7 +40,7 @@
 	
 	 // HUD:
 	global.hud_bind   = script_bind("NTTEHUDDraw", CustomDraw, script_ref_create(ntte_hud, false), object_get_depth(TopCont) - 1, true);
-	global.hud_reroll = null;
+	global.hud_reroll = undefined;
 	
 	 // Scythe Tippage:
 	global.scythe_tip_index = 0;
@@ -65,7 +65,7 @@
 #define game_start
 	 // Reset:
 	global.area_mapdata     = [];
-	global.hud_reroll       = null;
+	global.hud_reroll       = undefined;
 	global.kills_last       = GameCont.kills;
 	global.scythe_tip_index = 0;
 	for(var i = 0; i < array_length(global.pet_mapicon); i++){
@@ -1994,7 +1994,7 @@
 		if(array_length(_inst)) with(_inst){
 			mask_index_fix_brooooo = true;
 			if(mask_index == mskNone && !canfly){
-				mask_index = mskScorpion;
+				mask_index = object_get_mask(Turret);
 			}
 		}
 	}
@@ -2746,6 +2746,22 @@
 			depth   = -9;
 			visible = true;
 		}
+		
+		 // Reset:
+		if(instance_exists(RavenFly)){
+			_inst = instances_matching(instances_matching(RavenFly, "sprite_index", sprRavenLand), "depth", -9);
+			if(array_length(_inst)) with(_inst){
+				if(anim_end){
+					depth = object_get_depth(Raven);
+				}
+			}
+		}
+		if(instance_exists(LilHunterFly)){
+			_inst = instances_matching(instances_matching_ge(instances_matching(LilHunterFly, "sprite_index", sprLilHunterLand), "z", -10 * current_time_scale), "depth", -9);
+			if(array_length(_inst)) with(_inst){
+				depth = object_get_depth(LilHunter);
+			}
+		}
 	}
 	
 	 // This is it:
@@ -3406,7 +3422,7 @@
 		var	_skillType = [],
 			_skillList = [];
 			
-		 // Compile Stuff to Draw:
+		 // Compile Orchid Skills to Draw:
 		if(instance_exists(CustomObject)){
 			var _inst = instances_matching(CustomObject, "name", "OrchidSkill");
 			if(array_length(_inst)) with(_inst){
@@ -3416,9 +3432,23 @@
 				}
 			}
 		}
+		
+		 // Compile Orchid Rerolls to Draw:
 		if(skill_get(global.hud_reroll) != 0){
 			array_push(_skillType, "reroll");
-			array_push(_skillList, ((global.hud_reroll == mut_patience && skill_get(GameCont.hud_patience) != 0) ? GameCont.hud_patience : global.hud_reroll));
+			array_push(_skillList, (
+				(global.hud_reroll == mut_patience && skill_get(GameCont.hud_patience) != 0)
+				? GameCont.hud_patience
+				: global.hud_reroll
+			));
+		}
+		else if(!is_undefined(global.hud_reroll)){
+			global.hud_reroll = undefined;
+			
+			 // Link to Latest Mutation:
+			for(var _pos = 0; !is_undefined(skill_get_at(_pos)); _pos++){
+				global.hud_reroll = skill_get_at(_pos);
+			}
 		}
 		
 		 // Draw Stuff:

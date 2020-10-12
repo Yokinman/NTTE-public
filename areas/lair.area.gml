@@ -1117,7 +1117,7 @@
 				
 				 // Tires:
 				repeat(2){
-					instance_create(
+					obj_create(
 						_cx + irandom_range(24, (_w / 2) - 10),
 						_y  + irandom_range(16, _h - 24),
 						(chance(1, 10) ? choose("ChairFront", "ChairSide") : Tires)

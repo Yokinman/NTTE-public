@@ -5,14 +5,14 @@
 	
 	 // Bind Events:
 	global.wall_fake_bind = [
-		script_bind("WallFakeBotDraw", CustomDraw, script_ref_create(draw_wall_fake, "Bot"), 3,                            false),
-		script_bind("WallFakeTopDraw", CustomDraw, script_ref_create(draw_wall_fake, "Top"), object_get_depth(SubTopCont), false)
+		script_bind("WallFakeBotDraw", CustomDraw, script_ref_create(draw_wall_fake, "Bot"), 4,                            false),
+		script_bind("WallFakeTopDraw", CustomDraw, script_ref_create(draw_wall_fake, "Top"), object_get_depth(SubTopCont) + 1, false)
 	];
 	global.wall_fake_bind_reveal = [];
 	with(global.wall_fake_bind){
 		array_push(
 			global.wall_fake_bind_reveal,
-			script_bind(name + "Reveal", object, script_ref_create(draw_wall_fake_reveal), depth, visible)
+			script_bind(name + "Reveal", object, script_ref_create(draw_wall_fake_reveal), depth - 1, visible)
 		);
 	}
 	global.wall_shine_bind = script_bind("WallShineDraw", CustomDraw, script_ref_create(draw_wall_shine), object_get_depth(SubTopCont), false);
@@ -1536,7 +1536,7 @@
 				with(other){
 					var _cannon = false;
 					
-					 // Vlasma:
+					 // Cannon?
 					with(instances_matching_gt(projectile, "id", _minID)){
 						_cannon = true;
 						if(_deflect){
@@ -1544,36 +1544,40 @@
 						}
 						else break;
 					}
-					if(_deflect){
-						with(projectile_create(_x, _y, (_cannon ? "VlasmaCannon" : "VlasmaBullet"), direction, speed + 2)){
-							target   = _target;
-							target_x = _targetX;
-							target_y = _targetY;
-							
-							 // Cannon:
-							if(_cannon){
-								cannon = _damage * 1.5;
+					
+					if(instance_exists(self)){
+						 // Vlasma:
+						if(_deflect){
+							with(projectile_create(_x, _y, (_cannon ? "VlasmaCannon" : "VlasmaBullet"), direction, speed + 2)){
+								target   = _target;
+								target_x = _targetX;
+								target_y = _targetY;
+								
+								 // Cannon:
+								if(_cannon){
+									cannon = _damage * 1.5;
+								}
 							}
 						}
-					}
-					
-					 // Plasma Impact:
-					with(projectile_create(_x, _y, (_cannon ? PlasmaImpact : "PlasmaImpactSmall"), 0, 0)){
-						depth = _depth;
 						
-						 // Sounds:
-						var _snd = [
-							[sndPlasma,    sndPlasmaUpg], 
-							[sndPlasmaBig, sndPlasmaBigUpg]
-						];
-						sound_play_hit_ext(
-							_snd[_cannon][(instance_is(creator, Player) && skill_get(mut_laser_brain) > 0)],
-							random_range(0.7, 1.3),
-							0.6
-						);
-					}
-					if(_cannon){
-						sleep_max(10 * _damage);
+						 // Plasma Impact:
+						with(projectile_create(_x, _y, (_cannon ? PlasmaImpact : "PlasmaImpactSmall"), 0, 0)){
+							depth = _depth;
+							
+							 // Sounds:
+							var _snd = [
+								[sndPlasma,    sndPlasmaUpg], 
+								[sndPlasmaBig, sndPlasmaBigUpg]
+							];
+							sound_play_hit_ext(
+								_snd[_cannon][(instance_is(creator, Player) && skill_get(mut_laser_brain) > 0)],
+								random_range(0.7, 1.3),
+								0.6
+							);
+						}
+						if(_cannon){
+							sleep_max(10 * _damage);
+						}
 					}
 				}
 			}
@@ -3265,10 +3269,6 @@
 	with(global.wall_fake_bind){
 		with(id){
 			visible = _visible;
-			if(visible){
-				depth++;
-				depth--;
-			}
 		}
 	}
 	with(global.wall_fake_bind_reveal){
