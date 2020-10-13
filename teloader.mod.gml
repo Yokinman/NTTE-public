@@ -28,68 +28,68 @@
 		}
 		_coop *= 2;
 		
-		 // Mods:
-		list = [ // [path, delay, loading text]
-			["teassets.mod.gml",                      5 + _coop, "Assets"],
-			["telib.mod.gml",                         1 + _coop, "Main Files"],
-			["temenu.mod.gml",                        1 + _coop],
-			["teevents.mod.gml",                      1 + _coop],
-			["ntte.mod.gml",                          1 + _coop],
-			["petlib.mod.gml",                        1 + _coop],
-			["objects/tegeneral.mod.gml",             0 + _coop, "Objects"],
-			["objects/tepickups.mod.gml",             1 + _coop],
-			["objects/tedesert.mod.gml",              0 + _coop],
-			["objects/tecoast.mod.gml",               1 + _coop],
-			["objects/teoasis.mod.gml",               0 + _coop],
-			["objects/tetrench.mod.gml",              1 + _coop],
-			["objects/tesewers.mod.gml",              0 + _coop],
-			["objects/tescrapyard.mod.gml",           1 + _coop],
-			["objects/tecaves.mod.gml",               0 + _coop],
-			["objects/telabs.mod.gml",                1 + _coop],
-			["areas/coast.area.gml",                  1 + _coop, "Areas"],
-			["areas/oasis.area.gml",                  1 + _coop],
-			["areas/trench.area.gml",                 1 + _coop],
-			["areas/pizza.area.gml",                  1 + _coop],
-			["areas/lair.area.gml",                   1 + _coop],
-			["areas/red.area.gml",                    1 + _coop],
-			["races/parrot.race.gml",                 1 + _coop, "Characters"],
-			["skins/red crystal.skin.gml",            1 + _coop, "Skins"],
-			["skills/compassion.skill.gml",           1 + _coop, "Mutations"],
-			["skills/silver tongue.skill.gml",        1 + _coop],
-			["skills/reroll.skill.gml",               1 + _coop],
-			["skills/annihilation.skill.gml",         1 + _coop],
-			["crowns/bonus.crown.gml",                0 + _coop, "Crowns"],
-			["crowns/crime.crown.gml",                0 + _coop],
-			["crowns/red.crown.gml",                  1 + _coop],
-			["weps/merge.wep.gml",                    1 + _coop, "Weapons"],
-			["weps/crabbone.wep.gml",                 1],
-			["weps/scythe.wep.gml",                   1],
-			["weps/teleport gun.wep.gml",             1],
-			["weps/super teleport gun.wep.gml",       1],
-			["weps/energy bat.wep.gml",               1],
-			["weps/annihilator.wep.gml",              1],
-		//	["weps/entangler.wep.gml",                1],
-			["weps/tunneller.wep.gml",                1],
-			["weps/bat disc launcher.wep.gml",        1],
-			["weps/bat disc cannon.wep.gml",          1],
-			["weps/harpoon launcher.wep.gml",         1],
-			["weps/net launcher.wep.gml",             1],
-			["weps/clam shield.wep.gml",              1],
-			["weps/trident.wep.gml",                  1],
-			["weps/bubble rifle.wep.gml",             1],
-			["weps/bubble shotgun.wep.gml",           1],
-			["weps/bubble minigun.wep.gml",           1],
-			["weps/bubble cannon.wep.gml",            1],
-			["weps/hyper bubbler.wep.gml",            1],
-			["weps/bubble bat.wep.gml",               1],
-			["weps/lightring launcher.wep.gml",       1],
-			["weps/super lightring launcher.wep.gml", 1],
-			["weps/tesla coil.wep.gml",               1],
-			["weps/electroplasma rifle.wep.gml",      1],
-			["weps/electroplasma shotgun.wep.gml",    1],
-			["weps/quasar blaster.wep.gml",           1],
-			["weps/quasar rifle.wep.gml",             1],
-			["weps/quasar cannon.wep.gml",            1]
+		 // Mod Paths:
+		list = [
+			"teassets.mod.gml",
+			"telib.mod.gml",
+			"temenu.mod.gml",
+			"teevents.mod.gml",
+			"ntte.mod.gml",
+			"petlib.mod.gml",
+			"objects/tegeneral.mod.gml",
+			"objects/tepickups.mod.gml",
+			"objects/tedesert.mod.gml",
+			"objects/tecoast.mod.gml",
+			"objects/teoasis.mod.gml",
+			"objects/tetrench.mod.gml",
+			"objects/tesewers.mod.gml",
+			"objects/tescrapyard.mod.gml",
+			"objects/tecaves.mod.gml",
+			"objects/telabs.mod.gml",
+			"areas/coast.area.gml",
+			"areas/oasis.area.gml",
+			"areas/trench.area.gml",
+			"areas/pizza.area.gml",
+			"areas/lair.area.gml",
+			"areas/red.area.gml",
+			"races/parrot.race.gml",
+			"skins/red crystal.skin.gml",
+			"skills/compassion.skill.gml",
+			"skills/silver tongue.skill.gml",
+			"skills/reroll.skill.gml",
+			"skills/annihilation.skill.gml",
+			"crowns/bonus.crown.gml",
+			"crowns/crime.crown.gml",
+			"crowns/red.crown.gml",
+			"weps/merge.wep.gml",
+			"weps/crabbone.wep.gml",
+			"weps/scythe.wep.gml",
+			"weps/teleport gun.wep.gml",
+			"weps/super teleport gun.wep.gml",
+			"weps/energy bat.wep.gml",
+			"weps/annihilator.wep.gml",
+		//	"weps/entangler.wep.gml",
+			"weps/tunneller.wep.gml",
+			"weps/bat disc launcher.wep.gml",
+			"weps/bat disc cannon.wep.gml",
+			"weps/harpoon launcher.wep.gml",
+			"weps/net launcher.wep.gml",
+			"weps/clam shield.wep.gml",
+			"weps/trident.wep.gml",
+			"weps/bubble rifle.wep.gml",
+			"weps/bubble shotgun.wep.gml",
+			"weps/bubble minigun.wep.gml",
+			"weps/bubble cannon.wep.gml",
+			"weps/hyper bubbler.wep.gml",
+			"weps/bubble bat.wep.gml",
+			"weps/lightring launcher.wep.gml",
+			"weps/super lightring launcher.wep.gml",
+			"weps/tesla coil.wep.gml",
+			"weps/electroplasma rifle.wep.gml",
+			"weps/electroplasma shotgun.wep.gml",
+			"weps/quasar blaster.wep.gml",
+			"weps/quasar rifle.wep.gml",
+			"weps/quasar cannon.wep.gml"
 		];
 	}
 	
@@ -200,28 +200,9 @@
 	}
 	
 	 // Retrieve Local Version:
-	var _version = file_read(path_download + path_version);
+	var _version = file_read(path_version);
 	if(!is_undefined(_version)){
 		global.version = _version;
-		
-		 // Load Latest teloader.mod:
-		_version = file_read(path_version);
-		if(is_undefined(_version)){
-			var _load = file_read(path_download + path_load);
-			if(!is_undefined(_load)){
-				while(!mod_sideload()){
-					wait 0;
-				}
-				mod_loadtext(path_download + path_load);
-				exit;
-			}
-		}
-	}
-	else{
-		_version = file_read(path_version);
-		if(!is_undefined(_version)){
-			global.version = _version;
-		}
 	}
 	
 	 // Retrieve GitHub Version:
@@ -259,6 +240,9 @@
 		}
 	}
 	catch(_error){}
+	if(git_version == ""){
+		git_version = global.version;
+	}
 	
 	 // Retrieve Changelog File:
 	var _fileText = undefined;
@@ -323,7 +307,7 @@
 	}
 	
 	 // Force Update:
-	if(global.version == "" && git_version != ""){
+	if(global.version == "" && global.version != git_version){
 		global.load.type = load_type_updating;
 	}
 	
@@ -342,75 +326,130 @@
 	}
 	
 	 // Loading Time:
-	try{
-		switch(global.load.type){
+	switch(global.load.type){
+		
+		case load_type_loading: // LOAD MODS
 			
-			case load_type_loading: // LOAD MODS
-				
-				global.load.num   = 0;
-				global.load.total = array_length(global.load.list);
-				
-				wait 10;
-				
-				 // Unload Mods:
-				with(global.load.list){
-					var	_path      = self[0],
-						_pathSplit = string_split(_path, "/"),
-						_fileSplit = string_split(_pathSplit[array_length(_pathSplit) - 1], ".");
-						
-					if(array_length(_fileSplit) >= 3){
-						var	_type = _fileSplit[array_length(_fileSplit) - 2],
-							_name = array_join(array_slice(_fileSplit, 0, array_length(_fileSplit) - 2), ".");
-							
-						if(mod_exists(_type, _name)){
-							mod_unload(_path);
-						}
+			global.load.num   = 0;
+			global.load.total = array_length(global.load.list);
+			
+			wait 10;
+			
+			var _modName = ds_map_create();
+			
+			 // Unload Mods:
+			with(global.load.list){
+				var	_path      = self,
+					_pathSplit = string_split(_path, "/"),
+					_fileSplit = string_split(_pathSplit[array_length(_pathSplit) - 1], "."),
+					_type      = "",
+					_name      = "";
+					
+				if(array_length(_fileSplit) >= 3){
+					_type = _fileSplit[array_length(_fileSplit) - 2];
+					_name = array_join(array_slice(_fileSplit, 0, array_length(_fileSplit) - 2), ".");
+					if(_type == "wep"){
+						_type = "weapon";
+					}
+					if(mod_exists(_type, _name)){
+						mod_unload(_path);
 					}
 				}
 				
-				 // Load Mods:
-				with(global.load.list){
-					var	_path = self[0],
-						_wait = self[1];
-						
+				_modName[? _path] = [_type, _name];
+			}
+			
+			 // Load Mods:
+			with(global.load.list){
+				var	_path = self,
+					_type = _modName[? _path][0],
+					_name = _modName[? _path][1];
+					
+				 // Loading Text:
+				switch(string_split(_path, "/")[0]){
+					case "teassets.mod.gml" : global.load.text = "Assets";     break;
+					case "objects"          : global.load.text = "Objects";    break;
+					case "areas"            : global.load.text = "Areas";      break;
+					case "races"            : global.load.text = "Mutants";    break;
+					case "skins"            : global.load.text = "Skins";      break;
+					case "skills"           : global.load.text = "Mutations";  break;
+					case "crowns"           : global.load.text = "Crowns";     break;
+					case "weps"             : global.load.text = "Weapons";    break;
+					default                 : global.load.text = "Main Files"; break;
+				}
+				
+				 // Load:
+				var _tries = 10;
+				file_unload(_path);
+				file_load(_path);
+				while(!file_loaded(_path)){
+					_tries++;
+					wait 0;
+				}
+				if(file_exists(_path)){
 					mod_load(_path);
 					
-					 // Advance Loading Bar:
-					global.load.num += 1 + random(0.2);
-					if(array_length(self) > 2){
-						global.load.text = self[2];
+					 // Wait:
+					while(_tries-- > 0 && !mod_exists(_type, _name)){
+						wait 0;
 					}
-					
-					 // Delay:
-					if(_wait > 0){
-						wait _wait;
-					}
-					
-					 // Wait for Sprites:
-					if(array_length(mod_variable_get("mod", "teassets", "spr_load")) > 0){
-						var _spritePercent = 0.2;
-						
-						global.load.num   /= (1 - _spritePercent)
-						global.load.total /= (1 - _spritePercent);
-						
-						var	_l = global.load.num,
-							_m = global.load.total * _spritePercent;
+				}
+				file_unload(_path);
+				
+				 // Fully Loaded:
+				if(mod_exists(_type, _name)){
+					 // Wait for Sprites to Load:
+					if(_type == "mod" && _name == "teassets"){
+						if(array_length(mod_variable_get(_type, _name, "spr_load")) > 0){
+							var _spritePercent = 0.2;
 							
-						while(true){
-							var _sprLoad = mod_variable_get("mod", "teassets", "spr_load");
-							if(array_length(_sprLoad) > 0){
-								global.load.num = (_l + (_m * (_sprLoad[0, 1] / array_length(_sprLoad[0, 0]))));
+							global.load.num   /= (1 - _spritePercent)
+							global.load.total /= (1 - _spritePercent);
+							
+							var	_l = global.load.num,
+								_m = global.load.total * _spritePercent;
+								
+							while(true){
+								var _sprLoad = mod_variable_get(_type, _name, "spr_load");
+								if(array_length(_sprLoad) > 0){
+									global.load.num = (_l + (_m * (_sprLoad[0, 1] / array_length(_sprLoad[0, 0]))));
+								}
+								else break;
+								wait 0;
 							}
-							else break;
-							wait 0;
 						}
 					}
 				}
 				
-				break;
-			
-			case load_type_updating: // UPDATE DA MOD
+				 // Failed to Load:
+				else{
+					with(global.load.list){
+						if(mod_exists(_modName[? self][0], _modName[? self][1])){
+							mod_unload(self);
+						}
+					}
+					global.load.type = load_type_failed;
+					trace("");
+					trace_color("NT:TE | Loading Failed", c_yellow);
+					trace(
+						(git_version == "")
+						? "Try redownloading the mod from NT:TE's itch.io page: yokin.itch.io/ntte"
+						: "Will attempt to redownload files, please wait..."
+					);
+					break;
+				}
 				
+				 // Advance Loading Bar:
+				global.load.num += 1 + random(0.2);
+			}
+			
+			ds_map_destroy(_modName);
+			
+			break;
+			
+		case load_type_updating: // UPDATE DA MOD
+			
+			try{
 				var	_pathList = [""],
 					_fileList = [];
 					
@@ -437,7 +476,7 @@
 							
 							while(_search){
 								var _list = github_repo_request(git_user, git_repo, git_token, `commits?sha=${git_branch}&page=${_page}&per_page=${_pagePer}`);
-								if(!is_undefined(_list)){
+								if(is_array(_list) && array_length(_list) > 0){
 									with(_list){
 										global.load.num++;
 										
@@ -535,61 +574,82 @@
 					global.load.total = 1;
 					global.load.num   = global.load.total;
 				}
-				
-				break;
+			}
 			
-		}
-		
-		 // Finished:
-		if(global.load.type != load_type_menu){
-			global.load.text = `@q@(color:${make_color_rgb(235, 0, 67)})Complete!`;
+			 // Update Failed:
+			catch(_error){
+				global.load.type = load_type_failed;
+				trace("");
+				trace_color(_error, c_yellow);
+				trace("");
+				trace_color("NT:TE | Update Failed", c_yellow);
+				trace("Are you connected to the internet? Try downloading the latest version manually from NT:TE's itch.io page: yokin.itch.io/ntte");
+			}
+			
+			break;
+			
+	}
+	
+	 // Finished:
+	with(global.load){
+		if(type != load_type_menu){
 			sound_play_pitchvol(sndEXPChest, 1.5 + random(0.1), 0.6);
-			sound_play_pitchvol(sndNoSelect, 0.6 + random(0.1), 0.5);
-			wait 15;
+			
+			 // Failure:
+			if(type == load_type_failed){
+				sound_play_pitchvol(sndCrownRandom, 0.6 + random(0.1), 0.5);
+				text  = choose("Uh oh", "Something happened", "That's weird", "Failed", "ERROR");
+				num   = 0;
+				total = 1;
+				wait 150;
+			}
+			
+			 // Success:
+			else{
+				sound_play_pitchvol(sndNoSelect, 0.6 + random(0.1), 0.5);
+				text = `@q@(color:${make_color_rgb(235, 0, 67)})Complete!`;
+				wait 15;
+			}
 		}
 		
 		 // Wait for Changelog to Close:
-		while(changelog_exists(changelog_get_display()) && global.load.open){
+		while(open && changelog_exists(changelog_get_display())){
 			wait 0;
 		}
-	}
-	
-	 // Failed:
-	catch(_error){
-		trace("");
-		trace_color(_error, c_yellow);
-		if(global.load.type == load_type_updating){
-			trace("");
-			trace_color("NT:TE | Update Failed", c_yellow)
-			trace("Are you connected to the internet? Try downloading the latest version manually from NT:TE's itch.io page: yokin.itch.io/ntte");
-		}
 		
-		 // Sound:
-		sound_play_pitchvol(sndEXPChest,    1.5 + random(0.1), 0.6);
-		sound_play_pitchvol(sndCrownRandom, 0.6 + random(0.1), 0.5);
-		
-		 // Broke !!!!!
-		with(global.load){
-			type  = load_type_failed;
-			text  = choose("Uh oh", "Something happened", "That's weird", "Failed", "ERROR");
-			num   = 0;
-			total = 1;
-		}
-		
-		wait 150;
-	}
-	
-	 // Unload / Reload:
-	with(global.load){
+		 // Close:
 		open = false;
 		while(open_scale > 0){
 			wait 0;
 		}
-		mod_loadtext(
-			(type == load_type_updating)
-			? path_mod + path_load
-			: "main3.txt"
-		);
+		
+		 // Reload:
+		if(type == load_type_updating){
+			var	_path  = path_download + path_loader,
+				_tries = 1;
+				
+			file_unload(_path);
+			file_load(_path);
+			while(!file_loaded(_path)){
+				_tries++;
+				wait 0;
+			}
+			if(file_exists(_path)){
+				mod_load(_path);
+				
+				 // Wait:
+				while(_tries-- > 0){
+					wait 0;
+				}
+			}
+			file_unload(_path);
+			
+			 // Failed to Reload:
+			type = load_type_failed;
+		}
+		
+		 // Unload:
+		mod_loadtext(path_main_unload);
 	}
 	
 #macro load_type_menu     -1 // Button menu
@@ -597,11 +657,13 @@
 #macro load_type_updating  1 // Updating the mod
 #macro load_type_failed    2 // Errored while loading
 
-#macro path_mod       "NTTE/"
-#macro path_download  "../../mods/" + path_mod
-#macro path_load      "main.txt"
-#macro path_version   "NTTE-Version.txt"
-#macro path_changelog "NTTE-Changelog.txt"
+#macro path_download    "../../mods/NTTE/"
+#macro path_main_load   "main.txt"
+#macro path_main_allow  "main2.txt"
+#macro path_main_unload "main3.txt"
+#macro path_loader      mod_current + ".mod.gml"
+#macro path_version     "NTTE-Version.txt"
+#macro path_changelog   "NTTE-Changelog.txt"
 
 #macro git_user    "Yokinman"
 #macro git_repo    "NTTE-public"
@@ -2215,6 +2277,7 @@
 				_char    = string_upper(string_char_at(_current, 1));
 				
 			switch(_char){
+				
 				case "": // CANCEL : "@@rHey" -> "@rHey"
 					
 					if(i < _stringSplitMax - 1){
@@ -2283,6 +2346,7 @@
 				default: // NONE : "@Hey" -> "@Hey"
 					
 					_current = _split + _current;
+					
 			}
 			
 			_stringSplit[i] = _current;
@@ -2292,6 +2356,23 @@
 	return array_join(_stringSplit, "");
 	
 #define cleanup
+	 // FAILED:
+	if(global.load.type == load_type_updating){
+		if(global.load.open || global.load.open_scale > 0){
+			global.load.type = load_type_failed;
+		}
+	}
+	if(global.load.type == load_type_failed){
+		string_save("", path_download + path_version);
+		file_delete(path_download + path_loader);
+		mod_loadtext(path_main_load);
+	}
+	
+	 // Help Out New teloader:
+	else if(global.load.type == load_type_updating && mod_sideload()){
+		mod_loadtext(path_main_allow);
+	}
+	
 	 // Unload Changelogs:
 	for(var i = 0; i < changelog_size(); i++){
 		changelog_delete(i);
