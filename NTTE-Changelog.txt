@@ -1,10 +1,12 @@
-2.01 - 2.015 ~ Time to Fix
+2.01 - 2.016 ~ Time to Fix
+	+	The loading bar now supports full gamepad input
 	*	Fixed the Auto Updater occasionally making the mod unloadable
 	*	Fixed the mod trying to update when you don't have internet
 	*	Fixed a few errors that occurred in the NTT beta (9942+) versions
 	*	Fixed the changelog being unreadable in NTT beta (9942+) versions
 	*	Fixed Lair's turrets not having hitboxes in NTT beta (9942+) versions
 	*	Fixed Lair's doors not opening properly in NTT beta (9942+) versions
+	*	Fixed the Strong Spirit halo being invisible when in Coast's water
 	*	Fixed the fake walls in @r[REDACTED] @snot looking right the NTT beta (9942+) versions
 	*	Fixed Ravens and Lil Hunter appearing above walls after flying in NTT beta (9942+) versions
 	*	Fixed Lil Hunter getting stuck if you take a trident out of him mid-flight

@@ -14,19 +14,13 @@
 		open       = false;
 		open_scale = 0;
 		bloom      = 0;
+		noinput    = 0;
 		
 		 // Sprites:
 		spr = {
 			"bar"  : sprite_add("sprites/menu/sprNTTELoading.png",     1, 34, 10),
 			"fill" : sprite_add("sprites/menu/sprNTTELoadingFill.png", 3, 28,  8)
 		};
-		
-		 // Coop Delay Increase:
-		var _coop = -1;
-		for(var i = 0; i < maxp; i++){
-			_coop += player_is_active(i);
-		}
-		_coop *= 2;
 		
 		 // Mod Paths:
 		list = [
@@ -322,6 +316,21 @@
 			|| global.load.type == load_type_menu // Player to click button
 		)
 	){
+		 // Disable "spec" Input:
+		if(global.load.type == load_type_menu && instance_exists(Menu)){
+			with(BackFromCharSelect){
+				var _hover = false;
+				for(var i = 0; i < maxp; i++){
+					if(position_meeting((mouse_x[i] - (view_xview[i] + xstart)) + x, (mouse_y[i] - (view_yview[i] + ystart)) + y, id)){
+						_hover = true;
+						break;
+					}
+				}
+				if(!_hover){
+					noinput = 3;
+				}
+			}
+		}
 		wait 0;
 	}
 	
@@ -808,6 +817,7 @@
 							"font"   : fntSmall,
 							"text"   : (changelog_exists(_logIndex) ? "Update" : "Load"),
 							"color"  : "s",
+							"input"  : (changelog_exists(_logIndex) ? "swap" : "pick"),
 							"active" : (instance_exists(Menu) && mod_sideload() && (!changelog_exists(_logIndex) || global.version != git_version))
 						},
 						{	"x"      : -17 * _xsc,
@@ -815,6 +825,7 @@
 							"font"   : fntM,
 							"text"   : "X",
 							"color"  : "s",
+							"input"  : (changelog_exists(_logIndex) ? "" : "spec"),
 							"active" : mod_sideload()
 						},
 						{	"x"      : 17 * _xsc,
@@ -822,6 +833,7 @@
 							"font"   : fntM,
 							"text"   : "!",
 							"color"  : ((changelog_exists(_logIndex) || git_version == global.version || (current_frame % 24) < 8) ? "s" : "y"),
+							"input"  : (changelog_exists(_logIndex) ? "" : "swap"),
 							"active" : (instance_exists(Menu) && (mod_sideload() || changelog_exists(_logIndex)))
 						}
 					];
@@ -838,18 +850,26 @@
 									
 								for(var j = 0; j < maxp; j++){
 									if(is_undefined(_hover[j])){
-										if(point_in_rectangle(
-											mouse_x[j] - view_xview[j],
-											mouse_y[j] - view_yview[j],
-											_x + x - _bx,
-											_y + y - _by,
-											_x + x + _bx - 1,
-											_y + y + _by - 1
-										)){
+										var _pick = (
+											button_pressed(j, input)
+											&& other.noinput <= 0
+											&& instance_exists(Menu)
+										);
+										if(
+											_pick ||
+											point_in_rectangle(
+												mouse_x[j] - view_xview[j],
+												mouse_y[j] - view_yview[j],
+												_x + x - _bx,
+												_y + y - _by,
+												_x + x + _bx - 1,
+												_y + y + _by - 1
+											)
+										){
 											_hover[j] = self;
 											
 											 // Confirm:
-											if(button_pressed(j, "fire")){
+											if(_pick || button_pressed(j, "fire")){
 												sound_play_pitchvol(sndClick, 1 + random_range(-0.1, 0.1), 0.6);
 												switch(text){
 													case "Load":
@@ -941,6 +961,11 @@
 				}
 			}
 		}
+		
+		 // Button Input Delay:
+		if(noinput > 0){
+			noinput -= current_time_scale;
+		}
 	}
 	
 #define draw_pause
@@ -967,6 +992,8 @@
 		
 		 // Main Code:
 		if(changelog_exists(changelog_get_display())){
+			global.load.noinput = max(global.load.noinput, 6);
+			
 			if(!instance_exists(Menu) || Menu.mode == 1){
 				var	_logW      = width,
 					_logH      = height,
@@ -1331,11 +1358,17 @@
 					_cycle = (button_check_nonsync(_index, "pick") - button_check_nonsync(_index, "swap"));
 					if(_cycle != 0){
 						if((button_pressed_nonsync(_index, "pick") || button_pressed_nonsync(_index, "swap"))){
-							if(changelog_exists(changelog_get_display() + _cycle)){
-								changelog_set_display(changelog_get_display() + _cycle);
+							var _logCycle = changelog_get_display() + _cycle;
+							if(changelog_exists(_logCycle)){
+								changelog_set_display(_logCycle);
 							}
 							else{
 								sound_play_pitchvol(sndNoSelect, 1.2 + random_nonsync(0.2), 0.3);
+								
+								 // Update:
+								if(_logCycle < 0 && global.version != git_version && global.load.type == load_type_menu){
+									global.load.noinput = 0;
+								}
 							}
 						}
 						_oy += _cycle;
@@ -1346,8 +1379,9 @@
 						_cycle = ((_my < _y) ? -1 : 1);
 						if(button_check_nonsync(_index, "fire")){
 							if(button_pressed_nonsync(_index, "fire")){
-								if(changelog_exists(changelog_get_display() + _cycle)){
-									changelog_set_display(changelog_get_display() + _cycle);
+								var _logCycle = changelog_get_display() + _cycle;
+								if(changelog_exists(_logCycle)){
+									changelog_set_display(_logCycle);
 								}
 								else{
 									sound_play_pitchvol(sndNoSelect, 1.2 + random_nonsync(0.2), 0.3);

@@ -1236,7 +1236,7 @@
 	
 	 // More Aggressive Bats:
 	else with(instances_matching(instances_matching(CustomEnemy, "name", "Bat"), "creator", id)){
-		if(current_frame_active) alarm1 = ceil(alarm1 / 2);
+		alarm1 = ceil(alarm1 / 2);
 		
 		if(enemy_target(x, y)){
 			if(instance_seen(x, y, target) && instance_near(x, y, target, 128)){
@@ -1276,13 +1276,13 @@
 		
 		 // Turnin Into Bats:
 		var _ang = random(360);
-		for(var d = _ang; d < _ang + 360; d += (360 / (3 + (2 * GameCont.loops)))){
-			var l = 8;
-			with(obj_create(x + lengthdir_x(l, d), y + lengthdir_y(l, d), "BatCloud")){
+		for(var _d = _ang; _d < _ang + 360; _d += (360 / (3 + (2 * GameCont.loops)))){
+			var _l = 8;
+			with(obj_create(x + lengthdir_x(_l, _d), y + lengthdir_y(_l, _d), "BatCloud")){
 				target        = other.target;
-				target_offdir = d;
+				target_offdir = _d;
 				creator       = other;
-				direction     = d;
+				direction     = _d;
 			}
 		}
 		

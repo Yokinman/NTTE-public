@@ -6,10 +6,10 @@
 	 // Bind Events:
 	var _seaDepth = object_get_depth(Floor) + 10;
 	global.sea_bind = ds_map_create();
-	global.sea_bind[? "main"       ] = script_bind("SeaDraw",       CustomDraw, script_ref_create(draw_sea),                _seaDepth,                    false);
-	global.sea_bind[? "top"        ] = script_bind("SeaDrawTop",    CustomDraw, script_ref_create(draw_sea_top),            -1,                           false);
-	global.sea_bind[? "visible_max"] = script_bind("SeaInstVisMax", CustomDraw, script_ref_create(sea_inst_visible, false), _seaDepth,                    false);
-	global.sea_bind[? "visible_min"] = script_bind("SeaInstVisMin", CustomDraw, script_ref_create(sea_inst_visible, true),  object_get_depth(SubTopCont), false);
+	global.sea_bind[? "main"       ] = script_bind("SeaDraw",       CustomDraw, script_ref_create(draw_sea),                _seaDepth,                        false);
+	global.sea_bind[? "top"        ] = script_bind("SeaDrawTop",    CustomDraw, script_ref_create(draw_sea_top),            -1,                               false);
+	global.sea_bind[? "visible_max"] = script_bind("SeaInstVisMax", CustomDraw, script_ref_create(sea_inst_visible, false), _seaDepth,                        false);
+	global.sea_bind[? "visible_min"] = script_bind("SeaInstVisMin", CustomDraw, script_ref_create(sea_inst_visible, true),  object_get_depth(SubTopCont) + 1, false);
 	global.sea_inst = [];
 	
 	 // # of times that 'area_pop_enemies' must be called before it spawns another enemy, to reduce enemy spawns:
@@ -532,7 +532,7 @@
 			),
 			instances_matching(CustomSlash, "name", "ClamShield")
 		);
-		global.sea_inst = instances_matching_lt(global.sea_inst, "depth", _depthMax);
+		global.sea_inst = instances_matching_le(global.sea_inst, "depth", _depthMax);
 		global.sea_inst = instances_matching(   global.sea_inst, "visible", true);
 		global.sea_inst = instances_matching_ne(global.sea_inst, "canwade", false);
 		
@@ -550,7 +550,7 @@
 			with(global.sea_inst){
 				 // In Water:
 				var _dis = distance_to_object(Floor);
-				if(_dis > 4 && depth > _depthMin){
+				if(_dis > 4 && depth >= _depthMin){
 					if(wading <= 0){
 						 // Splash:
 						repeat(irandom_range(4, 8)){
@@ -590,7 +590,7 @@
 		
 		 // Corpse Sinking (THE PEAK OF OPTIMIZATION):
 		if(instance_exists(Corpse)){
-			_inst = instances_matching_gt(Corpse, "wading", 30);
+			var _inst = instances_matching_gt(Corpse, "wading", 30);
 			if(array_length(_inst)){
 				_inst = instances_matching(_inst, "speed", 0);
 				if(array_length(_inst)){
