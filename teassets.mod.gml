@@ -1,5 +1,5 @@
 #define init
-	ntte_version = 2.016;
+	ntte_version = 2.017;
 	
 	 // Debug Lag:
 	lag = false;
@@ -792,10 +792,11 @@
 				CowSkullDead = sprite(p + "sprCowSkullDead", 3, 24, 24);
 				
 				 // Scorpion Rock:
-				ScorpionRockEnemy   = sprite(p + "sprScorpionRock",     6, 16, 16);
-				ScorpionRockFriend  = sprite(p + "sprScorpionRockAlly", 6, 16, 16);
-				ScorpionRockHurt    = sprite(p + "sprScorpionRock",     6, 16, 16, shnHurt);
-				ScorpionRockDead    = sprite(p + "sprScorpionRockDead", 3, 16, 16);
+				ScorpionRock         = sprite(p + "sprScorpionRock",     6, 16, 16);
+				ScorpionRockAlly     = sprite(p + "sprScorpionRockAlly", 6, 16, 16);
+				ScorpionRockHurt     = sprite(p + "sprScorpionRock",     6, 16, 16, shnHurt);
+				ScorpionRockAllyHurt = sprite(p + "sprScorpionRockAlly", 6, 16, 16, shnHurt);
+				ScorpionRockDead     = sprite(p + "sprScorpionRockDead", 3, 16, 16);
 				
 			//#endregion
 			
@@ -1411,6 +1412,15 @@
 			with(msk.FloorMiddleSmall){
 				mask = [false, 0];
 			}
+			
+		//#endregion
+		
+		//#region CRIB
+		m = "areas/Crib/";
+		p = m;
+			
+			 // TV Shadow:
+			shd.VenuzTV = sprite(p + "shdVenuzTV", 1, 129, 96);
 			
 		//#endregion
 		

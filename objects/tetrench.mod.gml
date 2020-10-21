@@ -608,7 +608,7 @@
 		sprite_index = spr.ElectroPlasma;
 		image_speed  = 0.4;
 		image_index  = 1 - image_speed;
-		depth        = -4;
+		depth        = -3;
 		
 		 // Vars:
 		mask_index   = mskEnemyBullet1;

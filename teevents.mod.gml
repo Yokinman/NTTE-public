@@ -894,9 +894,9 @@
 	}
 	
 	 // No Scorpion Pets:
-	with(instances_matching(CustomProp, "name", "ScorpionRock")){
+	/*with(instances_matching(CustomProp, "name", "ScorpionRock")){
 		friendly = -1;
-	}
+	}*/
 	
 	 // Delete Lone Walls:
 	with(Wall) if(place_meeting(x, y, Floor)){

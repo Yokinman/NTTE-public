@@ -449,14 +449,12 @@
 				var _pit = pit_get(x, bbox_bottom);
 				
 				 // Do a spin:
-				if(speed < maxspeed - friction){
-					if(_pit){
-						var	_x = x + cos(wave / 10) * 0.25 * right,
-							_y = y + sin(wave / 10) * 0.25 * right;
-							
-						if(!place_meeting(_x, y, Wall)) x = _x;
-						if(!place_meeting(x, _y, Wall)) y = _y;
-					}
+				if(_pit && speed < maxspeed - friction){
+					var	_x = x + cos(wave / 10) * 0.25 * right,
+						_y = y + sin(wave / 10) * 0.25 * right;
+						
+					if(!place_meeting(_x, y, Wall)) x = _x;
+					if(!place_meeting(x, _y, Wall)) y = _y;
 				}
 				
 				 // Pit Transition FX:
@@ -1017,19 +1015,31 @@
 	if(lag) trace_time(script[2]);
 	
 #define pit_get(_x, _y)
-	return global.pit_grid[# _x / 16, _y / 16];
+	_x /= 16;
+	_y /= 16;
+	
+	if(_x >= 0 && _y >= 0 && _x < ds_grid_width(global.pit_grid) && _y < ds_grid_height(global.pit_grid)){
+		return global.pit_grid[# _x, _y];
+	}
+	
+	return false;
 	
 #define pit_set(_x, _y, _bool)
-	global.pit_grid[# _x / 16, _y / 16] = _bool;
+	_x /= 16;
+	_y /= 16;
+	
+	if(_x >= 0 && _y >= 0 && _x < ds_grid_width(global.pit_grid) && _y < ds_grid_height(global.pit_grid)){
+		global.pit_grid[# _x, _y] = _bool;
+		
+		 // Reset Pit Sink Checks:
+		with(instances_matching_ne([Corpse, ChestOpen, Debris, Shell, Feather], "trenchpit_check", null)){
+			trenchpit_check = null;
+		}
+	}
 	
 	 // Reset Pit Surfaces:
 	with([surfPit, surfPitWallTop, surfPitWallBot]){
 		reset = true;
-	}
-	
-	 // Reset Pit Sink Checks:
-	with(instances_matching_ne([Corpse, ChestOpen, Debris, Shell, Feather], "trenchpit_check", null)){
-		trenchpit_check = null;
 	}
 	
 	 // Activate Pit Drawing:

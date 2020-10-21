@@ -89,7 +89,7 @@
 			if(skill_get(mut_boiling_veins) > 0){
 				array_push(_jsGrub, "sunset mayo");
 			}
-			if(array_length(instances_matching(Player, "notoxic", false)) > 0){
+			if(array_length(instances_matching(Player, "notoxic", false))){
 				array_push(_jsGrub, "frog milk");
 			}
 			
@@ -1767,7 +1767,7 @@
 					if(skill_get(mut_boiling_veins) > 0){
 						array_push(a, "sunset mayo");
 					}
-					if(array_length(instances_matching_lt(Player, "notoxic", 1)) > 0){
+					if(array_length(instances_matching(Player, "notoxic", false))){
 						array_push(a, "frog milk");
 					}
 					soda = a[irandom(array_length(a) - 1)];
@@ -2726,7 +2726,9 @@
 		xprevious = x;
 		yprevious = y;
 		
-		if(!target.visible) target = noone;
+		if(!target.visible){
+			target = noone;
+		}
 	}
 	
 #define HarpoonPickup_pull
@@ -2769,7 +2771,7 @@
 			flash       - How many frames to draw in flat white
 	*/
 	
-	 // First, Enable Orchid Chest Spawning:
+	 // Enable Orchid Chest Spawning:
 	save_set("orchid:seen", true);
 	
 	 // Back to Business:
@@ -2797,7 +2799,9 @@
 	}
 	
 #define OrchidBall_step
-	if(flash > 0) flash -= current_time_scale;
+	if(flash > 0){
+		flash -= current_time_scale;
+	}
 	
 	 // Grow / Shrink:
 	var	_scale = 1 + (0.1 * sin(current_frame / 10)),
@@ -2825,7 +2829,10 @@
 				
 				 // Movin':
 				else{
-					motion_add_ct(point_direction(x, y, target.x, target.y), 1.5);
+					motion_add_ct(
+						point_direction(x, y, target.x, target.y),
+						1.5
+					);
 					speed = min(speed, 10);
 					
 					 // Trail:
@@ -2838,7 +2845,7 @@
 								image_yscale = image_xscale;
 								image_angle  = random(360);
 								depth        = other.depth + 1;
-								// image_speed  = 0.4;
+							//	image_speed  = 0.4;
 							}
 						}
 					}
@@ -2902,7 +2909,7 @@
 			snd_flash   = sndLevelUp;
 			
 			 // Fix Overlap:
-			while(array_length(instances_meeting(target.x + target_x, target.y + target_y, instances_matching(instances_matching(CustomObject, "name", "AlertIndicator"), "target", target))) > 0){
+			while(array_length(instances_meeting(target.x + target_x, target.y + target_y, instances_matching(instances_matching(CustomObject, "name", "AlertIndicator"), "target", target)))){
 				target_y -= 8;
 			}
 		}
@@ -2911,7 +2918,7 @@
 	 // Effects:
 	repeat(10 + irandom(10)){
 		with(scrFX([x, 16], [y, 16], [direction, 3 + random(3)], "VaultFlowerSparkle")){
-			depth = -9;
+			depth    = -9;
 			friction = 0.2;
 		}
 	}
@@ -3041,11 +3048,11 @@
 	
 	with(array_shuffle(_skillList)){
 		var _skill = self;
-		if(_skillAll || (skill_get(_skill) == 0 && array_length(instances_matching(_skillInst, "skill", _skill)) <= 0)){
+		if(_skillAll || (skill_get(_skill) == 0 && !array_length(instances_matching(_skillInst, "skill", _skill)))){
 			
 			 // Attempted Manual Defpack Support:
 			if(_skill == "prismatic iris"){
-				skill_set(`irisslave${irandom_range(1, 6)}`, 1);
+				return `irisslave${irandom_range(1, 6)}`;
 			}
 			
 			return _skill;
@@ -3062,93 +3069,101 @@
 	sound_play_pitch(sndMut, 1 + orandom(0.2));
 	sound_play_pitchvol(sndStatueXP, 0.8, 0.8);
 	
-	 // Skill:
+	 // Mutation:
 	skill_set(skill, max(0, skill_get(skill)) + num);
-	if(num != 0) switch(skill){
-		case mut_scarier_face:
+	if(num != 0){
+		switch(skill){
 			
-			 // Manually Reduce Enemy HP:
-			with(enemy){
-				maxhealth = round(maxhealth * power(0.8, other.num));
-				my_health = round(my_health * power(0.8, other.num));
+			case mut_scarier_face:
 				
-				 // Hurt FX:
-				image_index = 0;
-				sprite_index = spr_hurt;
-				if(point_seen(x, y, -1)) sound_play_hit(snd_hurt, 0.3);
-			}
-			
-			break;
-			
-		case mut_hammerhead:
-			
-			 // Give Hammerhead Points:
-			with(Player) hammerhead += 20 * other.num;
-			
-			break;
-			
-		case mut_strong_spirit:
-			
-			with(Player){
-				var _num = other.num;
-				
-				 // Restore Strong Spirit:
-				if(canspirit == false || skill_get(mut_strong_spirit) <= other.num){
-					canspirit = true;
-					_num--;
+				 // Manually Reduce Enemy HP:
+				with(enemy){
+					maxhealth = round(maxhealth * power(0.8, other.num));
+					my_health = round(my_health * power(0.8, other.num));
 					
-					 // Effects:
-					with(instance_create(x, y, StrongSpirit)){
-						sprite_index = sprStrongSpiritRefill;
-						creator = other;
+					 // Hurt FX:
+					sprite_index = spr_hurt;
+					image_index  = 0;
+					if(point_seen(x, y, -1)){
+						sound_play_hit(snd_hurt, 0.3);
 					}
-					sound_play(sndStrongSpiritGain);
 				}
 				
-				 // Bonus Spirit (Strong Spirit's built-in mutation stacking don't exist):
-				if("bonus_spirit" not in self){
-					bonus_spirit = [];
+				break;
+				
+			case mut_hammerhead:
+				
+				 // Give Hammerhead Points:
+				with(Player){
+					hammerhead += 20 * other.num;
 				}
-				if(_num > 0) repeat(_num){
-					var _spirit = {};
-					array_push(other.spirit, _spirit);
-					array_push(bonus_spirit, _spirit);
-					sound_play(sndStrongSpiritGain);
-				}
-			}
-			
-			break;
-			
-		case mut_open_mind:
-			
-			if(num > 0){
-				 // Duplicate Chest:
-				with(instance_random(instances_matching_ne([chestprop, RadChest], "mask_index", mskNone))){
-					repeat(other.num){
-						array_push(other.chest, instance_clone());
+				
+				break;
+				
+			case mut_strong_spirit:
+				
+				with(Player){
+					var _num = other.num;
+					
+					 // Restore Strong Spirit:
+					if(canspirit == false || skill_get(mut_strong_spirit) <= other.num){
+						canspirit = true;
+						_num--;
+						
+						 // Effects:
+						with(instance_create(x, y, StrongSpirit)){
+							sprite_index = sprStrongSpiritRefill;
+							creator      = other;
+						}
+						sound_play(sndStrongSpiritGain);
 					}
 					
-					 // Manual Offset:
-					if(instance_is(self, RadChest)){
-						with(other.chest) instance_budge(other, -1);
+					 // Bonus Spirit (Strong Spirit's built-in mutation stacking don't exist):
+					if("bonus_spirit" not in self){
+						bonus_spirit = [];
+					}
+					if(_num > 0) repeat(_num){
+						var _spirit = {};
+						array_push(other.spirit, _spirit);
+						array_push(bonus_spirit, _spirit);
+						sound_play(sndStrongSpiritGain);
 					}
 				}
 				
-				 // Alert:
-				with(chest) with(other){
-					var _icon = skill_get_icon(skill);
-					with(alert_create(other, _icon[0])){
-						image_index = _icon[1];
-						image_speed = 0;
-						alert       = {};
-						alarm0      = other.time - (2 * blink);
-						flash       = 4;
-						snd_flash   = sndChest;
+				break;
+				
+			case mut_open_mind:
+				
+				if(num > 0){
+					 // Duplicate Chest:
+					with(instance_random(instances_matching_ne([chestprop, RadChest], "mask_index", mskNone))){
+						repeat(other.num){
+							array_push(other.chest, instance_clone());
+						}
+						
+						 // Manual Offset:
+						if(instance_is(self, RadChest)){
+							with(other.chest) instance_budge(other, -1);
+						}
+					}
+					
+					 // Alert:
+					with(chest) with(other){
+						var _icon = skill_get_icon(skill);
+						with(alert_create(other, _icon[0])){
+							image_index = _icon[1];
+							image_speed = 0;
+							alert       = {};
+							alarm0      = other.time - (2 * blink);
+							flash       = 4;
+							snd_flash   = sndChest;
+						}
 					}
 				}
-			}
-			
-			break;
+				
+				break;
+				
+		}
 	}
 	
 #define OrchidSkill_step
@@ -3157,16 +3172,8 @@
 	 // Unflash:
 	else flash = false;
 	
+	 // Timer:
 	if(skill_get(skill) != 0){
-		 // Chest Blink:
-		with(chest) if(instance_exists(self)){
-			with(instances_matching(instances_matching(CustomObject, "name", "AlertIndicator"), "target", self)){
-				other.visible = visible;
-				break;
-			}
-		}
-		
-		 // Timer:
 		time_max = max(time, time_max);
 		if(time >= 0 && !instance_exists(GenCont) && !instance_exists(LevCont)){
 			time -= current_time_scale;
@@ -3178,15 +3185,43 @@
 			}
 		}
 	}
+	
+	 // Mutation Not Active:
 	else instance_delete(id);
 	
+#define OrchidSkill_end_step
+	 // Blink:
+	if(array_length(chest)){
+		var _inst = instances_matching(chest, "", null);
+		if(array_length(_inst)) with(_inst){
+			var _instAlert = instances_matching(instances_matching(CustomObject, "name", "AlertIndicator"), "target", self);
+			if(array_length(_instAlert)){
+				visible = _instAlert[0].visible;
+			}
+		}
+	}
+	
 #define OrchidSkill_destroy
+	 // Remember Health:
+	var _lastHP = [];
+	with(Player){
+		array_push(_lastHP, [id, my_health]);
+	}
+	
+	 // Lose Mutation:
 	skill_set(skill, max(0, skill_get(skill) - num));
 	
+	 // Restore Health:
+	with(_lastHP){
+		with(self[0]){
+			my_health = other[1];
+		}
+	}
+	
 	 // Blip:
-	sound_play_pitchvol(sndMutHover,       0.5 + random(0.2), 3);
-	sound_play_pitchvol(sndCursedReminder, 1 + orandom(0.1),  3);
-	sound_play_pitchvol(sndStatueHurt,     0.7 + random(0.1), 0.4);
+	sound_play_pitchvol(sndMutHover,       0.5 +  random(0.2), 3.0);
+	sound_play_pitchvol(sndCursedReminder, 1.0 + orandom(0.1), 3.0);
+	sound_play_pitchvol(sndStatueHurt,     0.7 +  random(0.1), 0.4);
 	
 	 // Delete Alerts:
 	with(instances_matching(instances_matching(CustomObject, "name", "AlertIndicator"), "creator", id)){
@@ -3198,10 +3233,14 @@
 	
 	 // Skill-Specific:
 	switch(skill){
+		
 		case mut_throne_butt:
+			
+			 // Fix Sound Looping:
 			with(instances_matching_ne(Player, "roll", 0)){
 				sound_stop(sndFishTB);
 			}
+			
 			break;
 			
 		case mut_scarier_face:
@@ -3212,11 +3251,11 @@
 				my_health = round(my_health / power(0.8, other.num));
 				
 				 // Heal FX:
-				image_index = 0;
 				sprite_index = spr_hurt;
+				image_index  = 0;
 				with(instance_create(x, y, BloodLust)){
 					sprite_index = sprHealFX;
-					creator = other;
+					creator      = other;
 				}
 				sound_play_pitchvol(sndHPPickup, 1.5, 0.3);
 			}
@@ -3236,9 +3275,9 @@
 			
 			 // Remove Bonus Spirit:
 			with(spirit) if(lq_defget(self, "active", true)){
-				active = false;
+				active       = false;
 				sprite_index = sprStrongSpirit;
-				image_index = 0;
+				image_index  = 0;
 				sound_play(sndStrongSpiritLost);
 			}
 			
@@ -3253,14 +3292,12 @@
 			
 			break;
 			
-		case mut_open_mind:
-			
-			 // Delete Duplicate Chest:
-			with(chest) if(instance_exists(self)){
-				instance_delete(id);
-			}
-			
-			break;
+	}
+	
+	 // Delete Duplicate Chest:
+	with(instances_matching(chest, "", null)){
+		//instance_create(x, y, FishA);
+		instance_delete(id);
 	}
 	
 	
@@ -3316,7 +3353,7 @@
 		with(scrFX([x, 2], y - random(16), [90, random(2)], EatRad)){
 			sprite_index = choose(sprEatRadPlut, sprEatBigRadPlut);
 			image_speed  = 0.4;
-			depth = -7;
+			depth        = -7;
 		} 
 	}
 	
@@ -3367,7 +3404,7 @@
 	}
 	
 	 // Alert:
-	if(array_length(instances_matching(instances_matching(CustomObject, "name", "OrchidSkill"), "creator", id)) > 0){
+	if(array_length(instances_matching(instances_matching(CustomObject, "name", "OrchidSkill"), "creator", id))){
 		var _icon = skill_get_icon(skill);
 		with(alert_create(self, _icon[0])){
 			image_index = _icon[1];
@@ -3545,8 +3582,8 @@
 	with(instance_create(_x, _y, CustomObject)){
 		 // Vars:
 		creator = noone;
-		small = false;
-		num = 6;
+		small   = false;
+		num     = 6;
 		
 		return id;
 	}
@@ -3637,7 +3674,7 @@
 	if(stick_time > 0){
 		 // Generate Queue:
 		if(stick){
-			if(array_length(stick_list) <= 0){
+			if(!array_length(stick_list)){
 				var _list = instances_matching(instances_matching(instances_matching(object_index, "name", name), "target", target), "creator", creator);
 				with(_list){
 					stick_list = _list;
@@ -3907,29 +3944,31 @@
 	}
 	
 #define Prompt_begin_step
-	with(nearwep) instance_delete(id);
+	with(nearwep){
+		instance_delete(id);
+	}
 	
 #define Prompt_end_step
 	 // Follow Creator:
-	var c = creator;
-	if(c != noone){
-		if(instance_exists(c)){
-			if(instance_exists(nearwep)) with(nearwep){
-				x += c.x - other.x;
-				y += c.y - other.y;
-				visible = true;
+	if(creator != noone){
+		if(instance_exists(creator)){
+			if(instance_exists(nearwep)){
+				with(nearwep){
+					x += other.creator.x - other.x;
+					y += other.creator.y - other.y;
+					visible = true;
+				}
 			}
-			x = c.x;
-			y = c.y;
-			//image_angle = c.image_angle;
-			//image_xscale = c.image_xscale;
-			//image_yscale = c.image_yscale;
+			x = creator.x;
+			y = creator.y;
 		}
 		else instance_destroy();
 	}
 	
 #define Prompt_cleanup
-	with(nearwep) instance_delete(id);
+	with(nearwep){
+		instance_delete(id);
+	}
 	
 	
 #define RedAmmoChest_create(_x, _y)
@@ -4060,7 +4099,7 @@
 #define SpiritPickup_open
 	var	_inst = noone,
 		_num  = num,
-		_text ="% @yBONUS @wSPIRIT" + ((_num > 1) ? "S" : "");
+		_text = "% @yBONUS @wSPIRIT" + ((_num > 1) ? "S" : "");
 		
 	 // Acquire Bonus Spirit:
 	with(instance_is(other, Player) ? other : Player){
@@ -4348,7 +4387,7 @@
 						array_push(_skillList, _skill);
 					}
 				}
-				if(array_length(_skillList) > 0){
+				if(array_length(_skillList)){
 					skill = _skillList[irandom(array_length(_skillList) - 1)];
 				}
 			}
@@ -5031,85 +5070,11 @@
 			}
 		}
 		
-		 // Bonus Spirits:
-		var _inst = instances_matching_ne(Player, "bonus_spirit", null);
-		if(array_length(_inst)) with(_inst){
-			if(array_length(bonus_spirit) > 0){
-				 // Grant Grace:
-				if(my_health <= 0 && lsthealth > 0 && player_active){
-					if(skill_get(mut_strong_spirit) <= 0 || canspirit != true){
-						for(var i = array_length(bonus_spirit) - 1; i >= 0; i--){
-							var _spirit = bonus_spirit[i];
-							if(lq_defget(_spirit, "active", true)){
-								my_health    = 1;
-								spiriteffect = 5;
-								
-								 // Lost:
-								with(_spirit){
-									active = false;
-									sprite_index = sprStrongSpirit;
-									image_index = 0;
-								}
-								sound_play(sndStrongSpiritLost);
-								
-								break;
-							}
-						}
-					}
-				}
-				
-				 // Override Halos:
-				with(instances_matching(instances_matching(StrongSpirit, "creator", id), "visible", true)){
-					visible = false;
-					array_push(other.bonus_spirit, {
-						active       : false,
-						sprite_index : sprite_index,
-						image_index  : image_index
-					});
-				}
-				
-				 // Animate and Cull Spirits:
-				with(bonus_spirit){
-					if("active"       not in self) active = true;
-					if("sprite_index" not in self) sprite_index = (active ? sprStrongSpiritRefill : sprStrongSpirit);
-					if("image_index"  not in self) image_index = 0;
-					
-					 // Animate:
-					if(active || sprite_index != mskNone){
-						image_index += 0.4 * current_time_scale;
-						if(image_index >= sprite_get_number(sprite_index)){
-							if(active) sprite_index = sprHalo;
-							else sprite_index = mskNone;
-							image_index = 0;
-						}
-					}
-					
-					 // Gone:
-					else other.bonus_spirit = array_delete_value(other.bonus_spirit, self);
-				}
-				
-				 // Wobble:
-				if("bonus_spirit_bend" not in self){
-					bonus_spirit_bend = 0;
-					bonus_spirit_bend_spd = 0;
-				}
-				var _num = array_length(bonus_spirit) + (skill_get(mut_strong_spirit) > 0 && canspirit == true && array_length(instances_matching(StrongSpirit, "creator", id)) <= 0);
-				bonus_spirit_bend_spd += hspeed_raw / (3 * max(1, _num));
-				bonus_spirit_bend_spd += 0.1 * (0 - bonus_spirit_bend) * current_time_scale;
-				bonus_spirit_bend += bonus_spirit_bend_spd * current_time_scale;
-				bonus_spirit_bend_spd -= bonus_spirit_bend_spd * 0.15 * current_time_scale;
-			}
-			else{
-				bonus_spirit_bend = 0;
-				bonus_spirit_bend_spd = 0;
-			}
-		}
-		
 		 // Bonus HP / Overheal:
 		var _inst = instances_matching_le(instances_matching_le(instances_matching_gt(Player, "bonus_health", 0), "my_health", 0), "spiriteffect", 0);
 		if(array_length(_inst)) with(_inst){
 			if(player_active){
-				if(lsthealth <= 0 || skill_get(mut_strong_spirit) <= 0 || canspirit != true){
+				//if(lsthealth <= 0 || skill_get(mut_strong_spirit) <= 0 || canspirit != true){
 					var _bonus = clamp(1 - my_health, 0, bonus_health);
 					my_health    += _bonus;
 					lsthealth    += _bonus;
@@ -5187,7 +5152,81 @@
 							direction    = _dir;
 						}
 					}
+				//}
+			}
+		}
+		
+		 // Bonus Spirits:
+		var _inst = instances_matching_ne(Player, "bonus_spirit", null);
+		if(array_length(_inst)) with(_inst){
+			if(array_length(bonus_spirit)){
+				 // Grant Grace:
+				if(my_health <= 0 && lsthealth > 0 && player_active){
+					if(skill_get(mut_strong_spirit) <= 0 || canspirit != true){
+						for(var i = array_length(bonus_spirit) - 1; i >= 0; i--){
+							var _spirit = bonus_spirit[i];
+							if(lq_defget(_spirit, "active", true)){
+								my_health    = 1;
+								spiriteffect = 5;
+								
+								 // Lost:
+								with(_spirit){
+									active = false;
+									sprite_index = sprStrongSpirit;
+									image_index = 0;
+								}
+								sound_play(sndStrongSpiritLost);
+								
+								break;
+							}
+						}
+					}
 				}
+				
+				 // Override Halos:
+				with(instances_matching(instances_matching(StrongSpirit, "creator", id), "visible", true)){
+					visible = false;
+					array_push(other.bonus_spirit, {
+						active       : false,
+						sprite_index : sprite_index,
+						image_index  : image_index
+					});
+				}
+				
+				 // Animate and Cull Spirits:
+				with(bonus_spirit){
+					if("active"       not in self) active = true;
+					if("sprite_index" not in self) sprite_index = (active ? sprStrongSpiritRefill : sprStrongSpirit);
+					if("image_index"  not in self) image_index = 0;
+					
+					 // Animate:
+					if(active || sprite_index != mskNone){
+						image_index += 0.4 * current_time_scale;
+						if(image_index >= sprite_get_number(sprite_index)){
+							if(active) sprite_index = sprHalo;
+							else sprite_index = mskNone;
+							image_index = 0;
+						}
+					}
+					
+					 // Gone:
+					else other.bonus_spirit = array_delete_value(other.bonus_spirit, self);
+				}
+				
+				 // Wobble:
+				if("bonus_spirit_bend" not in self){
+					bonus_spirit_bend = 0;
+					bonus_spirit_bend_spd = 0;
+				}
+				var _num = array_length(bonus_spirit) + (skill_get(mut_strong_spirit) > 0 && canspirit == true && !array_length(instances_matching(StrongSpirit, "creator", id)));
+				bonus_spirit_bend_spd += hspeed_raw / (3 * max(1, _num));
+				bonus_spirit_bend_spd += 0.1 * (0 - bonus_spirit_bend) * current_time_scale;
+				bonus_spirit_bend += bonus_spirit_bend_spd * current_time_scale;
+				bonus_spirit_bend_spd -= bonus_spirit_bend_spd * 0.15 * current_time_scale;
+			}
+			else{
+				bonus_spirit_bend = 0;
+				bonus_spirit_bend_spd = 0;
 			}
 		}
 	}
@@ -5371,7 +5410,7 @@
 					
 					 // Cursed Player:
 					if(chance(1, 2)){
-						if(array_length(instances_matching_gt(instances_matching_gt(Player, "curse", 0), "bcurse", 0)) > 0){
+						if(array_length(instances_matching_gt(instances_matching_gt(Player, "curse", 0), "bcurse", 0))){
 							cursedammochest_check = true;
 						}
 					}
@@ -5446,7 +5485,7 @@
 										sprite_index = other.spr_open;
 										image_xscale = other.image_xscale;
 										image_yscale = other.image_yscale;
-										image_angle = other.image_angle;
+										image_angle  = other.image_angle;
 									}
 								}
 								sound_play(snd_open);
@@ -5465,11 +5504,17 @@
 	if(instance_exists(CustomObject)){
 		var _inst = instances_matching(CustomObject, "name", "Prompt");
 		if(array_length(_inst)){
-			with(_inst) pick = -1;
+			 // Reset:
+			var _instReset = instances_matching_ne(_inst, "pick", -1);
+			if(array_length(_instReset)){
+				with(_instReset){
+					pick = -1;
+				}
+			}
 			
+			 // Player Collision:
 			if(instance_exists(Player)){
 				_inst = instances_matching(_inst, "visible", true);
-				
 				if(array_length(_inst)){
 					with(instances_matching(Player, "visible", true)){
 						if(
@@ -5490,16 +5535,15 @@
 							}
 							
 							if(_noVan){
-								// Find Nearest Touching Indicator:
 								var	_nearest  = noone,
 									_maxDis   = null,
 									_maxDepth = null;
 									
+								// Find Nearest Touching Indicator:
 								if(instance_exists(nearwep)){
 									_maxDis   = point_distance(x, y, nearwep.x, nearwep.y);
 									_maxDepth = nearwep.depth;
 								}
-								
 								with(instances_meeting(x, y, _inst)){
 									if(place_meeting(x, y, other)){
 										if(!instance_exists(creator) || creator.visible){
@@ -5729,7 +5773,7 @@
 						_x    = x,
 						_y    = y + sin(wave * 0.1);
 						
-					if(skill_get(mut_strong_spirit) > 0 && canspirit == true && array_length(instances_matching(StrongSpirit, "creator", id)) <= 0){
+					if(skill_get(mut_strong_spirit) > 0 && canspirit == true && !array_length(instances_matching(StrongSpirit, "creator", id))){
 						_x += lengthdir_x(_dis, _dir);
 						_y += lengthdir_y(_dis, _dir);
 						_dir += _bend;

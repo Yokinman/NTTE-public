@@ -1535,11 +1535,11 @@
 	 // Visual:
 	spr_spwn       = spr.PetSlaughterSpwn;
 	spr_fire       = spr.PetSlaughterBite;
-	hitid          = [spr_idle, "SLAUGHTERFISH"];
-	sprite_index   = spr_spwn;
 	spr_shadow_y   = -2;
 	spr_bubble     = -1;
 	spr_bubble_pop = -1;
+	hitid          = [spr_idle, "SLAUGHTERFISH"];
+	sprite_index   = spr_spwn;
 	depth          = -3;
 	
 	 // Sound:
@@ -2051,6 +2051,7 @@
 	spr_shadow_y   = 2;
 	spr_bubble     = -1;
 	spr_bubble_pop = -1;
+	hitid          = [spr.PetTwinsStat, "TWINS"];
 	depth          = -3;
 	
 	 // Vars:
@@ -2316,6 +2317,7 @@
 											ystart    = y;
 											deflected = true;
 											team      = other.team;
+											hitid     = other.hitid;
 											
 											var _dirOff = angle_difference(_dir, direction);
 											direction   += _dirOff;
@@ -2377,7 +2379,7 @@
 		
 		 // Contact Damage:
 		if(instance_exists(leader) && place_meeting(x, y, hitme)){
-			with(instances_meeting(x, y, instances_matching_ne(hitme, "team", team))){
+			with(instances_meeting(x, y, instances_matching_ne(pet_target_inst, "team", team, 0))){
 				if(!instance_is(self, Player) && place_meeting(x, y, other)){
 					with(other){
 						if(projectile_canhit_melee(other)){
@@ -2899,7 +2901,9 @@
 							_accuracy = variable_instance_get(other.leader, "accuracy", 1);
 							
 						 // LWO Weapon Fix:
-						if("wep" in self) _clone.wep = wep;
+						if("wep" in self){
+							_clone.wep = wep;
+						}
 						
 						 // Object-Specific:
 						switch(_clone.object_index){
@@ -3097,10 +3101,10 @@
 	
 #define Weapon_create
 	 // Visual:
-	hitid        = [spr.PetWeaponIdle, "WEAPON MIMIC"];
 	spr_spwn     = spr.PetWeaponSpwn;
 	spr_hide     = spr.PetWeaponHide;
 	spr_bubble_y = -1;
+	hitid        = [spr.PetWeaponIdle, "WEAPON MIMIC"];
 	sprite_index = spr_hide;
 	image_index  = image_number - 1;
 	

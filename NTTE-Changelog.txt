@@ -1,5 +1,11 @@
-2.01 - 2.016 ~ Time to Fix
+2.01 - 2.017 ~ Time to Fix
+	+	Net Launcher projectiles now support melee baseball
+	+	Gave the Crib's TV and giant chests slightly better shadows
 	+	The loading bar now supports full gamepad input
+	~	Bonus Health now gets taken before Strong Spirit
+	~	Made Chaos Hearts both more and less chaotic
+	~	Twins pet no longer damages props and also sets a cause-of-death if you kill yourself with it
+	~	The scorpion rock prop becomes friendly a bit faster, and no longer spawns during Scorpion City
 	*	Fixed the Auto Updater occasionally making the mod unloadable
 	*	Fixed the mod trying to update when you don't have internet
 	*	Fixed a few errors that occurred in the NTT beta (9942+) versions
@@ -9,7 +15,21 @@
 	*	Fixed the Strong Spirit halo being invisible when in Coast's water
 	*	Fixed the fake walls in @r[REDACTED] @snot looking right the NTT beta (9942+) versions
 	*	Fixed Ravens and Lil Hunter appearing above walls after flying in NTT beta (9942+) versions
+	*	Fixed walls next to Silver Tongue crates having no hitbox in NTT beta (9942+) versions
+	*	Fixed wall shadows from Crystal Heart area chunks sometimes being visible outside of the level in NTT beta (9942+) versions
+	*	Fixed the Throne's broken pipe decals appearing above the Throne during its intro in NTT beta (9942+) versions
+	*	Fixed Big Bat getting stuck in their transformation when playing on <20 FPS in NTT beta (9942+) versions
+	*	Fixed Harpoons erroring when attached to flying Lil Hunters or Ravens in NTT beta (9942+) versions
+	*	Fixed Net Launcher tying big objects to themselves, and pushing them towards a direction forever
 	*	Fixed Lil Hunter getting stuck if you take a trident out of him mid-flight
+	*	Fixed Orchid Rhino Skin taking 4 HP when you lose the mutation, causing death
+	*	Fixed the character selection loadout sometimes causing errors in NTT 9940
+	*	Fixed the '/ntte' command not opening the NTTE menu in the Settings menu
+	*	Fixed the Mansion's gold chest not spawning with a golden weapon inside
+	*	Fixed Big Fish's boss intro not playing if you attacked him fast enough
+	*	Fixed the Orchid Flower reroll's icon appearing over Patience's icon
+	*	Fixed Crystal Brain clones not appearing red in Coast's ocean
+	*	Fixed an error with Prism duplicating Quasar Beams
 	*	Fixed Seal King softlocking the game if playing on a lower max FPS
 	*	Fixed Water Boost from an Orchid looping its sound forever if active when you lose it
 	*	Fixed tires & chairs being able to spawn in the walls of Lair's garage rooms

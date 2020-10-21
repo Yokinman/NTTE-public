@@ -213,7 +213,7 @@
 
 #macro infinity 1/0
 
-#macro mod_type_current script_ref_create(0)[0]
+#macro mod_current_type script_ref_create(0)[0]
 
 #macro current_frame_active ((current_frame % 1) < current_time_scale)
 
@@ -2164,9 +2164,9 @@
 		
 		Ex:
 			list = [1, [ds_list_create(), 3], surface_create(1, 1)];
-			data_clone(list, 0)   == Returns a clone of the main array
-			data_clone(list, 1/0) == Returns a clone of the main array, sub array, surface, and ds_list
-			data_clone(list, 1)   == Returns a clone of the main array, sub array, and surface
+			data_clone(list, 0) == Returns a clone of the main array
+			data_clone(list, 1) == Returns a clone of the main array, sub array, and surface
+			data_clone(list, 2) == Returns a clone of the main array, sub array, surface, and ds_list
 	*/
 	
 	if(_depth >= 0){
@@ -2198,6 +2198,7 @@
 			return _clone;
 		}
 		
+		/* GM data structures are tied to mod files
 		 // DS List:
 		if(ds_list_valid(_value)){
 			var _clone = ds_list_clone(_value);
@@ -2236,6 +2237,7 @@
 			
 			return _clone;
 		}
+		*/
 		
 		 // Surface:
 		if(surface_exists(_value)){
@@ -2701,9 +2703,9 @@
 			}
 			
 			 // Delete Loading Spirals:
-			with(SpiralCont) instance_destroy();
-			with(Spiral) instance_destroy();
-			with(SpiralStar) instance_destroy();
+			with(SpiralCont  ) instance_destroy();
+			with(Spiral      ) instance_destroy();
+			with(SpiralStar  ) instance_destroy();
 			with(SpiralDebris) instance_destroy(); // *might play a 0.1 pitched sound
 			
 			 // Custom Code:
@@ -2712,7 +2714,7 @@
 			}
 			
 			 // Floors:
-			var	_tries = 100,
+			var	_tries    = 100,
 				_floorNum = 0;
 				
 			while(instance_exists(FloorMaker) && _tries-- > 0){
@@ -2723,10 +2725,12 @@
 				}
 				if(instance_number(Floor) > _floorNum){
 					_floorNum = instance_number(Floor);
-					_tries = 300;
+					_tries    = 300;
 				}
 			}
-			with(FloorMaker) instance_destroy();
+			with(FloorMaker){
+				instance_destroy();
+			}
 			
 			 // Safe Spawns & Misc:
 			event_perform(ev_alarm, 2);
@@ -2759,23 +2763,26 @@
 			event_perform(ev_alarm, 0);
 			if(!_setArea){
 				with(WantPopo) instance_delete(id);
-				with(WantVan) instance_delete(id);
+				with(WantVan ) instance_delete(id);
 			}
+			var _clearID = GameObject.id;
 			event_perform(ev_alarm, 1);
 			
 			 // Player Reset:
-			if(game_letterbox == false) game_letterbox = _lastLetterbox;
+			if(game_letterbox == false){
+				game_letterbox = _lastLetterbox;
+			}
 			for(var i = 0; i < maxp; i++){
-				if(view_object[i] == noone) view_object[i] = _lastViewObj[i];
-				if(view_pan_factor[i] == null) view_pan_factor[i] = _lastViewPan[i];
-				if(view_shake[i] == 0) view_shake[i] = _lastViewShk[i];
+				if(view_object[i]     == noone) view_object[i]     = _lastViewObj[i];
+				if(view_pan_factor[i] == null ) view_pan_factor[i] = _lastViewPan[i];
+				if(view_shake[i]      == 0    ) view_shake[i]      = _lastViewShk[i];
 				
 				with(instances_matching(Player, "index", i)){
 					 // Fix View:
-					var	_vx1 = x - (game_width / 2),
-						_vy1 = y - (game_height / 2),
-						_vx2 = view_xview[i],
-						_vy2 = view_yview[i],
+					var	_vx1   = x - (game_width / 2),
+						_vy1   = y - (game_height / 2),
+						_vx2   = view_xview[i],
+						_vy2   = view_yview[i],
 						_shake = UberCont.opt_shake;
 						
 					UberCont.opt_shake = 1;
@@ -2784,23 +2791,26 @@
 					UberCont.opt_shake = _shake;
 					
 					 // Delete:
-					repeat(4) with(instance_nearest(x, y, PortalL)) instance_destroy();
-					with(instance_nearest(x, y, PortalClear)) instance_destroy();
+					repeat(4) with(instance_nearest(x, y, PortalL)){
+						instance_destroy();
+					}
 					instance_delete(id);
-					
 					break;
 				}
+			}
+			with(instances_matching_gt(PortalClear, "id", _clearID)){
+				instance_destroy();
 			}
 			
 			 // Move Objects:
 			with(instances_matching_ne(instances_matching_ne(instances_matching_gt(all, "id", _genID), "x", null), "y", null)){
 				if(x != 0 || y != 0){
-					x += _ox;
-					y += _oy;
+					x         += _ox;
+					y         += _oy;
 					xprevious += _ox;
 					yprevious += _oy;
-					xstart += _ox;
-					ystart += _oy;
+					xstart    += _ox;
+					ystart    += _oy;
 				}
 			}
 		}
@@ -2814,11 +2824,13 @@
 		
 		 // Reactivate Objects:
 		game_activate();
-		with(_lastSolid) solid = true;
+		with(_lastSolid){
+			solid = true;
+		}
 		
 		 // Overlap Fixes:
 		var	_overlapObject = [Floor, Wall, InvisiWall, TopSmall, TopPot, Bones],
-			_overlapObj = array_clone(_overlapObject);
+			_overlapObj    = array_clone(_overlapObject);
 			
 		while(array_length(_overlapObj) > 0){
 			var _obj = _overlapObj[0];
@@ -2827,7 +2839,9 @@
 			var _objNew = instances_matching_gt(_obj, "id", _genID);
 			with(instances_matching_lt(_overlapObj, "id", _genID)){
 				if(place_meeting(x, y, _obj) && array_length(instances_meeting(x, y, _objNew)) > 0){
-					if(object_index == Floor) array_push(_overlapFloorFill, [bbox_left, bbox_top, bbox_right, bbox_bottom]);
+					if(object_index == Floor){
+						array_push(_overlapFloorFill, [bbox_left, bbox_top, bbox_right, bbox_bottom]);
+					}
 					instance_delete(id);
 				}
 			}
@@ -2967,7 +2981,7 @@
 	
 	 // Victory:
 	if(GameCont.win == true){
-		if(_area == area_palace || _area == area_labs){
+		if(_area == area_palace || _area == area_hq){
 			_name = ["END", (_area >= 100) ? 2 : 1];
 		}
 	}
@@ -3103,7 +3117,7 @@
 	*/
 	
 	 // Store Sprites:
-	if(!mod_variable_exists(mod_type_current, mod_current, "area_sprite_map")){
+	if(!mod_variable_exists(mod_current_type, mod_current, "area_sprite_map")){
 		var _map = ds_map_create();
 		_map[? 0  ] = [sprFloor0,   sprFloor0,    sprFloor0Explo,   sprWall0Trans,   sprWall0Bot,   sprWall0Out,   sprWall0Top,   sprDebris0,   sprDetail0,   sprNightBones,      sprNightDesertTopDecal];
 		_map[? 1  ] = [sprFloor1,   sprFloor1B,   sprFloor1Explo,   sprWall1Trans,   sprWall1Bot,   sprWall1Out,   sprWall1Top,   sprDebris1,   sprDetail1,   sprBones,           sprDesertTopDecal     ];
@@ -3460,7 +3474,7 @@
 	}
 	
 	return _reveal;
-
+	
 #define floor_reveal_draw
 	if(lag) trace_time();
 	
@@ -3852,7 +3866,7 @@
 	
 #define floor_room_create(_x, _y, _w, _h, _type, _dirStart, _dirOff, _floorDis)
 	/*
-		Moves toward a given direction until an open space is found, then creates a room based on the width, height, and script
+		Moves toward a given direction until an open space is found, then creates a room based on the width, height, and type
 		Rooms will always connect to the level as long as floorDis <= 0 (and the starting x/y is over a floor)
 		Rooms will not overlap existing Floors as long as floorDis >= 0 (they can still overlap FloorExplo)
 		
@@ -3935,7 +3949,7 @@
 	
 	 // Create Room:
 	var	_floorNumLast = array_length(FloorNormal),
-		_floors       = mod_script_call_nc(mod_type_current, mod_current, "floor_fill", _x, _y, _w, _h, _type),
+		_floors       = mod_script_call_nc(mod_current_type, mod_current, "floor_fill", _x, _y, _w, _h, _type),
 		_floorNum     = array_length(FloorNormal),
 		_x1           = _x,
 		_y1           = _y,
@@ -4014,9 +4028,7 @@
 	*/
 	
 	with(floor_room_start(_spawnX, _spawnY, _spawnDis, _spawnFloor)){
-		with(floor_room_create(x, y, _w, _h, _type, direction, _dirOff, _floorDis)){
-			return self;
-		}
+		return floor_room_create(x, y, _w, _h, _type, direction, _dirOff, _floorDis);
 	}
 	
 	return noone;
@@ -4300,7 +4312,7 @@
 	
 	 // Default:
 	var _wepDecide = wep_screwdriver;
-	if("wep" in self){
+	if("wep" in self && wep != wep_none){
 		_wepDecide = wep;
 	}
 	else if(_gold > 0){
@@ -4462,20 +4474,22 @@
 				_ny = _sy - sin(i),
 				_nc = _costSoFar + 1;
 				
-			if(_grid[# _nx, _ny] == -1){
-				if(_nx >= 0 && _ny >= 0){
-					if(_nx < _gridw && _ny < _gridh){
-						_gridCost[# _nx, _ny] = _nc;
-						_grid[# _nx, _ny] = point_direction(_nx, _ny, _sx, _sy);
-						
-						 // Add to Search List:
-						array_push(_searchList, [
-							_nx,
-							_ny,
-							point_distance(_x2, _y2, _nx, _ny) + (abs(_x2 - _nx) + abs(_y2 - _ny)) + _nc
-						]);
-					}
-				}
+			if(
+				_nx >= 0     &&
+				_ny >= 0     &&
+				_nx < _gridw &&
+				_ny < _gridh &&
+				_grid[# _nx, _ny] == -1
+			){
+				_gridCost[# _nx, _ny] = _nc;
+				_grid[# _nx, _ny] = point_direction(_nx, _ny, _sx, _sy);
+				
+				 // Add to Search List:
+				array_push(_searchList, [
+					_nx,
+					_ny,
+					point_distance(_x2, _y2, _nx, _ny) + (abs(_x2 - _nx) + abs(_y2 - _ny)) + _nc
+				]);
 			}
 			
 			 // Path Complete:

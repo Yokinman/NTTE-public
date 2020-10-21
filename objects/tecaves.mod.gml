@@ -330,6 +330,7 @@
 		 // Rematerialize:
 		if(instance_exists(_floor)){
 			teleport = false;
+			canfly   = false;
 			
 			 // Move:
 			with(_floor){
@@ -751,7 +752,7 @@
 		y = target.y;
 		
 		 // Visual:
-		depth      = target.depth - 1;
+		depth      = min(target.depth - 1, object_get_depth(SubTopCont));
 		mask_index = target.sprite_index;
 		if(appear > 0){
 			target.visible = false;
@@ -1105,45 +1106,41 @@
 	
 	 // Determine Area:
 	if(area_chaos){
-		var _area  = [GameCont.area, area],
-			_loops = GameCont.loops;
+		var _pick = [
+			((area_get_secret(GameCont.area) || GameCont.subarea <= 0) ? GameCont.lastarea : GameCont.area),
+			area
+		];
+		if(chance(1, 2)){
+			_pick = [_pick[0]];
 			
-		 // Secret:
-		if(area_get_secret(GameCont.area)){
-			_area = [GameCont.lastarea, area];
-		}
-		
-		 // Normal:
-		else if(chance(1, 2)){
-			var _pick = [GameCont.area];
-			
-			while(true){
-				switch(_pick[irandom(array_length(_pick) - 1)]){
-					case area_desert     : _pick = [area_sewers, area_scrapyards]; break;
-					case area_sewers     : _pick = [area_caves];                   break;
-					case area_scrapyards : _pick = [area_sewers, area_city];       break;
-					case area_caves      : _pick = [area_labs];                    break;
-					case area_city       : _pick = [area_labs, area_palace];       break;
-					case area_labs       : _pick = [area_sewers, area_caves];      break;
-					case area_palace     : _pick = [area_scrapyards, area_labs];   break;
-					case "coast"         : _pick = [area_scrapyards, area_jungle]; break;
-					case "oasis"         : _pick = [area_sewers, area_labs];       break;
-					case "trench"        : _pick = [area_sewers, area_caves];      break;
-				}
+			while(loops > 0){
+				loops = ceil(loops - 1);
 				
-				 // Decrement Loop:
-				if(_loops >= 1 && chance(1, 2)){
-					_loops--;
+				if(chance(1, 2)){
+					switch(_pick[irandom(array_length(_pick) - 1)]){
+						case area_desert     : _pick = [area_sewers, area_scrapyards]; break;
+						case area_sewers     : _pick = [area_caves];                   break;
+						case area_scrapyards : _pick = [area_sewers, area_city];       break;
+						case area_caves      : _pick = [area_labs];                    break;
+						case area_city       : _pick = [area_labs, area_palace];       break;
+						case area_labs       : _pick = [area_sewers, area_caves];      break;
+						case area_palace     : _pick = [area_scrapyards, area_labs];   break;
+						case "coast"         : _pick = [area_scrapyards, area_jungle]; break;
+						case "oasis"         : _pick = [area_sewers, area_labs];       break;
+						case "trench"        : _pick = [area_sewers, area_caves];      break;
+					}
 				}
 				else break;
 			}
-			
-			 // Woah:
-			_area = _pick;
 		}
+		area = _pick[irandom(array_length(_pick) - 1)];
 		
-		area  = _area[irandom(array_length(_area) - 1)];
-		loops = _loops;
+		 // Boss Time:
+		if(loops > 0 && GameCont.subarea == 3){
+			if(area == area_desert || area == area_scrapyards || area == area_city){
+				subarea = 3;
+			}
+		}
 	}
 	
 	 // Colorize:
@@ -1370,6 +1367,11 @@
 		if(area_chaos){
 			with(instances_matching_gt([PizzaEntrance, CarVenus, IceFlower], "id", _genID)){
 				instance_delete(id);
+			}
+			if(loops <= 0 || GameCont.subarea != 3 || !instance_exists(enemy)){
+				with(instances_matching_gt(WantBoss, "id", _genID)){
+					instance_delete(id);
+				}
 			}
 		}
 		

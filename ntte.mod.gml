@@ -450,7 +450,9 @@
 			array_shuffle(_propFloor);
 			
 			 // Sharky Skull:
-			with(BigSkull) instance_delete(id);
+			with(BigSkull){
+				instance_delete(id);
+			}
 			if(GameCont.subarea == 3){
 				var	_sx = _spawnX,
 					_sy = _spawnY;
@@ -471,7 +473,11 @@
 			}
 			
 			 // Scorpion Rocks:
-			if(chance(2, 5) && GameCont.subarea < area_get_subarea(GameCont.area)){
+			if(
+				chance(2, 5)
+				&& GameCont.subarea < area_get_subarea(GameCont.area)
+				&& !instance_exists(teevent_get_active("ScorpionCity"))
+			){
 				if(_propIndex >= 0) with(_propFloor[_propIndex--]){
 					obj_create(bbox_center_x, bbox_center_y - 2, "ScorpionRock");
 				}
@@ -479,9 +485,11 @@
 			
 			 // Big Maggot Nests:
 			if(!instance_exists(teevent_get_active("MaggotPark"))){
-				with(MaggotSpawn) if(chance(1 + GameCont.loops, 12)){
-					obj_create(x, y, "BigMaggotSpawn");
-					instance_delete(id);
+				with(MaggotSpawn){
+					if(chance(1 + GameCont.loops, 12)){
+						obj_create(x, y, "BigMaggotSpawn");
+						instance_delete(id);
+					}
 				}
 			}
 			
@@ -1036,7 +1044,21 @@
 			
 		with(_wallCrate){
 			with(instance_rectangle_bbox(bbox_left - 1, bbox_top - 1, bbox_right + 1, bbox_bottom + 1, _wallLast)){
-				instance_copy(false);
+				with(instance_copy(false)){
+					try{
+						 // GMS2 Fix:
+						if(!null && fork()){
+							var _lastMask = mask_index;
+							mask_index = mskNone;
+							wait 0;
+							if(instance_exists(self)){
+								mask_index = _lastMask;
+							}
+							exit;
+						}
+					}
+					catch(_error){}
+				}
 				instance_delete(id);
 			}
 		}
@@ -2244,12 +2266,12 @@
 						
 						with(other){
 							 // Pipe Depth Fix:
-							if(object_get_depth(NothingPipes) < depth){
+							if(object_get_depth(NothingPipes) <= depth){
 								with(instance_nearest(x, y, NothingPipes)){
 									with(other){
 										with(instance_create(x, y, GameObject)){
 											sprite_index = object_get_sprite(NothingPipes);
-											depth = other.depth;
+											depth        = other.depth;
 										}
 									}
 									instance_destroy();
@@ -2355,8 +2377,8 @@
 	if(instance_exists(VenuzTV)){
 		var _inst = instances_matching(VenuzTV, "spr_shadow", shd24);
 		if(array_length(_inst)) with(_inst){
-			spr_shadow   = spr_idle;
-			spr_shadow_y = 2;
+			spr_shadow = spr.shd.VenuzTV;
+			depth      = -5;
 		}
 	}
 	if(instance_exists(VenuzCouch)){
@@ -2364,6 +2386,13 @@
 		if(array_length(_inst)) with(_inst){
 			spr_shadow   = spr_idle;
 			spr_shadow_y = 4;
+		}
+	}
+	if(instance_exists(GiantWeaponChest) || instance_exists(GiantAmmoChest)){
+		var _inst = instances_matching([GiantWeaponChest, GiantAmmoChest], "spr_shadow", shd24);
+		if(array_length(_inst)) with(_inst){
+			spr_shadow   = shd32;
+			spr_shadow_y = 8;
 		}
 	}
 	if(instance_exists(Generator) || instance_exists(GeneratorInactive)){
@@ -3510,7 +3539,7 @@
 								draw_sprite(
 									spr.SkillRerollHUDSmall,
 									0,
-									_dx + ((_skill == mut_patience && skill_get(GameCont.hud_patience) != 0) ? -4 : 5),
+									_dx + ((global.hud_reroll == mut_patience && skill_get(GameCont.hud_patience) != 0) ? -4 : 5),
 									_dy + 5
 								);
 								
@@ -3597,11 +3626,17 @@
 						_skillIndex = array_find_index(_skillList, _skill);
 					}
 					
-					if(array_length(_skillList) <= 0) break;
+					if(array_length(_skillList) <= 0){
+						break;
+					}
 				}
 				
 				 // Keep it movin:
-				if(_skill != mut_patience || GameCont.hud_patience == 0 || GameCont.hud_patience == null){
+				if(
+					_skill != mut_patience
+					|| GameCont.hud_patience == 0
+					|| GameCont.hud_patience == null
+				){
 					_x += _addx;
 					if(_x < _minx){
 						_x = _sx;

@@ -365,7 +365,7 @@
 		
 		 // Baseball:
 		var _inst = instances_matching(_meeting, "object_index", Slash, GuitarSlash, BloodSlash, EnergySlash, EnergyHammerSlash, CustomSlash);
-		if(array_length(_inst) > 0) with(_inst){
+		if(array_length(_inst)) with(_inst){
 			if(place_meeting(x, y + other.z, other)){
 				with(other){
 					var	_lastAlrm = alarm1,
@@ -392,7 +392,7 @@
 		
 		 // Bubble Collision:
 		var _inst = instances_matching_ge(instances_matching(_meeting, "name", name), "big", big);
-		if(array_length(_inst) > 0) with(_inst){
+		if(array_length(_inst)) with(_inst){
 			if(place_meeting(x, y, other)){
 				with(other) motion_add_ct(point_direction(other.x, other.y, x, y) + orandom(4), 0.5);
 			}
@@ -400,7 +400,7 @@
 		
 		 // Poppable:
 		var _inst = instances_matching(instances_matching_ne(_meeting, "team", team), "object_index", Flame, Bolt, Splinter, HeavyBolt, UltraBolt);
-		if(array_length(_inst) > 0) with(_inst){
+		if(array_length(_inst)) with(_inst){
 			if(place_meeting(x, y + other.z, other)){
 				with(other) instance_destroy();
 				exit;
@@ -409,12 +409,12 @@
 		
 		 // Grabbing:
 		if(z < 24){
-			if(array_length(held) <= 0 || big > 0){
+			if(!array_length(held) || big > 0){
 				var _inst = instances_matching(_meeting, "bubble_bombed", null, false);
 				if(big > 0){
 					_inst = instances_matching_ne(_inst, "team", team);
 				}
-				if(array_length(_inst) > 0) with(_inst){
+				if(array_length(_inst)) with(_inst){
 					if(place_meeting(x, y + other.z, other)){
 						if("size" not in self || size - (object_index == DogGuardian) <= (3 * other.big)){
 							if(!instance_is(self, projectile) || (typ != 0 && variable_instance_get(id, "name") != other.name)){

@@ -346,8 +346,7 @@
 			if(typ == 1 || typ == 2){
 				if(speed > 0 && !instance_is(self, ToxicGas)){
 					var	_deflectDir = other.image_angle,
-						_batDisc    = (team == other.team && instance_is(self, CustomProjectile) && "name" in self && name == "BatDisc"),
-						_typ        = (other.candeflect ? (_batDisc ? 1 : typ) : 2);
+						_typ        = (other.candeflect ? typ : 2);
 						
 					if(
 						(instance_is(other.creator, Player) && team != other.team)
@@ -374,11 +373,7 @@
 						}
 						
 						 // Deflect:
-						if(_batDisc){
-							speed = max(speed, 16);
-							direction = _deflectDir;
-						}
-						else if(_typ == 1){
+						if(_typ == 1){
 							speed += friction * 3;
 							direction = _deflectDir - clamp(angle_difference(direction + 180, _deflectDir), -40, 40);
 							image_angle = direction;
@@ -424,17 +419,9 @@
 	}
 	
 #define ClamShield_grenade
-	 // Bat Disc Synergy:
-	if(team == other.team && instance_is(other, CustomProjectile) && "name" in other && other.name == "BatDisc"){
-		ClamShield_projectile();
-	}
-	
-	 // Normal:
-	else{
-		var _team = team;
-		event_perform(ev_collision, projectile);
-		team = _team;
-	}
+	var _team = team;
+	event_perform(ev_collision, projectile);
+	team = _team;
 	
 	
 #define ClamShieldSlash_create(_x, _y)
@@ -1315,9 +1302,12 @@
 				harpoon_stuck = true;
 				
 				 // Attached to Same Thing:
-				if(instance_is(link1, BoltStick) && instance_is(link2, BoltStick)){
-					if(link1.target == link2.target){
-						with([link1, link2]) pull_speed = 0;
+				var	_linkInst1 = (instance_is(link1, BoltStick) ? link1.target : link1),
+					_linkInst2 = (instance_is(link2, BoltStick) ? link2.target : link2);
+					
+				if(_linkInst1 == _linkInst2){
+					with([link1, link2]){
+						pull_speed = 0;
 					}
 				}
 				
@@ -1402,19 +1392,21 @@
 	with(instance_create(_x, _y, CustomProjectile)){
 		 // Visual:
 		sprite_index = spr.NetNade;
-		image_speed = 0.4;
+		image_speed  = 0.4;
 		
 		 // Vars:
 		mask_index = mskBigRad;
-		friction = 0.8;
-		creator = noone;
-		lasthit = noone;
-		damage = 10;
-		force = 4;
-		typ = 1;
+		friction   = 0.4;
+		creator    = noone;
+		lasthit    = noone;
+		damage     = 10;
+		force      = 4;
+		typ        = 1;
 		
 		 // Alarms:
 		alarm0 = 60;
+		alarm1 = 3;
+		alarm2 = alarm0 - 15;
 		
 		return id;
 	}
@@ -1422,6 +1414,19 @@
 #define NetNade_step
 	 // Alarms:
 	if(alarm0_run) exit;
+	if(alarm1_run) exit;
+	if(alarm2_run) exit;
+	
+	 // Baseball:
+	if(place_meeting(x, y, projectile)){
+		var _inst = instances_meeting(x, y, [Slash, GuitarSlash, BloodSlash, EnergySlash, EnergyHammerSlash, CustomSlash]);
+		if(array_length(_inst)) with(_inst){
+			if(place_meeting(x, y, other)){
+				event_perform(ev_collision, Grenade);
+				if(!instance_exists(other)) exit;
+			}
+		}
+	}
 	
 	 // Tryin a trail:
 	if(speed > 0){
@@ -1433,23 +1438,24 @@
 		}
 	}
 	
-	 // Blink:
-	if(alarm0 > 0 && alarm0 < 15){
-		sprite_index = spr.NetNadeBlink;
-	}
-	
 #define NetNade_hit
 	if(speed > 0 && projectile_canhit(other)){
 		lasthit = other;
 		projectile_hit_push(other, damage, force);
-		if(alarm0 > 1) alarm0 = 1;
+		instance_destroy();
 	}
 	
 #define NetNade_wall
-	alarm0 = min(alarm0, 1);
+	instance_destroy();
 	
 #define NetNade_alrm0
 	instance_destroy();
+	
+#define NetNade_alrm1
+	friction = 0.8;
+	
+#define NetNade_alrm2
+	sprite_index = spr.NetNadeBlink;
 	
 #define NetNade_destroy
 	 // Effects:
@@ -5016,7 +5022,7 @@
 							 // Rope Directly Attached:
 							else if(_link1 != _link2){
 								if(
-									(!instance_is(self, prop) && team != 0)
+									(!instance_is(self, prop) && "team" in self && team != 0)
 									|| instance_is(self, RadChest)
 									|| instance_is(self, Car)
 									|| instance_is(self, CarVenus)
@@ -5144,9 +5150,9 @@
 		with(inst){
 			if(instance_exists(link1) && instance_exists(link2)){
 				var	_x1  = link1.x,
-					_y1  = link1.y,
+					_y1  = link1.y + (("z" in link1) ? -abs(link1.z) : 0),
 					_x2  = link2.x,
-					_y2  = link2.y,
+					_y2  = link2.y + (("z" in link2) ? -abs(link2.z) : 0),
 					_wid = clamp(length / point_distance(_x1, _y1, _x2, _y2), 0.1, 2),
 					_col = merge_color(c_white, c_red, (0.25 + clamp(0.5 - (break_timer / 15), 0, 0.5)) * clamp(break_force / 100, 0, 1));
 					

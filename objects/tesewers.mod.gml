@@ -486,7 +486,8 @@
 	
 	 // Baseball:
 	if(place_meeting(x, y, projectile)){
-		with(instances_matching(instances_meeting(x, y, projectile), "object_index", Slash, GuitarSlash, BloodSlash, EnergySlash, EnergyHammerSlash, CustomSlash)){
+		var _inst = instances_meeting(x, y, [Slash, GuitarSlash, BloodSlash, EnergySlash, EnergyHammerSlash, CustomSlash]);
+		if(array_length(_inst)) with(_inst){
 			if(place_meeting(x, y, other)){
 				event_perform(ev_collision, Grenade);
 				if(!instance_exists(other)) exit;
@@ -1026,9 +1027,10 @@
 		
 		 // Reappear:
 		if(
-			array_length(_bat) <= 1  &&
-			array_length(cloud) <= 0 &&
-			array_length(instances_matching(CustomObject, "name", "BatCloud")) <= 0
+			alarm2 < 0
+			&& array_length(_bat) <= 1
+			&& array_length(cloud) <= 0
+			&& array_length(instances_matching(CustomObject, "name", "BatCloud")) <= 0
 		){
 			alarm2 = 20;
 			for(var i = 0; i < 3; i++){
@@ -1641,21 +1643,19 @@ var _extraScale = argument_count > 1 ? argument[1] : 0.5;
 		 // Baseball:
 		if(place_meeting(x, y, projectile)){
 			var _inst = instances_meeting(x, y, [Slash, GuitarSlash, BloodSlash, EnergySlash, EnergyHammerSlash, CustomSlash]);
-			if(array_length(_inst) > 0) with(_inst){
+			if(array_length(_inst)) with(_inst){
 				if(place_meeting(x, y, other)){
 					with(other){
-						var	_lastAlrm = alarm1,
-							_lastFric = friction,
-							_lastSpd  = speed;
-							
-						with(other){
-							event_perform(ev_collision, Grenade);
-							if(!instance_exists(other)) exit;
-						}
-						
-						alarm1 = _lastAlrm;
-						friction = _lastFric;
-						if(speed != _lastSpd) speed = max(_lastSpd, 16);
+						deflected = true;
+					    direction = other.direction;
+					    speed     = 16;
+					    
+					     // Effects:
+					    sleep(10);
+					    view_shake_at(x, y, 3);
+					    with(instance_create(x, y, Deflect)){
+					        image_angle = other.direction;
+					    }
 					}
 				}
 			}

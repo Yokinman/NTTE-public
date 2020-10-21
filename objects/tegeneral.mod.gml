@@ -4360,10 +4360,10 @@
 				if("spr_shadow" in self && other.z <= 8){
 					 // Trail:
 					if(chance_ct(sqr(_spd), 90)){
-						var	o = abs(sprite_width / 16),
+						var	_off  = abs(sprite_width / 16),
 							_leaf = (GameCont.area == area_jungle);
 							
-						with(instance_create(x + orandom(o), y + o + random(o), (_leaf ? Feather : Dust))){
+						with(instance_create(x + orandom(_off), y + _off + random(_off), (_leaf ? Feather : Dust))){
 							if(_leaf){
 								sprite_index = sprLeaf;
 								speed *= random_range(0.5, 1);
@@ -4864,9 +4864,33 @@
 					if(instance_exists(self)){
 						var _inst = instances_matching_ne(instance_rectangle_bbox(bbox_left - 1, bbox_top - 1, bbox_right, bbox_bottom, TopSmall), "name", "TopTiny");
 						array_sort(_inst, true);
-						with(_inst){
-							instance_copy(false);
-							instance_delete(id);
+						
+						 // GMS2:
+						try{
+							if(!null){
+								with(_inst){
+									with(instance_copy(false)){
+										if(fork()){
+											var _lastMask = mask_index;
+											mask_index = mskNone;
+											wait 0;
+											if(instance_exists(self)){
+												mask_index = _lastMask;
+											}
+											exit;
+										}
+									}
+									instance_delete(id);
+								}
+							}
+						}
+						
+						 // GMS1:
+						catch(_error){
+							with(_inst){
+								instance_copy(false);
+								instance_delete(id);
+							}
 						}
 					}
 					exit;

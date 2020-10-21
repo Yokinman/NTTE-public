@@ -966,7 +966,7 @@
 	enemy_walk(walkspeed, maxspeed);
 	
 	 // Animate:
-	if(!array_exists([spr_hurt, spr_spwn, spr_dive, spr_rise, spr_efir, spr_fire, spr_chrg], sprite_index)){
+	if(!array_exists([spr_hurt, spr_spwn, spr_chrg, spr_fire, spr_efir, spr_dive, spr_rise], sprite_index)){
 		sprite_index = enemy_sprite;
 	}
 	else if(anim_end){
@@ -1360,7 +1360,7 @@
 		}
 		
 		 // Hurt Sprite:
-		if(!array_exists([spr_fire, spr_chrg, spr_efir, spr_dive, spr_rise], sprite_index)){
+		if(!array_exists([spr_spwn, spr_chrg, spr_fire, spr_efir, spr_dive, spr_rise], sprite_index)){
 			sprite_index = spr_hurt;
 			image_index  = 0;
 		}
@@ -1587,7 +1587,7 @@
 #define ScorpionRock_create(_x, _y)
 	with(instance_create(_x, _y, CustomProp)){
 		 // Visual:
-		spr_idle     = spr.ScorpionRockEnemy;
+		spr_idle     = spr.ScorpionRock;
 		spr_hurt     = spr.ScorpionRockHurt;
 		spr_dead     = spr.ScorpionRockDead;
 		spr_shadow   = shd32;
@@ -1622,12 +1622,13 @@
 		image_index -= image_speed_raw * _fac;
 		
 		 // Friendify:
-		if(anim_end){
+		if(image_index < 1){
 			if(friendly == false && !instance_exists(enemy)){
 				friendly = true;
 			}
-			if(friendly && spr_idle == spr.ScorpionRockEnemy){
-				spr_idle = spr.ScorpionRockFriend;
+			if(friendly && spr_idle == spr.ScorpionRock){
+				spr_idle = spr.ScorpionRockAlly;
+				spr_hurt = spr.ScorpionRockAllyHurt;
 				sprite_index = spr_idle;
 				image_index = 0;
 			}
@@ -1643,8 +1644,12 @@
 	}
 	
 	 // Homeowner:
-	if(friendly) pet_spawn(x, y, "Scorpion");
-	else obj_create(x, y, "BabyScorpion");
+	if(friendly){
+		pet_spawn(x, y, "Scorpion");
+	}
+	else{
+		obj_create(x, y, "BabyScorpion");
+	}
 	
 	 // Light Snack:
 	repeat(3) if(chance(1, 2)){

@@ -284,6 +284,9 @@
 	global.mouse_x_previous = array_create(maxp, 0);
 	global.mouse_y_previous = array_create(maxp, 0);
 	
+	 // Menu Command Helper:
+	chat_comp_add("ntte", "manually opens NT:TE's menu");
+	
 #macro spr global.spr
 #macro msk spr.msk
 #macro snd global.snd
@@ -341,8 +344,29 @@
 #macro wepIconH   48
 
 #define chat_command(_cmd, _arg, _ind)
-	if(string_upper(_cmd) == "NTTE"){
-		NTTEMenu.open = !NTTEMenu.open;
+	if(_cmd == "ntte" || _cmd == "NTTE"){
+		if(_cmd == "NTTE" || instance_exists(Menu) || instance_exists(BackMainMenu)){
+			NTTEMenu.open = !NTTEMenu.open;
+			
+			 // Paused:
+			if(instance_exists(BackMainMenu)){
+				 // Clear Options:
+				if(NTTEMenu.open){
+					with([OptionMenuButton, AudioMenuButton, VisualsMenuButton, GameMenuButton, ControlMenuButton]){
+						with(self){
+							instance_destroy();
+						}
+					}
+				}
+				
+				 // Unpause:
+				else with(UberCont){
+					with(self){
+						event_perform(ev_alarm, 2);
+					}
+				}
+			}
+		}
 		return true;
 	}
 	
@@ -543,9 +567,9 @@
 			var _race = ((i < 17) ? race_get_name(i) : _mods[i - 17]);
 			if(_race not in crownRace){
 				lq_set(crownRace, _race, {
-					icon   : [],
-					slct   : crwn_none,
-					custom : { icon : [], slct : -1 }
+					"icon"   : [],
+					"slct"   : crwn_none,
+					"custom" : { "icon" : [], "slct" : -1 }
 				});
 			}
 		}
@@ -796,7 +820,7 @@
 		if(array_length(instances_matching(Loadout, "selected", true)) > 0){
 			 // Loadout Reset:
 			with(_crown.icon){
-				if(!instance_exists(inst)){
+				if("inst" not in self/*<- 9940 'with' scoping bug*/ || !instance_exists(inst)){
 					_crown.icon = [];
 					_crown.custom.icon = [];
 					break;
@@ -2714,7 +2738,9 @@
 					
 					 // Tooltips:
 					if(_local && _tooltip != ""){
-						draw_tooltip(mouse_x_nonsync, mouse_y_nonsync, _tooltip);
+						if(mouse_x[player_find_local_nonsync()] != 0 || mouse_y[player_find_local_nonsync()] != 0){ // Gamepad fix
+							draw_tooltip(mouse_x_nonsync, mouse_y_nonsync, _tooltip);
+						}
 					}
 					
 					MenuSlct[_index] = _menuCurrent;
@@ -2752,6 +2778,9 @@
 	}
 	
 #define cleanup
+	 // Remove Chat Command Helper:
+	chat_comp_remove("ntte");
+	
 	 // Fix Options:
 	if(MenuOpen){
 		with(Menu) mode = 0;
@@ -2940,6 +2969,6 @@
 #define charm_instance(_inst, _charm)                                                   return  mod_script_call_nc  ('mod', 'telib', 'charm_instance', _inst, _charm);
 #define motion_step(_mult)                                                              return  mod_script_call_self('mod', 'telib', 'motion_step', _mult);
 #define pool(_pool)                                                                     return  mod_script_call_nc  ('mod', 'telib', 'pool', _pool);
-#define unlock_get_name(_name)                                                          return  mod_script_call_nc('mod', 'telib', 'unlock_get_name', _name);
-#define draw_text_bn(_x, _y, _string, _angle)                                                   mod_script_call_nc('mod', 'telib', 'draw_text_bn', _x, _y, _string, _angle);
-#define weapon_get_loadout(_wep)                                                        return  mod_script_call(   'mod', 'telib', 'weapon_get_loadout', _wep)
+#define unlock_get_name(_name)                                                          return  mod_script_call_nc  ('mod', 'telib', 'unlock_get_name', _name);
+#define draw_text_bn(_x, _y, _string, _angle)                                                   mod_script_call_nc  ('mod', 'telib', 'draw_text_bn', _x, _y, _string, _angle);
+#define weapon_get_loadout(_wep)                                                        return  mod_script_call     ('mod', 'telib', 'weapon_get_loadout', _wep)
