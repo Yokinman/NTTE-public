@@ -2000,7 +2000,9 @@
 			}
 		}
 		catch(_error){}
-		trace_color("NT:TE | WARNING - Playing on higher than 30 FPS will likely cause lag!", c_red);
+		if(room_speed > 30){
+			trace_color("NT:TE | WARNING - Playing on higher than 30 FPS will likely cause lag!", c_red);
+		}
 		
 		exit;
 	}
