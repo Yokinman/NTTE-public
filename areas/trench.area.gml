@@ -41,7 +41,7 @@
 #macro surfPitWallBot global.surfPitWallBot
 #macro surfPitSpark   global.surfPitSpark
 
-#macro FloorPit     instances_matching(Floor, "sprite_index", spr.FloorTrenchB)
+#macro FloorPit     instances_matching   (Floor, "sprite_index", spr.FloorTrenchB)
 #macro FloorPitless instances_matching_ne(Floor, "sprite_index", spr.FloorTrenchB)
 
 #define area_subarea           return 3;
@@ -554,22 +554,27 @@
 			global.floor_num = instance_number(Floor);
 			global.floor_min = GameObject.id;
 			
-			 // Non-Pits:
-			with(instances_matching_ne(FloorPitless, "trenchpit_check", false)){
-				trenchpit_check = false;
+			var	_pits  = FloorPit,
+				_floor = FloorPitless;
+				
+			 // Pits:
+			with(instances_matching_ne(_pits, "trenchpit_check", true)){
+				trenchpit_check = true;
 				for(var _x = bbox_left; _x < bbox_right + 1; _x += 16){
 					for(var _y = bbox_top; _y < bbox_bottom + 1; _y += 16){
-						pit_set(_x, _y, false);
+						if(!position_meeting(_x + 8, _y + 8, Wall) && !array_length(instances_at(_x + 8, _y + 8, _floor))){
+							pit_set(_x, _y, true);
+						}
 					}
 				}
 			}
 			
-			 // Pits:
-			with(instances_matching_ne(FloorPit, "trenchpit_check", true)){
-				trenchpit_check = true;
+			 // Non-Pits:
+			with(instances_matching_ne(_floor, "trenchpit_check", false)){
+				trenchpit_check = false;
 				for(var _x = bbox_left; _x < bbox_right + 1; _x += 16){
 					for(var _y = bbox_top; _y < bbox_bottom + 1; _y += 16){
-						pit_set(_x, _y, true);
+						pit_set(_x, _y, false);
 					}
 				}
 			}

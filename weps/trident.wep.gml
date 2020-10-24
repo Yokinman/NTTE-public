@@ -31,7 +31,7 @@
 #define weapon_sprt(_wep)   return (lq_defget(_wep, "visible", true) ? (weapon_avail() ? ((weapon_get_gold(_wep) != 0) ? global.sprWepGold : global.sprWep) : global.sprWepLocked) : mskNone);
 #define weapon_loadout      return ((argument_count > 0 && weapon_get_gold(argument0) != 0) ? global.sprWepGoldLoadout : global.sprWepLoadout);
 #define weapon_area(_wep)   return ((argument_count > 0 && weapon_avail(_wep) && weapon_get_gold(_wep) == 0) ? 7 : -1); // 3-2
-#define weapon_gold(_wep)   return (lq_defget(_wep, "gold", false) ? -1 : 0);
+#define weapon_gold(_wep)   return ((argument_count > 0 && lq_defget(_wep, "gold", false)) ? -1 : 0);
 #define weapon_type(_wep)   return type_melee;
 #define weapon_auto(_wep)   return true;
 #define weapon_melee(_wep)  return false;

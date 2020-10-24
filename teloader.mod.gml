@@ -81,6 +81,7 @@
 			"weps/tesla coil.wep.gml",
 			"weps/electroplasma rifle.wep.gml",
 			"weps/electroplasma shotgun.wep.gml",
+			"weps/electroplasma cannon.wep.gml",
 			"weps/quasar blaster.wep.gml",
 			"weps/quasar rifle.wep.gml",
 			"weps/quasar cannon.wep.gml"

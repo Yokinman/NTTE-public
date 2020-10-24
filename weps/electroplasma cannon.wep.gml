@@ -1,16 +1,16 @@
 #define init
 	 // Sprites:
-	global.sprWep = sprite_add_weapon("../sprites/weps/sprElectroPlasmaShotgun.png", 2, 6);
+	global.sprWep = sprite_add_weapon("../sprites/weps/sprElectroPlasmaCannon.png", 5, 6);
 	global.sprWepLocked = mskNone;
 	
-#define weapon_name       return (weapon_avail() ? "ELECTROPLASMA SHOTGUN" : "LOCKED");
-#define weapon_text       return "WHERE'S THE PEANUT BUTTER";
+#define weapon_name       return (weapon_avail() ? "ELECTROPLASMA CANNON" : "LOCKED");
+#define weapon_text       return "BRAIN EXPANDING";
 #define weapon_swap       return sndSwapEnergy;
 #define weapon_sprt       return (weapon_avail() ? global.sprWep : global.sprWepLocked);
-#define weapon_area       return (weapon_avail() ? 8 : -1); // 3-3
+#define weapon_area       return (weapon_avail() ? 9 : -1); // 4-1
 #define weapon_type       return type_energy;
-#define weapon_cost       return 8;
-#define weapon_load       return 27; // 0.9 Seconds
+#define weapon_cost       return 10;
+#define weapon_load       return 50; // 1.66 Seconds
 #define weapon_avail      return unlock_get("pack:" + weapon_ntte_pack());
 #define weapon_ntte_pack  return "trench";
 
@@ -22,34 +22,30 @@
 	var _fire = weapon_fire_init(_wep);
 	_wep = _fire.wep;
 	
-	 // Spread Fire:
-	var _last = variable_instance_get(_fire.creator, "electroplasma_last", noone);
-	for(var i = -2; i <= 2; i++){
-		with(projectile_create(
-			x,
-			y,
-			"ElectroPlasma",
-			gunangle + ((20 + orandom(6)) * accuracy * i),
-			random_range(4, 4.8)
-		)){
-			 // Tether Together:
-			tether_inst = _last;
-			_last = id;
-		}
-	}
-	with(_fire.creator){
-		electroplasma_last = _last;
-	}
+	 // Projectile:
+	projectile_create(x, y, "ElectroPlasmaBig", gunangle + orandom(4 * accuracy), 6);
 	
 	 // Sounds:
-	var _brain = (skill_get(mut_laser_brain) > 0);
-	if(_brain) sound_play_gun(sndLightningShotgunUpg, 0.4, 0.6);
-	else       sound_play_gun(sndLightningShotgun,    0.3, 0.3);
-	sound_play_pitch(sndPlasmaBig, 1.1 + random(0.3));
+	if(skill_get(mut_laser_brain) > 0){
+		audio_sound_pitch(
+			sound_play_gun(sndLightningShotgunUpg, 0, 0.6),
+			0.6 + random(0.2)
+		);
+		sound_play_pitch(sndPlasmaRifleUpg, 0.5 + random(0.1));
+	}
+	else{
+		audio_sound_pitch(
+			sound_play_gun(sndLightningShotgun, 0, 0.3),
+			0.6 + random(0.2)
+		);
+		sound_play_pitch(sndPlasmaRifle, 0.5 + random(0.1));
+	}
 	
 	 // Effects:
-	weapon_post(8, 6, 0);
-	motion_add(gunangle, -4);
+	weapon_post(12, 30, 0);
+	motion_add(gunangle + 180, 4);
+	instance_create(x, y, Smoke);
+	
 	
 	
 /// SCRIPTS

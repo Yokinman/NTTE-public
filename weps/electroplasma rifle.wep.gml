@@ -17,6 +17,7 @@
 
 #define weapon_reloaded
 	sound_play(sndLightningReload);
+	sound_play_pitch(sndPlasmaReload, 1.5);
 	
 #define weapon_fire(_wep)
 	var _fire = weapon_fire_init(_wep);

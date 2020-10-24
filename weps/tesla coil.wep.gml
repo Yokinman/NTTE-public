@@ -34,7 +34,7 @@
 	}
 	
 	 // Effects:
-	if(array_length(instances_matching(instances_matching(instances_matching(instances_matching(CustomObject, "name", "TeslaCoil"), "bat", false), "creator", _fire.creator), "roids", _fire.roids)) <= 1){
+	if(array_length(instances_matching(instances_matching(instances_matching(CustomObject, "name", "TeslaCoil"), "creator", _fire.creator), "roids", _fire.roids)) <= 1){
 		weapon_post(8, -10, 10);
 		
 		 // Ball Appear FX:

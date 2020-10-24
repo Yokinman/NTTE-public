@@ -506,10 +506,55 @@
 			
 			 // Frog Nest:
 			with(FrogQueen){
-				var	_total = 0,
-					_queen = self;
-					
-				with(array_shuffle(floor_fill(x, y, 5, 5, "round"))){
+				var _minID = GameObject.id;
+				
+				 // Bathing:
+				with(obj_create(x, y, "SludgePool")){
+					sprite_index = msk.SewerPoolBig;
+					spr_floor    = spr.SewerPoolBig;
+					with(self){
+						event_perform(ev_step, ev_step_normal);
+					}
+				}
+				
+				var _floors = instances_matching_gt(Floor, "id", _minID);
+				
+				 // Corner Walls:
+				with(_floors){
+					var	_nw = (!place_meeting(x - 32, y, Floor) && !place_meeting(x, y - 32, Floor)),
+						_ne = (!place_meeting(x + 32, y, Floor) && !place_meeting(x, y - 32, Floor)),
+						_sw = (!place_meeting(x - 32, y, Floor) && !place_meeting(x, y + 32, Floor)),
+						_se = (!place_meeting(x + 32, y, Floor) && !place_meeting(x, y + 32, Floor));
+						
+					if(_nw || _ne || _sw || _se){
+						if(chance(1, 5)){
+							with(instance_create(bbox_center_x, bbox_center_y, choose(Pipe, ToxicBarrel))){
+								 // pls mom dont step on the props:
+								if(fork()){
+									var _lastSize = size;
+									size = 4;
+									while(instance_exists(self) && !point_seen(x, y, -1)){
+										wait 0;
+									}
+									if(instance_exists(self) && size == 4){
+										size = _lastSize;
+									}
+									exit;
+								}
+							}
+						}
+						else{
+							if(_nw) instance_create(x,      y,      Wall);
+							if(_ne) instance_create(x + 16, y,      Wall);
+							if(_sw) instance_create(x,      y + 16, Wall);
+							if(_se) instance_create(x + 16, y + 16, Wall);
+						}
+					}
+				}
+				
+				/*
+				 // Eggs:
+				with(array_shuffle(_floors)){
 					var _chance = 0;
 					
 					for(var _checkDir = 0; _checkDir < 360; _checkDir += 90){
@@ -546,6 +591,9 @@
 						}
 					}
 				}
+				*/
+				
+				break;
 			}
 			
 			 // Loop Spawns:
@@ -1622,11 +1670,23 @@
 #define ntte_begin_step
 	if(lag) trace_time();
 	
-	 // Manually Recreating Pause/Loading/GameOver Map:
+	 // New Area:
 	if(global.area_update){
 		global.area_update = false;
 		
 		with(GameCont){
+			 // NTTE Area B-Themes:
+			if(subarea == 1){
+				if(array_exists(ntte_mods.area, area)){
+					if(random(20) < 1 || array_length(instances_matching_le(Player, "my_health", 1))){
+						if(vaults < 3){
+							proto = true;
+						}
+					}
+				}
+			}
+			
+			 // Manually Recreating Pause/Loading/GameOver Map:
 			var i = waypoints - 1;
 			if(i >= 0){
 				global.area_mapdata[i] = [area, subarea, loops];
@@ -3077,6 +3137,14 @@
 		}
 	}
 	
+	 // Popo Shields:
+	if(instance_exists(PopoShield)){
+		var _inst = instances_matching(instances_matching_gt(PopoShield, "alarm0", 0), "spr_shadow", null);
+		if(array_length(_inst)) with(_inst){
+			draw_sprite(shd48, 0, x, y);
+		}
+	}
+	
 	 // Call Scripts:
 	ntte_call("shadows");
 	
@@ -4480,16 +4548,14 @@
 	
 #define DeflectTeamifier_end_step
 	 // Teamify Deflections:
-	if(instance_exists(projectile)){
-		var _inst = instances_matching([Slash, GuitarSlash, BloodSlash, EnergySlash, EnergyHammerSlash, LightningSlash, CustomSlash, CrystalShield, PopoShield], "", null);
+	if(instance_exists(Deflect)){
+		var _inst = instances_matching(Deflect, "ntte_teamdeflect", null);
 		if(array_length(_inst)) with(_inst){
-			if(place_meeting(x, y, projectile)){
-				with(instances_meeting(x, y, instances_matching(projectile, "team", team))){
-					if(place_meeting(x, y, other)){
-						if(sprite_get_team(sprite_index) != 3){
-							if(hitid == -1) hitid = variable_instance_get(other, "hitid", -1);
-							team_instance_sprite(((team == 3) ? 1 : team), self);
-						}
+			ntte_teamdeflect = (distance_to_object(projectile) <= 0);
+			if(ntte_teamdeflect){
+				with(instances_meeting(x, y, projectile)){
+					if(sprite_get_team(sprite_index) != 3){
+						team_instance_sprite(((team == 3) ? 1 : team), self);
 					}
 				}
 			}

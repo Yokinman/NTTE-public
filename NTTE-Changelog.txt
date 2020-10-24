@@ -1,6 +1,27 @@
-2.01 - 2.017 ~ Time to Fix
+2.02 ~ Sludge Party
+	         @(sprite:menu/banners/sprSludgeMain.png:1)
+	+	Gave @pMom @sa @gSludge Nest
+	+	New weapon, @pElectroplasma Cannon
+	+	Added a @wB-Theme @strack to @wCoast
+	+	Added a shadow to @bI.D.P.D. Shields
+	~	@bPit Squid @sperformance improvements
+	~	@bPit Squid's @stentacles now can't be hit while rising from a pit, for fear of @wNaders
+	~	Reduced @bPit Squid's @rHP @sfrom @w400 @sto @w340
+	~	Reduced @wJellyfish @rHP @sfrom @w52 @sto @w42
+	~	@pElectroplasma @sguns have a better reload sound
+	~	Once @yMimic @sstores every gun, their stat text @q@wshakes
+	*	@yPit Eels @snow smash @sthrough the floor if no pits are available, no more softlock
+	*	Fixed @gUltra Bolts @sgetting deleted over @wCoast's @socean
+	*	Fixed @rWarp Portals @sgetting moved to @wCoast's @socean, sometimes causing a softlock
+	*	Fixed @wMerged Grenade Projectiles @snot blinking before exploding in NTT beta (9942+) versions @(sprite:sprGrenadeBlink:0:-0.15)
+	*	Fixed deflected projectiles rarely not visually changing their team @(sprite:sprEnemyBullet1:0:1) -> @(sprite:sprAllyBullet:0:1)
+	*	Fixed @yElite Eels @sfrom the @yEel Grave @sevent giving off too much light
+	*	Fixed an error from opening a normal @yGold Chest
+	
+2.01 ~ Time to Fix
 	+	Net Launcher projectiles now support melee baseball
 	+	Gave the Crib's TV and giant chests slightly better shadows
+	+	Added a chat command helper for the '/ntte' command
 	+	The loading bar now supports full gamepad input
 	~	Bonus Health now gets taken before Strong Spirit
 	~	Made Chaos Hearts both more and less chaotic
@@ -12,8 +33,7 @@
 	*	Fixed the changelog being unreadable in NTT beta (9942+) versions
 	*	Fixed Lair's turrets not having hitboxes in NTT beta (9942+) versions
 	*	Fixed Lair's doors not opening properly in NTT beta (9942+) versions
-	*	Fixed the Strong Spirit halo being invisible when in Coast's water
-	*	Fixed the fake walls in @r[REDACTED] @snot looking right the NTT beta (9942+) versions
+	*	Fixed the fake walls in @r[REDACTED] @snot looking right in NTT beta (9942+) versions
 	*	Fixed Ravens and Lil Hunter appearing above walls after flying in NTT beta (9942+) versions
 	*	Fixed walls next to Silver Tongue crates having no hitbox in NTT beta (9942+) versions
 	*	Fixed wall shadows from Crystal Heart area chunks sometimes being visible outside of the level in NTT beta (9942+) versions
@@ -28,6 +48,7 @@
 	*	Fixed the Mansion's gold chest not spawning with a golden weapon inside
 	*	Fixed Big Fish's boss intro not playing if you attacked him fast enough
 	*	Fixed the Orchid Flower reroll's icon appearing over Patience's icon
+	*	Fixed the Strong Spirit halo being invisible when in Coast's water
 	*	Fixed Crystal Brain clones not appearing red in Coast's ocean
 	*	Fixed an error with Prism duplicating Quasar Beams
 	*	Fixed Seal King softlocking the game if playing on a lower max FPS
@@ -36,7 +57,7 @@
 	*	Fixed corpses awkwardly floating above pits at the end of the level in Trench
 	*	Fixed the ocean following you back to the character selection screen from Coast
 	*	Fixed the Raven Arena not creating enough ravens
-	*	Fixed a weird error with @gEnergy Bat @sslashes
+	*	Fixed a weird error with Energy Bat slashes
 	*	Fixed Chaos hearts spawning when they shouldn't
 	
 2.0 ~ Heart to Heart

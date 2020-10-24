@@ -2326,7 +2326,7 @@
 #define weapon_text(_wep)         return wep_stat(_wep, "text");
 #define weapon_swap(_wep)         return wep_stat(_wep, "swap");
 #define weapon_area(_wep)         return -1;
-#define weapon_gold(_wep)         return ((wep_stat(_wep, "gold") != 0) ? -1 : 0);
+#define weapon_gold(_wep)         return ((argument_count > 0 && wep_stat(_wep, "gold") != 0) ? -1 : 0);
 #define weapon_type(_wep)         return wep_stat(_wep, "type");
 #define weapon_cost(_wep)         return wep_stat(_wep, "cost");
 #define weapon_rads(_wep)         return wep_stat(_wep, "rads");
@@ -3437,16 +3437,15 @@
 				
 				 // Blinkin:
 				else if(o.time < 15){
-					var	d = pround(depth, 0.1),
-						c = instances_matching(instances_matching(CustomDraw, "name", "proj_explo_draw"), "depth_mark", d);
+					var	d = floor(depth) - 1,
+						c = instances_matching(instances_matching(CustomDraw, "name", "proj_explo_draw"), "depth", d);
 						
 					if(array_length(c)) with(c){
 						if(!array_exists(inst, other)) array_push(inst, other);
 					}
-					else with(script_bind_draw(proj_explo_draw, d - 0.001)){
+					else with(script_bind_draw(proj_explo_draw, d)){
 						name = script[2];
 						inst = [other];
-						depth_mark = d;
 					}
 				}
 			}
@@ -3552,8 +3551,7 @@
 						}
 						if(distance_to_object(PlasmaImpact) <= 0){
 							with(instance_nearest(x, y, PlasmaImpact)){
-								depth++;
-								depth--;
+								depth = max(depth, other.depth + 1);
 							}
 						}
 					}
@@ -3811,7 +3809,7 @@
 			 // Flame Trail:
 			if(object_index != Nuke && object_index != Flame){
 				if(array_length(instances_matching(CustomDraw, "name", "proj_rocket_trail")) <= 0){
-					with(script_bind_draw(proj_rocket_trail, -0.1)){
+					with(script_bind_draw(proj_rocket_trail, -1)){
 						name = script[2];
 						inst = [];
 					}
@@ -3872,7 +3870,7 @@
 			 // Smoke:
 			if(speed > 0 && chance_ct(1, 200 / ((2 * (speed + damage)) + 1))){
 				with(instance_create(_x - (2 * hspeed), _y - (2 * vspeed), Smoke)){
-					depth = max(depth, other.depth - 0.05);
+					depth = max(depth, other.depth - 1);
 					image_xscale *= other.image_xscale;
 					image_yscale *= other.image_xscale;
 				}
@@ -3898,7 +3896,7 @@
 			 // Flame Trail:
 			if(object_index != Rocket && object_index != Flame){
 				if(array_length(instances_matching(CustomDraw, "name", "proj_rocket_trail")) <= 0){
-					with(script_bind_draw(proj_rocket_trail, -0.1)){
+					with(script_bind_draw(proj_rocket_trail, -1)){
 						name = script[2];
 						inst = [];
 					}
@@ -4211,7 +4209,7 @@
 					team = o.team;
 					hspeed += o.hspeed / 2;
 					vspeed += o.vspeed / 2;
-					depth = -1.5;
+					depth = -2;
 					x += hspeed;
 					y += vspeed;
 					

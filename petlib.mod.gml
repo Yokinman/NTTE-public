@@ -426,7 +426,10 @@
 				}
 			}
 			
-			return [_name, string(_num) + "/" + string(_max)];
+			return [
+				_name,
+				((_num < _max) ? "" : "@q") + string(_num) + "/" + string(_max) + ((_num < _max) ? "" : "!")
+			];
 	}
 
 #define Mimic_anim

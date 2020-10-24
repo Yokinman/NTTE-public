@@ -40,7 +40,7 @@
 #define area_subarea           return 3;
 #define area_goal              return 100;
 #define area_next              return ["oasis", 1];
-#define area_music             return mus.Coast;
+#define area_music             return ((GameCont.proto == true) ? mus.CoastB : mus.Coast);
 #define area_music_boss        return mus.SealKing;
 #define area_ambient           return amb0b;
 #define area_background_color  return make_color_rgb(27, 118, 184);
@@ -478,9 +478,38 @@
 				alarm10 = max(alarm10, 90);
 			}
 		}
+		
+		 // Weird fix for ultra bolts destroying themselves when not touching a floor:
+		if(array_length(global.ultraboltfix_floors)){
+			global.ultraboltfix_floors = [];
+		}
+		if(instance_exists(UltraBolt)){
+			with(UltraBolt){
+				if(!place_meeting(x, y, Floor)){
+					with(instance_create(0, 0, Floor)){
+						name       = "UltraBoltCoastFix";
+						mask_index = sprBoltTrail;
+						x          = other.x;
+						y          = other.y;
+						xprevious  = x;
+						yprevious  = y;
+						visible    = false;
+						creator    = other;
+						array_push(global.ultraboltfix_floors, id);
+					}
+				}
+			}
+		}
 	}
 	
 #define ntte_step
+	 // Ultra Bolt Fix Pt.2:
+	if(array_length(global.ultraboltfix_floors)){
+		with(instances_matching_ne(global.ultraboltfix_floors, "id", null)){
+			instance_delete(id);
+		}
+	}
+	
 	if(area_active){
 		 // Push Stuff to Shore:
 		if(instance_exists(Floor)){
@@ -663,7 +692,7 @@
 			 // Underwater Portal Setup:
 			var _inst = instances_matching(Portal, "coast_portal", null);
 			if(array_length(_inst)) with(_inst){
-				coast_portal = (type == 1);
+				coast_portal = (type == 1 && endgame == 100 && image_alpha == 1);
 				alarm0 = -1;
 				
 				if(coast_portal){
@@ -725,26 +754,6 @@
 					if("coast_portal_sound" not in self){
 						coast_portal_sound = true;
 						sound_play(sndOasisPortal);
-					}
-				}
-			}
-		}
-		
-		 // Weird fix for ultra bolts destroying themselves when not touching a floor:
-		global.ultraboltfix_floors = [];
-		if(instance_exists(UltraBolt)){
-			with(UltraBolt){
-				if(!place_meeting(x, y, Floor)){
-					with(instance_create(0, 0, Floor)){
-						name = "UltraBoltCoastFix";
-						mask_index = sprBoltTrail;
-						x = other.x;
-						y = other.y;
-						xprevious = x;
-						yprevious = y;
-						visible = false;
-						creator = other;
-						array_push(global.ultraboltfix_floors, id);
 					}
 				}
 			}
@@ -824,13 +833,6 @@
 					}
 					instance_destroy();
 				}
-			}
-		}
-		
-		 // Ultra Bolt Fix Pt.2:
-		if(array_length(global.ultraboltfix_floors)){
-			with(instances_matching_ne(global.ultraboltfix_floors, "id", null)){
-				instance_delete(id);
 			}
 		}
 	}
