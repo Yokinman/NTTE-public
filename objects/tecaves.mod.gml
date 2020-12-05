@@ -1436,6 +1436,14 @@
 	 // Alarms:
 	if(alarm0_run) exit;
 	
+	 // Shielder Interaction:
+	if(deflected && hitid == 58 && area != area_hq){
+		area       = area_hq;
+		subarea    = min(subarea, 2);
+		area_chaos = false;
+		CrystalHeartBullet_setup();
+	}
+	
 	 // Movement:
 	if(friction_raw < 0 && speed_raw == 0){
 		speed_raw -= friction_raw;
@@ -1461,14 +1469,6 @@
 	 // Coast:
 	if(!place_meeting(x, y, Floor)){
 		instance_destroy();
-	}
-	
-	 // Shielder Interaction:
-	if(deflected && hitid == 58 && area != area_hq){
-		area       = area_hq;
-		subarea    = min(subarea, 2);
-		area_chaos = false;
-		CrystalHeartBullet_setup();
 	}
 	
 #define CrystalHeartBullet_draw

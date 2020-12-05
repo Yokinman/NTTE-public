@@ -42,7 +42,7 @@
 		"cost"     : 5,
 		"load"     : 18, // 0.6 Seconds
 		"auto"     : true,
-		"melee"    : true
+		"melee"    : false
 	};
 	scythe_mode[scythe_slugbow] = {
 		"name"     : "BONE SLUGBOW",
