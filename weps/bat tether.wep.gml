@@ -36,10 +36,10 @@
 			dist_max = 64;
 			time     = 7 * (1 + skill_get(mut_laser_brain));
 			bat      = true;
-			roids    = _fire.roids;
+			primary  = _fire.primary;
 			
 			 // Steroids Offset:
-			if(roids){
+			if(!primary){
 				creator_offy -= 4;
 			}
 		}
@@ -76,7 +76,7 @@
 		}
 		
 		 // Effects:
-		if(array_length(instances_matching(instances_matching(instances_matching(instances_matching(CustomObject, "name", "TeslaCoil"), "bat", true), "creator", _fire.creator), "roids", _fire.roids)) <= 1){
+		if(array_length(instances_matching(instances_matching(instances_matching(instances_matching(CustomObject, "name", "TeslaCoil"), "bat", true), "creator", _fire.creator), "primary", _fire.primary)) <= 1){
 			weapon_post(8, -10, 10);
 			
 			 // Sounds:

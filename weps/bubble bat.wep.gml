@@ -1,6 +1,6 @@
 #define init
 	 // Sprites:
-	global.sprWep = sprite_add_weapon("../sprites/weps/sprBubbleBat.png", 5, 3);
+	global.sprWep = sprite_add_weapon("../sprites/weps/sprBubbleBat.png", 4, 3);
 	global.sprWepLocked = mskNone;
 	
 #define weapon_name       return (weapon_avail() ? "BUBBLE BAT" : "LOCKED");

@@ -51,11 +51,11 @@
 	var _num = 4;
 	for(var _off = -1; _off <= 1; _off += 2 / (_num - 1)){
 		with(projectile_create(x, y, "PortalBullet", gunangle + (15 * _off * accuracy), random_range(11, 13))){
-			mask   = mskPlasma;
-			damage = 25;
-			spec   = _fire.spec;
-			roids  = _fire.roids;
-			offset = 20 - (2 * abs(_off));
+			mask    = mskPlasma;
+			damage  = 25;
+			spec    = _fire.spec;
+			primary = _fire.primary;
+			offset  = 20 - (2 * abs(_off));
 			
 			 // Remember Me:
 			array_push(_wep.inst, id);

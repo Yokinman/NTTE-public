@@ -469,11 +469,11 @@
 				hush = min(hush + 0.2, 0.3);
 				hushtime = 60;
 			}
-
+			
 			 // Not Holding Weapon:
 			if(wep == wep_none && !place_meeting(x, y, WepPickup) && instance_exists(prompt_mimic)){
 				with(prompt_mimic) visible = true;
-
+				
 				 // Place Weapon:
 				with(player_find(prompt_mimic.pick)){
 					if(canpick && wep != wep_none){
@@ -752,7 +752,7 @@
 		 // Find Sprite's Precise Right & Top Positions:
 		for(var i = 0; i < sprite_get_number(_spr); i++){
 			var _copy = sprite_duplicate_ext(_spr, i, 1);
-			sprite_collision_mask(_copy, true, 0, 0, 0, 0, 0, 1, 0);
+			sprite_collision_mask(_copy, false, 0, 0, 0, 0, 0, 1, 0);
 			array_push(_bob, [
 				sprite_get_bbox_right(_copy),
 				sprite_get_bbox_top(_copy)
@@ -903,6 +903,7 @@
 	with(prompt_mount){
 		image_xscale = 2;
 		image_yscale = 2;
+		depth        = 1;
 		on_meet      = script_ref_create(Salamander_prompt_meet);
 	}
 	
@@ -1011,20 +1012,50 @@
 		if(dash){
 			with((mount && instance_exists(leader)) ? leader : self){
 				 // Movement:
-				direction = angle_lerp(direction, other.dash_direction, 0.2 * current_time_scale);
-				speed = friction + maxspeed + 2 + (2 * other.dash_charge);
+				direction       = angle_lerp(direction, other.dash_direction, 0.2 * current_time_scale);
+				speed           = friction + maxspeed + 2 + (2 * other.dash_charge);
 				other.direction = direction;
-				other.speed = speed;
+				other.speed     = speed;
+				
+				 // Invulnerability:
+				if(instance_is(self, Player)){
+					nexthurt = max(nexthurt, current_frame + 6);
+					angle    = 1.5 * hspeed * -clamp((vspeed + 1) / 2, -1, 1);
+				}
+				
+				 // Melt Projectiles:
+				var _dis = 8;
+				if(distance_to_object(projectile) <= _dis){
+					var _inst = instance_rectangle_bbox(
+						bbox_left   - _dis,
+						bbox_top    - _dis,
+						bbox_right  + _dis,
+						bbox_bottom + _dis,
+						instances_matching_ne(instances_matching_gt(instances_matching_ne(instances_matching_ne(projectile, "team", team), "typ", 0), "damage", 0), "mask_index", mskNone)
+					);
+					if(array_length(_inst)) with(_inst){
+						if(distance_to_object(other) <= _dis && !instance_is(self, Grenade)){
+							with(other){
+								with(projectile_create(other.x, other.y, Flame, random(360), 1)){
+									sprite_index = sprSalamanderBullet;
+								}
+							}
+							instance_create(x, y, Smoke);
+							sound_play_hit(sndBurn, 0.2);
+							instance_destroy();
+						}
+					}
+				}
 				
 				 // Dash Bash:
-				var	_bx = 6,
-					_by = 6,
+				var	_bx   = 6,
+					_by   = 6,
 					_team = team,
 					_inst = instances_matching_ne(instances_matching_ne(instance_rectangle_bbox(bbox_left + hspeed_raw - _bx, bbox_top + vspeed_raw - _by, bbox_right + hspeed_raw + _bx, bbox_bottom + vspeed_raw + _by, hitme), "team", _team), "mask_index", mskNone);
 					
 				if(array_length(_inst) > 0){
 					with(other){
-						var _damage = 4 + ceil(4 * dash_charge);
+						var _damage = 10 + ceil(10 * dash_charge);
 						with(_inst){
 							projectile_hit(self, _damage, (instance_is(self, prop) ? 0 : other.speed * 2/3), other.direction);
 							
@@ -1034,13 +1065,37 @@
 									sound_play_hit_ext(sndBigBanditMeleeHit, max(0.2, 0.7 - (size / 10)) + random(0.1), 0.8);
 								}
 								
+								 // Large Dude, Stops Charge:
+								if(my_health > 0){
+									if((1 + size > other.dash_charge && !instance_is(self, prop)) || maxhealth > _damage){
+										with(other){
+											sprite_index = spr_hurt;
+											image_index  = 0;
+											
+											 // Bounce:
+											dash_direction = point_direction(other.x, other.y, x, y);
+											dash_charge    = 0;
+											with((mount && instance_exists(leader)) ? leader : self){
+												direction = other.dash_direction;
+												speed /= 3;
+											}
+										}
+										
+										 // Effects:
+										repeat(5){
+											with(scrFX(x, y, [other.direction + orandom(20), 4], Smoke)){
+												friction *= 2;
+											}
+										}
+									}
+								}
+								
 								 // Punt:
-								if(
-									chance(speed, 12)
-									&& my_health <= 0
-									&& size == 1
+								else if(
+									instance_is(self, enemy)
+									&& (size == 1 || instance_is(self, BanditBoss))
 									&& team != 0
-									&& !instance_is(self, prop)
+									&& chance(speed * (1 + (0.5 * skill_get(mut_throne_butt))), 12)
 								){
 									with(obj_create(x, y, "PalankingToss")){
 										direction    = other.direction;
@@ -1076,22 +1131,6 @@
 									
 									 // Stat:
 									other.stat.tossed++;
-								}
-								
-								 // Large Dude, Stops Charge:
-								if((1 + size > other.dash_charge && !instance_is(self, prop)) || maxhealth > _damage){
-									with(other){
-										dash_charge = 0;
-										sprite_index = spr_hurt;
-										image_index = 0;
-									}
-									
-									 // Effects:
-									repeat(5){
-										with(scrFX(x, y, [other.direction + orandom(20), 4], Smoke)){
-											friction *= 2;
-										}
-									}
 								}
 							}
 						}
@@ -1234,7 +1273,12 @@
 		}
 	}
 	else{
-		dash = false;
+		if(dash){
+			dash = false;
+			with(leader){
+				angle = 0;
+			}
+		}
 		dash_charge = 0;
 		dash_direction = direction;
 	}
@@ -1643,12 +1687,24 @@
 			 // Attack:
 			if(instance_is(target, hitme)){
 				sound_play_hit_ext(sndExplosionS, 1.5, 1.2);
-				with(projectile_create(target.x, target.y, "BubbleExplosionSmall", point_direction(x, y, target.x, target.y), 5)){
-					repeat(2) scrFX(x, y, [direction + orandom(30), 3], Smoke);
-					image_angle = 0;
-					friction = 1;
-					x -= hspeed;
-					y -= vspeed;
+				
+				var	_len = 8,
+					_dir = point_direction(x, y, target.x, target.y);
+					
+				for(var _ang = _dir; _ang < _dir + 360; _ang += (360 / 3)){
+					with(projectile_create(
+						target.x - lengthdir_x(8, _dir) + lengthdir_x(_len, _ang),
+						target.y - lengthdir_y(8, _dir) + lengthdir_y(_len, _ang),
+						"BubbleExplosionSmall",
+						_dir + orandom(20),
+						6
+					)){
+						repeat(2) scrFX(x, y, [direction + orandom(30), 3], Smoke);
+						image_angle = 0;
+						friction = 0.75;
+						x -= hspeed;
+						y -= vspeed;
+					}
 				}
 			}
 			
@@ -1814,6 +1870,8 @@
 						_num = 3 + (crown_current == crwn_death),
 						_l   = 8;
 						
+					projectile_create(x, y, "BubbleExplosion", 0, 0);
+					
 					for(var _d = _ang; _d < _ang + 360; _d += (360 / _num)){
 						projectile_create(x + lengthdir_x(_l, _d), y + lengthdir_y(_l, _d), "BubbleExplosionSmall", 0, 0);
 					}
@@ -2323,8 +2381,10 @@
 											hitid     = other.hitid;
 											
 											var _dirOff = angle_difference(_dir, direction);
+											if(image_angle != 0 || image_angle == direction){
+												image_angle += _dirOff;
+											}
 											direction   += _dirOff;
-											image_angle += _dirOff;
 											
 											 // Rebounce:
 											if("zspeed" in self) zspeed *= -1;
@@ -2577,8 +2637,8 @@
 							sprite_index = sprLightning;
 							image_xscale = random_range(0.5, 2);
 							image_yscale = random_range(0.5, 2);
-							image_angle = random(360);
-							alarm0 = 4 + random(4);
+							image_angle  = random(360);
+							alarm0       = 4 + random(4);
 						}
 						motion_add(random(360), 1);
 					}
@@ -2693,12 +2753,24 @@
 		light      = false;
 		spr_shadow = -1;
 		
+		 // Animate Slower:
+		if(image_index < 1){
+			image_index -= image_speed_raw * 0.95;
+			
+			 // Goodbye:
+			if(instance_exists(CustomEnemy) && array_length(instances_matching(instances_matching(CustomEnemy, "name", "PitSquid"), "intro", true))){
+				instance_destroy();
+				exit;
+			}
+		}
+		
 		 // Hop to New Pit:
-		if(image_index < 1) image_index -= image_speed_raw * 0.95;
 		else if(anim_end){
 			with(instance_random(instances_matching(Floor, "sprite_index", spr.FloorTrenchB))){
 				other.x = bbox_center_x;
 				other.y = bbox_center_y;
+				other.xprevious = other.x;
+				other.yprevious = other.y;
 			}
 		}
 		

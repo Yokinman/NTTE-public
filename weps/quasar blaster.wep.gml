@@ -21,7 +21,7 @@
 	
 	 // Quasar Beam:
 	with(projectile_create(x, y, "QuasarBeam", gunangle + orandom(4 * accuracy), 0)){
-		roids         = _fire.roids;
+		primary       = _fire.primary;
 		turn_factor   = 1/10;
 		shrink_delay  = 8;
 		scale_goal    = 0.5;

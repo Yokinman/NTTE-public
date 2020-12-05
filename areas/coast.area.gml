@@ -49,7 +49,7 @@
 #define area_secret            return false;
 
 #define area_name(_subarea, _loops)
-	return "@1(sprInterfaceIcons)1-" + string((_subarea <= 0) ? "?" : _subarea);
+	return `@1(${spr.RouteIcon}:0)1-` + string((_subarea <= 0) ? "?" : _subarea);
 	
 #define area_text
 	return choose(
@@ -349,7 +349,9 @@
 		
 		 // Normal Enemies:
 		else{
-			if(styleb) obj_create(_x + orandom(2), _y - irandom(16), "TrafficCrab");
+			if(styleb){
+				obj_create(_x + orandom(2), _y - irandom(16), "TrafficCrab");
+			}
 			else{
 				if(chance(GameCont.subarea, 18)){
 					obj_create(_x, _y, choose("Pelican", "Pelican", "TrafficCrab"));
@@ -609,6 +611,11 @@
 						scrFX(x, y, [direction, speed], Sweat);
 					}
 					sound_play_hit_ext(choose(sndOasisChest, sndOasisMelee), 1 + random(0.25), 1);
+					
+					 // Footprints:
+					if(instance_is(self, Player)){
+						mod_script_call("mod", "ntte", "footprint_give", 20, background_color, 0.5);
+					}
 				}
 				
 				//_inst[i++] = [id, y];

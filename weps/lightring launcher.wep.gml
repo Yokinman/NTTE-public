@@ -24,7 +24,7 @@
 	
 	 // Lightning Disc:
 	with(projectile_create(x, y, "LightningDisc", gunangle, 10)){
-		roids = _fire.roids;
+		primary = _fire.primary;
 	}
 	
 	 // Sounds:

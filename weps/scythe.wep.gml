@@ -9,51 +9,51 @@
 	
 	 // LWO:
 	global.lwoWep = {
-		wep   : mod_current,
-		ammo  : 0,
-		amax  : 55,
-		amin  : 4,
-		anam  : "BONES",
-		buff  : false,
-		mode  : scythe_basic,
-		cost  : 0,
-		combo : 0
+		"wep"   : mod_current,
+		"ammo"  : 0,
+		"amax"  : 55,
+		"amin"  : 4,
+		"anam"  : "BONES",
+		"buff"  : false,
+		"mode"  : scythe_basic,
+		"cost"  : 0,
+		"combo" : 0
 	};
 	
 	 // Modes:
 	scythe_mode = [];
 	scythe_mode[scythe_basic] = {
-		name     : "BONE SCYTHE",
-		text     : "@rREASSEMBLED",
-		sprt     : global.sprWep,
-		sprt_hud : global.sprWepHUD,
-		swap     : sndBloodGamble,
-		cost     : 0,
-		load     : 12, // 0.4 Seconds
-		auto     : true,
-		melee    : true
+		"name"     : "BONE SCYTHE",
+		"text"     : "@rREASSEMBLED",
+		"sprt"     : global.sprWep,
+		"sprt_hud" : global.sprWepHUD,
+		"swap"     : sndBloodGamble,
+		"cost"     : 0,
+		"load"     : 12, // 0.4 Seconds
+		"auto"     : true,
+		"melee"    : true
 	};
 	scythe_mode[scythe_shotbow] = {
-		name     : "BONE SHOTBOW",
-		text     : "@wMARROW @sFROM A HUNDRED @gMUTANTS",
-		sprt     : global.sprShotbow,
-		sprt_hud : global.sprShotbow,
-		swap     : sndSwapMachinegun,
-		cost     : 5,
-		load     : 18, // 0.6 Seconds
-		auto     : true,
-		melee    : false
+		"name"     : "BONE SHOTBOW",
+		"text"     : "@wMARROW @sFROM A HUNDRED @gMUTANTS",
+		"sprt"     : global.sprShotbow,
+		"sprt_hud" : global.sprShotbow,
+		"swap"     : sndSwapMachinegun,
+		"cost"     : 5,
+		"load"     : 18, // 0.6 Seconds
+		"auto"     : true,
+		"melee"    : true
 	};
 	scythe_mode[scythe_slugbow] = {
-		name     : "BONE SLUGBOW",
-		text     : "@gRADIATION@s DETERIORATES @wBONES",
-		sprt     : global.sprSlugbow,
-		sprt_hud : global.sprSlugbowHUD,
-		swap     : sndSwapMotorized,
-		cost     : 5,
-		load     : 15, // 0.5 Seconds
-		auto     : false,
-		melee    : false
+		"name"     : "BONE SLUGBOW",
+		"text"     : "@gRADIATION@s DETERIORATES @wBONES",
+		"sprt"     : global.sprSlugbow,
+		"sprt_hud" : global.sprSlugbowHUD,
+		"swap"     : sndSwapMotorized,
+		"cost"     : 5,
+		"load"     : 15, // 0.5 Seconds
+		"auto"     : false,
+		"melee"    : false
 	};
 	
 #macro scythe_mode    global.scythe_mode

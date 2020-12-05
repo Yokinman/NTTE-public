@@ -1,6 +1,6 @@
 #define init
-    spr = mod_variable_get("mod", "teassets", "spr");
-    snd = mod_variable_get("mod", "teassets", "snd");
+	spr = mod_variable_get("mod", "teassets", "spr");
+	snd = mod_variable_get("mod", "teassets", "snd");
 	
 #macro spr global.spr
 #macro msk spr.msk

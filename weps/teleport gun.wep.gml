@@ -42,10 +42,10 @@
 	
 	 // Portal Bullet:
 	with(projectile_create(x, y, "PortalBullet", gunangle, random_range(11, 13))){
-		mask   = mskPlasma;
-		damage = 25;
-		spec   = _fire.spec;
-		roids  = _fire.roids;
+		mask    = mskPlasma;
+		damage  = 25;
+		spec    = _fire.spec;
+		primary = _fire.primary;
 		
 		 // Remember Me:
 		array_push(_wep.inst, id);

@@ -789,25 +789,27 @@
 		A projectile used for the bone scythe's ranged modes
 	*/
 	
-	var	_shotgunShoulders = skill_get(mut_shotgun_shoulders),
-		_boltMarrow       = skill_get(mut_bolt_marrow);
-		
 	with(instance_create(_x, _y, CustomProjectile)){
 		 // Visual:
 		sprite_index = spr.BoneArrow;
 		
 		 // Vars:
-		mask_index = mskBolt;
-		friction = 0.6;
-		damage = 14;
-		force = 8;
-		typ = 2;
-		damage_falloff = current_frame + 2;
-		wallbounce = 4 * _shotgunShoulders;
-		home_inst = noone;
-		home_dir = 0;
-		setup = true;
-		big = false;
+		mask_index   = mskBolt;
+		friction     = 0.6;
+		damage       = 14;
+		force        = 8;
+		typ          = 2;
+		bonus        = true;
+		bonus_damage = 2;
+		maxspeed     = 18;
+		wallbounce   = 4 * skill_get(mut_shotgun_shoulders);
+		home_inst    = noone;
+		home_dir     = 0;
+		setup        = true;
+		big          = false;
+		
+		 // Alarms:
+		alarm2 = 2;
 		
 		return id;
 	}
@@ -908,6 +910,9 @@
 		image_angle   = _dir;
 	}
 	
+#define BoneArrow_alrm2
+	bonus = false;
+	
 #define BoneArrow_wall
 	 // Movin' Closer:
 	move_contact_solid(direction, speed);
@@ -935,17 +940,19 @@
 	scrFX(x, y, [direction, 2], Dust);
 	repeat(3) scrBoneDust(x, y);
 	
+	 // Reset Bonus Damage:
+	if(wallbounce > 0 && !bonus){
+		bonus = true;
+		alarm2 = 2;
+	}
+	
 	 // Bounce:
-	var d = direction;
-	speed *= 0.8;
+	var _dir = direction;
 	move_bounce_solid(true);
 	image_angle = direction;
-	home_dir += angle_difference(direction, d);
-	
-	 // Shotgun Shoulders:
-	var _skill = skill_get(mut_shotgun_shoulders);
-	speed = min(speed + wallbounce, 18);
-	wallbounce *= 0.9;
+	home_dir += angle_difference(direction, _dir);
+	speed = min((speed * 0.8) + wallbounce, maxspeed);
+	wallbounce *= 0.95;
 	
 	 // Sounds:
 	if(speed > 4){
@@ -957,21 +964,19 @@
 	 // Setup:
 	if(setup) BoneArrow_setup();
 	
+	 // Damage:
 	if(projectile_canhit_melee(other)){
-		var _damage = damage + ((damage_falloff > current_frame) * 2);
-		projectile_hit(other, _damage, force, direction);
+		projectile_hit_push(other, damage + (bonus_damage * bonus), force);
 	}
 	
 #define scrBoneDust(_x, _y)
-	var c = [
-		make_color_rgb(208, 197, 180),
-		make_color_rgb(157, 133, 098),
-		make_color_rgb(111, 082, 043)
-	];
-	
 	 // Create the guy aready:
 	with(instance_create(_x, _y, Sweat)){
-		image_blend = c[irandom(array_length(c) - 1)];
+		image_blend = choose(
+			make_color_rgb(208, 197, 180),
+			make_color_rgb(157, 133, 098),
+			make_color_rgb(111, 082, 043)
+		);
 		return id;
 	}
 
@@ -2534,7 +2539,9 @@
 	wave += current_time_scale;
 	
 	 // Pathfinding Delay:
-	if(path_delay > 0) path_delay -= current_time_scale;
+	if(path_delay > 0){
+		path_delay -= current_time_scale;
+	}
 	
 	 // Loop HP Scaling:
 	if(loops != GameCont.loops){
@@ -2573,6 +2580,9 @@
 		var _scrt = pet + "_anim";
 		if(mod_script_exists(mod_type, mod_name, _scrt)){ // Custom Animation Event
 			mod_script_call(mod_type, mod_name, _scrt);
+			if(!instance_exists(self)){
+				exit;
+			}
 		}
 		else sprite_index = enemy_sprite;
 		
@@ -2618,9 +2628,9 @@
 		}
 		
 		 // Custom Step Event:
-		var _scrt = pet + "_step";
-		if(mod_script_exists(mod_type, mod_name, _scrt)){
-			mod_script_call(mod_type, mod_name, _scrt);
+		mod_script_call(mod_type, mod_name, pet + "_step");
+		if(!instance_exists(self)){
+			exit;
 		}
 	}
 	else walk = 0;
@@ -2672,9 +2682,9 @@
 			image_index  = 0;
 			
 			 // Custom Death Event:
-			var _scrt = pet + "_death";
-			if(mod_script_exists(mod_type, mod_name, _scrt)){
-				mod_script_call(mod_type, mod_name, _scrt);
+			mod_script_call(mod_type, mod_name, pet + "_death");
+			if(!instance_exists(self)){
+				exit;
 			}
 		}
 	}
@@ -2711,7 +2721,7 @@
 							
 						if(place_free(_x, y)) x = _x;
 						if(place_free(x, _y)) y = _y;
-						_spin = (30 * right);
+						_spin = 30 * right;
 					}
 				}
 			}
@@ -2738,7 +2748,7 @@
 	}
 	else if(portal_angle != 0){
 		portal_angle = ((portal_angle % 360) + 360) % 360;
-		portal_angle -= portal_angle * 0.2 * current_time_scale;
+		portal_angle *= power(0.2, current_time_scale);
 	}
 	
 	 // Player Owns Pet:
@@ -2948,9 +2958,9 @@
 	
 	/*
 	 // Custom End Step Event:
-	var _scrt = pet + "_end_step";
-	if(mod_script_exists(mod_type, mod_name, _scrt)){
-		mod_script_call(mod_type, mod_name, _scrt);
+	mod_script_call(mod_type, mod_name, pet + "_end_step");
+	if(!instance_exists(self)){
+		exit;
 	}
 	*/
 	
@@ -3001,6 +3011,9 @@
 		
 	if(mod_script_exists(mod_type, mod_name, _scr)){
 		mod_script_call(mod_type, mod_name, _scr, _spr, _img, _x, _y, _xsc, _ysc, _ang, _col, _alp);
+		if(!instance_exists(self)){
+			exit;
+		}
 	}
 	else draw_sprite_ext(_spr, _img, _x, _y, _xsc, _ysc, _ang, _col, _alp);
 	
@@ -3046,8 +3059,13 @@
 		 // Custom Alarm Event:
 		var _scrt = pet + "_alrm0";
 		if(mod_script_exists(mod_type, mod_name, _scrt)){
-			var a = mod_script_call(mod_type, mod_name, _scrt, _leaderDir, _leaderDis);
-			if(is_real(a) && a != 0) alarm0 = a;
+			var _alarm = mod_script_call(mod_type, mod_name, _scrt, _leaderDir, _leaderDis);
+			if(!instance_exists(self)){
+				exit;
+			}
+			if(is_real(_alarm) && _alarm != 0){
+				alarm0 = _alarm;
+			}
 		}
 		
 		 // Default:
@@ -3097,6 +3115,9 @@
 				 // Custom Hurt Event:
 				if(mod_script_exists(mod_type, mod_name, _scrt)){
 					mod_script_call(mod_type, mod_name, _scrt, _hitdmg, _hitvel, _hitdir);
+					if(!instance_exists(self)){
+						exit;
+					}
 				}
 				
 				 // Default:
@@ -3111,6 +3132,9 @@
 					 // Custom Dodge Event:
 					if(mod_script_exists(mod_type, mod_name, _scrt)){
 						mod_script_call(mod_type, mod_name, _scrt, _hitdmg, _hitvel, _hitdir);
+						if(!instance_exists(self)){
+							exit;
+						}
 					}
 					
 					 // Default:
@@ -3125,10 +3149,7 @@
 	
 #define Pet_cleanup
 	 // Custom Cleanup Event:
-	var _scrt = pet + "_cleanup";
-	if(mod_script_exists(mod_type, mod_name, _scrt)){
-		mod_script_call(mod_type, mod_name, _scrt);
-	}
+	mod_script_call(mod_type, mod_name, pet + "_cleanup");
 	
 	 // Add to Pet History (MutantVats Event):
 	if(!stat_found && array_length(history) > 0){
@@ -3756,7 +3777,7 @@
 		portal     = false;
 		hold       = true;
 		spec       = false;
-		roids      = false;
+		primary    = true;
 		
 		return id;
 	}
@@ -3779,7 +3800,7 @@
 	 // Charging:
 	if(hold){
 		 // Hold Still:
-		var _wep = variable_instance_get(creator, (roids ? "b" : "") + "wep");
+		var _wep = variable_instance_get(creator, (primary ? "" : "b") + "wep");
 		if(
 			sprite_index == spr_spwn
 			|| (
@@ -3800,7 +3821,7 @@
 				y = creator.y;
 				move_contact_solid(
 					direction,
-					offset - variable_instance_get(creator, (roids ? "b" : "") + "wkick", 0)
+					offset - variable_instance_get(creator, (primary ? "" : "b") + "wkick", 0)
 				);
 				
 				mask_index = _lastMask;
@@ -3813,7 +3834,7 @@
 			hold = false;
 			
 			 // FX:
-			var _kick = (roids ? "b" : "") + "wkick";
+			var _kick = (primary ? "" : "b") + "wkick";
 			if(_kick in creator){
 				variable_instance_set(creator, _kick, 10);
 			}
@@ -4319,10 +4340,10 @@
 		override_mask    = true;
 	//	override_depth   = true;
 		unstick          = false;
-		search_x1        = x - 8;
-		search_x2        = x + 8;
-		search_y1        = y - 8;
-		search_y2        = y + 8;
+		search_x1        = x;
+		search_x2        = x;
+		search_y1        = y;
+		search_y2        = y;
 		
 		 // Up down:
 		y += z;
@@ -5804,7 +5825,7 @@
 			
 			 // Pets:
 			if(instance_exists(CustomHitme)){
-				var _inst = instances_matching(instances_matching(CustomHitme, "name", "Pet"), "visible", true);
+				var _inst = instances_matching(CustomHitme, "name", "Pet");
 				if(array_length(_inst)) with(_inst){
 					if(light && light_radius[_gray] > 0){
 						draw_circle(x, y, light_radius[_gray] + orandom(1), false);

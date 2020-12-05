@@ -1,6 +1,9 @@
 #define init
+	 // Sprites:
 	global.sprSkillIcon = sprite_add("../sprites/skills/Compassion/sprSkillCompassionIcon.png", 1, 12, 16);
 	global.sprSkillHUD  = sprite_add("../sprites/skills/Compassion/sprSkillCompassionHUD.png",  1,  8,  8);
+	
+	 // Reset:
 	game_start();
 	
 #define game_start
@@ -24,6 +27,7 @@
 			if(_num >= _max) return true;
 		}
 	}
+	
 	return false;
 	
 #define skill_take(_num)

@@ -47,7 +47,7 @@
 #define area_subarea           return 3;
 #define area_goal              return 150;
 #define area_next              return [area_city, 1];
-#define area_music             return mus.Trench;
+#define area_music             return ((GameCont.proto == true) ? mus.TrenchB : mus.Trench);
 #define area_music_boss        return mus.PitSquid;
 #define area_ambient           return amb101;
 #define area_background_color  return make_color_rgb(100, 114, 127);
@@ -57,7 +57,7 @@
 #define area_underwater        return true;
 
 #define area_name(_subarea, _loops)
-	return "@1(sprInterfaceIcons)3-" + string(_subarea);
+	return `@1(${spr.RouteIcon}:0)3-` + string(_subarea);
 	
 #define area_text
 	return choose(
@@ -138,10 +138,42 @@
 	 // Enable Area:
 	variable_instance_set(GameCont, "ntte_active_" + mod_current, true);
 	
-	 // Anglers:
-	with(RadChest) if(chance(1, 40)){
-		obj_create(x, y, "Angler");
-		instance_delete(id);
+	 // Gold Anglers:
+	with(instance_random(instances_matching(RadChest, "spr_idle", sprRadChestBig))){
+		if(GameCont.norads >= 1){
+			GameCont.norads = 0;
+			
+			 // Ensure Land:
+			floor_set_style(0, null);
+			with(FloorPit){
+				if(instance_near(bbox_center_x, bbox_center_y, other, random_range(64, 96))){
+					floor_set(x, y, true);
+				}
+			}
+			floor_reset_style();
+			
+			 // Friends:
+			/*var _num = irandom_range(1, 3) + GameCont.loops;
+			with(array_shuffle(FloorPitless)){
+				if(_num > 0){
+					if(instance_near(bbox_center_x, bbox_center_y, other, 64)){
+						if(
+							!place_meeting(x, y, Wall)  &&
+							!place_meeting(x, y, hitme) &&
+							!place_meeting(x, y, chestprop)
+						){
+							_num--;
+							obj_create(bbox_center_x, bbox_center_y, "Angler");
+						}
+					}
+				}
+				else break;
+			}*/
+			
+			 // Man of the Hour:
+			obj_create(x, y, "AnglerGold");
+			instance_delete(id);
+		}
 	}
 	
 	/*
@@ -155,40 +187,33 @@
 	}
 	*/
 	
-	switch(GameCont.subarea){
+	 // Pit Boys:
+	if(GameCont.subarea == 3){
+		 // Small:
+		with(instance_random(Floor)){
+			with(pet_spawn(bbox_center_x, bbox_center_y, "Octo")){
+				hiding = true;
+			}
+		}
 		
-		case 1: // Small Pit Boy
+		 // Big:
+		var	_x = 10016,
+			_y = 10016;
 			
-			with(instance_random(Floor)){
-				with(pet_spawn(bbox_center_x, bbox_center_y, "Octo")){
-					hiding = true;
-				}
+		if(false){
+			var _spawnFloor = [];
+			
+			with(Floor) if(distance_to_object(Player) > 96){
+				array_push(_spawnFloor, id);
 			}
-			
-			break;
-			
-		case 3: // Big Pit Boy
-			
-			var	_x = 10016,
-				_y = 10016;
 				
-			if(false){
-				var _spawnFloor = [];
-				
-				with(Floor) if(distance_to_object(Player) > 96){
-					array_push(_spawnFloor, id);
-				}
-					
-				with(instance_random(_spawnFloor)){
-					_x = bbox_center_x;
-					_y = bbox_center_y;
-				}
+			with(instance_random(_spawnFloor)){
+				_x = bbox_center_x;
+				_y = bbox_center_y;
 			}
-			
-			obj_create(_x + orandom(8), _y + random(8), "PitSquid");
-			
-			break;
-			
+		}
+		
+		obj_create(_x + orandom(8), _y + random(8), "PitSquid");
 	}
 	
 	 // Fix Props:
@@ -317,14 +342,25 @@
 	var	_x = x + 16,
 		_y = y + 16;
 		
-	if(GameCont.loops > 0 && chance(1, 3)){
+	 // Loop Spawns:
+	if(GameCont.loops > 0 && chance(1, (styleb ? 16 : 6))){
+		if(styleb){
+			instance_create(_x, _y, LightningCrystal);
+		}
+		else{
+			obj_create(_x, _y, (chance(1, 4) ? FireBaller : "CrystalBat"));
+		}
+		/*
 		if(chance(1, 5)){
 			instance_create(_x, _y, FireBaller);
 		}
 		else{
 			instance_create(_x, _y, choose(LaserCrystal, Salamander));
 		}
+		*/
 	}
+	
+	 // Normal:
 	else{
 		 // Anglers:
 		if(!styleb && chance(1, 15)){

@@ -16,9 +16,10 @@
 			Event_area    : Returns the event's spawn area, leave undefined if it can spawn on any area
 			Event_hard    : Returns the event's minimum difficulty, leave undefined to default to 2 (Desert-2)
 			Event_chance  : Returns the event's spawn chance from 0 to 1, leave undefined if it always spawns
-			Event_create  : The event's generation code, called from its controller object in ntte.mod's level_start script (can also define variables here to be used later)
+			Event_setup   : The event's pre-generation code, called from its controller object to define variables and/or adjust level gen before floors are made
+			Event_create  : The event's generation code, called from its controller object during ntte.mod's level_start script
 			Event_step    : The event's step code, called from its controller object
-			Event_cleanup : The event's cleanup code, called when its controller object is destroyed (usually when the level ends)
+			Event_cleanup : The event's cleanup code, called from its controller object when it's destroyed (usually when the level ends)
 	*/
 	
 	 // Event Tip Color:
@@ -203,6 +204,17 @@
 #define BlockedRoom_hard    return 1; // 1-1+
 #define BlockedRoom_chance  return 1/3;
 
+#define BlockedRoom_setup
+	type = pool({
+		"Chest"    : 2,
+		"Scorpion" : 1,
+		"Maggot"   : 1,
+		"Skull"    : 1,
+		"Dummy"    : (instance_exists(WantBoss) && GameCont.subarea < 3)
+	});
+	dummy_spawn = 1;
+	dummy_music = false;
+	
 #define BlockedRoom_create
 	var	_minID      = GameObject.id,
 		_w          = 2,
@@ -218,15 +230,6 @@
 	floor_set_align(null, null, 32, 32);
 	
 	 // Type Setup:
-	type = pool({
-		"Chest"    : 2,
-		"Scorpion" : 1,
-		"Maggot"   : 1,
-		"Skull"    : 1,
-		"Dummy"    : (instance_exists(WantBoss) && GameCont.subarea < 3)
-	});
-	dummy_spawn = 1;
-	dummy_music = false;
 	switch(type){
 		case "Chest":
 		case "Dummy":
@@ -258,10 +261,6 @@
 			
 		case "Skull":
 			_w = irandom_range(2, 3) + chance(1, 3);
-			_h = irandom_range(2, 3);
-			break;
-			
-			_w = irandom_range(2, 3);
 			_h = irandom_range(2, 3);
 			break;
 	}
@@ -884,6 +883,12 @@
 #define ScorpionCity_area    return area_desert;
 #define ScorpionCity_chance  return array_length(ScorpionCity_pet);
 
+#define ScorpionCity_setup
+	 // Smaller Level:
+	with(instances_matching_gt([GenCont, FloorMaker], "goal", 0)){
+		goal = ceil(goal * 0.85);
+	}
+	
 #define ScorpionCity_create
 	 // Alert:
 	with(ScorpionCity_pet){
@@ -958,7 +963,7 @@
 				sprite_index = spr.FloorScorpion;
 				image_index  = irandom(image_number - 1);
 				depth        = 8;
-				material     = 4;
+				material     = 2;
 				traction     = 0.45;
 				styleb       = false;
 				
@@ -1042,6 +1047,14 @@
 		instance_delete(id);
 	}
 	
+	 // Oh No:
+	if(GameCont.loops > 0) repeat(GameCont.loops){
+		with(instance_random([Scorpion, GoldScorpion])){
+			obj_create(x, y, "SilverScorpion");
+			instance_delete(id);
+		}
+	}
+	
 	
 #define SewerPool_text    return choose("", choose(`${event_tip}RADIOACTIVE SEWAGE @sSMELLS#WORSE THAN YOU THINK`, `${event_tip}ACID RAIN @sRUNOFF`));
 #define SewerPool_area    return area_sewers;
@@ -1112,8 +1125,11 @@
 #define GatorDen_area    return area_sewers;
 #define GatorDen_chance  return ((crown_current == "crime") ? 1 : (unlock_get("crown:crime") ? 1/10 : 0));
 
+#define GatorDen_setup
+	inst = [];
+	
 #define GatorDen_create
-	var _inst = [];
+	var _inst = inst;
 	
 	with(array_shuffle(FloorNormal)){
 		if(!place_meeting(x, y, Wall)){
@@ -1320,8 +1336,6 @@
 		}
 	}
 	
-	inst = _inst;
-	
 #define GatorDen_step
 	if(array_length(inst)){
 		with(inst){
@@ -1415,6 +1429,11 @@
 #define RavenArena_area    return area_scrapyards;
 #define RavenArena_chance  return 1/40;
 
+
+#define RavenArena_setup
+	inst_top  = [];
+	inst_idle = [];
+	
 #define RavenArena_create
 	var	_w          = 6 + ceil(GameCont.loops / 2.5),
 		_h          = _w,
@@ -1425,14 +1444,11 @@
 		_spawnY     = spawn_y,
 		_spawnDis   = 32,
 		_spawnFloor = FloorNormal,
-		_instTop    = [],
-		_instIdle   = [],
+		_instTop    = inst_top,
+		_instIdle   = inst_idle,
 		_wepDis     = random(12),
 		_wepDir     = random(360);
 		
-	inst_top  = _instTop;
-	inst_idle = _instIdle;
-	
 	floor_set_align(null, null, 32, 32);
 	
 	with(floor_room(_spawnX, _spawnY, _spawnDis, _spawnFloor, _w, _h, _type, _dirOff, _floorDis)){
@@ -1608,23 +1624,33 @@
 #define FirePit_chance  return ((GameCont.subarea != 3) ? 1/12 : 0);
 
 #define FirePit_create
+	var	_spawnX = spawn_x,
+		_spawnY = spawn_y;
+		
 	 // More Traps:
-	with(Wall) if(place_meeting(x, y, Floor)){
-		if(array_length(instance_rectangle(bbox_left, bbox_top, bbox_right, bbox_bottom, Trap)) <= 0){
-			var _spawn = true;
-			with(teevent_get_active("RavenArena")){
-				var _wall = other;
-				with(instances_matching(floors, "", null)){
-					if(place_meeting(x, y, _wall)){
-						_spawn = false;
-						break;
+	var _num = floor(array_length(FloorNormal) / 30);
+	with(array_shuffle(instances_matching(Wall, "", null))){
+		if(_num > 0){
+			if(place_meeting(x, y, Floor) && point_distance(bbox_center_x, bbox_center_y, _spawnX, _spawnY) > 64/* && chance(3, 5)*/){
+				if(array_length(instance_rectangle(bbox_left, bbox_top, bbox_right, bbox_bottom, Trap)) <= 0){
+					var _spawn = true;
+					with(teevent_get_active("RavenArena")){
+						var _wall = other;
+						with(instances_matching(floors, "", null)){
+							if(place_meeting(x, y, _wall)){
+								_spawn = false;
+								break;
+							}
+						}
+					}
+					if(_spawn){
+						_num--;
+						instance_create(x, y, Trap);
 					}
 				}
 			}
-			if(_spawn){
-				instance_create(x, y, Trap);
-			}
 		}
+		else break;
 	}
 	/*with(Trap){
 		alarm0 = 150;
@@ -1703,6 +1729,12 @@
 #define SealPlaza_area    return area_city;
 #define SealPlaza_chance  return (unlock_get("pack:coast") ? 1/18 : 0);
 
+#define SealPlaza_setup
+	 // Smaller Level:
+	with(instances_matching_gt([GenCont, FloorMaker], "goal", 0)){
+		goal = ceil(goal * 0.8);
+	}
+	
 #define SealPlaza_create
 	var	_minID      = GameObject.id,
 		_w          = 3,
@@ -1865,11 +1897,7 @@
 		if(i >= 0){
 			depth    = 8;
 			traction = 0.45;
-			switch(i){
-				case 0: material = 2;                                                  break;
-				case 1: material = 5;                                                  break;
-				case 2: material = (array_exists([0, 4, 20, 24], image_index) ? 2 : 5) break;
-			}
+			material = ((i == 0 || array_exists([0, sqrt(image_number) - 1, image_number - 1, image_number - sqrt(image_number)], image_index)) ? 2 : 1);
 			with(instance_create(x, y - 1, SnowFloor)){
 				sprite_index = _floorSnow[i];
 				image_index  = other.image_index;
@@ -2148,6 +2176,12 @@
 						
 						break;
 						
+					case wep_incinerator:
+						
+						array_push(_list, mut_shotgun_shoulders);
+						
+						break;
+						
 					case wep_jackhammer:
 						
 						array_push(_list, mut_long_arms);
@@ -2195,7 +2229,12 @@
 							
 							 // Ultra:
 							if(weapon_get_rads(_wep) > 0){
-								array_push(_list, mut_plutonium_hunger);
+								array_push(_list, "lead ribs");
+							}
+							
+							 // Toxic:
+							if(array_exists(_split, "TOXIC")){
+								array_push(_list, "toad breath");
 							}
 							
 							 // Blood:
@@ -2323,7 +2362,7 @@
 	
 #define EelGrave_text    return `EELS ${event_tip}NEVER @sFORGET`;
 #define EelGrave_area    return "trench";
-#define EelGrave_chance  return (unlock_get("pack:trench") ? 1/8 : 0);
+#define EelGrave_chance  return (unlock_get("pack:trench") ? 1/10 : 0);
 
 #define EelGrave_create
 	var	_w          = 6,
@@ -2345,10 +2384,12 @@
 		floor_fill(x, y, _w - 2, _h - 2, _type);
 		
 		 // Skulls:
-		var _ang = random(360);
-		for(var _dir = _ang; _dir < 360; _dir += (360 / 3)){
-			var	_l = random_range(16, 24),
-				_d = _dir + orandom(8);
+		var	_ang = random(360),
+			_num = irandom_range(2, 3);
+			
+		for(var _dir = _ang; _dir < _ang + 360; _dir += (360 / _num)){
+			var	_l = random_range(16, 28),
+				_d = _dir + orandom(30 / _num);
 				
 			obj_create(x + lengthdir_x(_l, _d), y + lengthdir_y(_l, _d), "EelSkull");
 		}
@@ -2370,7 +2411,7 @@
 	floor_reset_align();
 	floor_reset_style();
 	
-	
+
 #define teevent_add(_event)
 	/*
 		Adds a given event script reference to the list of events
@@ -2431,6 +2472,9 @@
 						}
 					}
 				}
+				
+				 // Setup:
+				mod_script_call(mod_type, mod_name, event + "_setup");
 			}
 		}
 	}

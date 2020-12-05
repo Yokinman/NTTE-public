@@ -27,21 +27,23 @@
 		_ydis = 0;
 		
 	with(projectile_create(x, y, "TeslaCoil", gunangle, 0)){
-		roids = _fire.roids;
-		if(roids) creator_offy -= 4;
+		primary = _fire.primary;
+		if(!primary){
+			creator_offy -= 4;
+		}
 		_xdis = creator_offx;
 		_ydis = creator_offy;
 	}
 	
 	 // Effects:
-	if(array_length(instances_matching(instances_matching(instances_matching(CustomObject, "name", "TeslaCoil"), "creator", _fire.creator), "roids", _fire.roids)) <= 1){
+	if(array_length(instances_matching(instances_matching(instances_matching(CustomObject, "name", "TeslaCoil"), "creator", _fire.creator), "primary", _fire.primary)) <= 1){
 		weapon_post(8, -10, 10);
 		
 		 // Ball Appear FX:
 		_ydis *= variable_instance_get(_fire.creator, "right", 1);
 		with(instance_create(
 			x + lengthdir_x(_xdis, gunangle) + lengthdir_x(_ydis, gunangle - 90),
-			y + lengthdir_y(_xdis, gunangle) + lengthdir_y(_ydis, gunangle - 90) - (4 * _fire.roids),
+			y + lengthdir_y(_xdis, gunangle) + lengthdir_y(_ydis, gunangle - 90) - (_fire.primary ? 0 : 4),
 			LightningHit
 		)){
 			motion_add(other.gunangle, 0.5);

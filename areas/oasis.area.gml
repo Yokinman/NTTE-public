@@ -24,7 +24,7 @@
 #define area_underwater        return true;
 
 #define area_name(_subarea, _loops)
-	return "@1(sprInterfaceIcons)2-" + string(_subarea);
+	return `@1(${spr.RouteIcon}:0)2-` + string(_subarea);
 	
 #define area_text
 	return choose(

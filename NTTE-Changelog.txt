@@ -1,4 +1,71 @@
+2.03 ~ Go for the Gold
+	
+	    @(sprite:menu/banners/sprGoldMain.png:1)
+	GENERAL
+	+	New enemies: @wCrystal Bats @s+ @yGolden Anglers
+	+	New unlockable skins for @bFish @sand @yPlant
+	+	Gave @yHyper Crystal @sa @wPit Arena
+	+	Gave @wSeal King @sa new theme
+	+	Added a @wB-theme @strack to @bTrench
+	+	Mechanically overhauled @bBonus Ammo @s& @bHP Pickups
+	+	New prop for @pCrystal Caves
+	+	@rCrystal Heart Orbs @sgenerate @wI.D.P.D. H.Q. @schunks when deflected by @wShielders
+	+	Added some new mutations, only obtainable at @rPalace Shrines @sfor now @(sprite:skills/Toad Breath/sprToadBreathHUD.png:1:0:16:12) @(sprite:skills/Lead Ribs/sprLeadRibsHUD.png:1:0:16:12)
+	+	Subtle @wFootprint @svisuals for walking on soft ground
+	~	@gSludge Pools @snow support @wExtra Feet
+	~	Reduced @wEel @rHP @sfrom @w12 @sto @w10
+	~	Reduced @wAngler @rHP @sfrom @w50 @sto @w45
+	~	Players can now shoot and use their active during @wSeal King's @sintro
+	~	Gave the @bAquatic Route @sa new map icon @(sprite:menu/sprRouteIcon.png:2:0)
+	~	@bLoop Trench @shas @wCrystal Bats @s+ @wLightning Crystals @sinstead of @wSalamanders @s+ @wLaser Crystals
+	~	Slightly lowered @yMortar @sspawns in @pCrystal Caves
+	~	Slightly shrunk the size of the main level during the @wScorpion City @sand @wSeal Plaza @sevents
+	~	The @wScorpion City @sevent spawns an extra @wSilver Scorpion @sfor each loop
+	~	The @rFire Pit @sevent creates less fire traps
+	~	Gave @wParrot @slouder footstep sounds
+	~	@rFake Walls @sare easier to spot
+	*	Fixed the @gSewer Pool @sroom sometimes being empty in NTT beta (9942+) versions
+	*	Fixed @yLair @srarely not generating past its hallway@d?
+	*	Fixed @wBig Bat @snot collecting @wBig Cat's @srads during morph mode in NTT beta (9942+) versions
+	*	Fixed @yPit Eels @soccasionally breaking through the floor right when the level starts
+	*	Fixed @yPit Eels @scausing an error if you died right when the level started
+	*	Fixed enemies cloned by @rCrystal Brain @sdropping the same weapons as their original enemy
+	*	Fixed @rFake Walls @shaving weird collision with the player and their projectiles
+	*	Fixed @rFake Walls @svisually breaking if you paused the game in NTT beta (9942+) versions
+	*	Fixed @wBat Chests @sincreasing next run's @wBig Weapon Chest @schance if restarting from the death screen
+	*	Fixed a rare error with charmed @wGators
+	*	Fixed NT:TE's HUD not fading out for the credits
+	*	Fixed NT:TE's HUD not appearing during boss intros
+	
+	             @(sprite:menu/banners/sprGoldWeapons.png:1)
+	WEAPONS
+	+	New weapon, @wPizza Cutter @(sprite:weps/sprPizzaCutter.png:3:2:-1:12)
+	+	Added ammo indicating lights for @wBat Disc @sguns @(sprite:weps/sprBatDiscLauncher.png:4:-0.1:-1:12)
+	+	@rAnnihilator @snow displays text and plays a sound when you annihilate an enemy
+	~	Increased @wBubble Bat's @smain damage from @w8 @sto @w16
+	~	Reduced @wBat Disc @sdamage from @w3 @sto @w2, @sand made them less overpowered with @wBolt Marrow
+	~	Reduced @wBat Disc Cannon's @smain damage from @w8 @sto @w2
+	~	@pElectroplasma Cannon @sspawns on @w7-1 @sinstead of @w4-1
+	~	@wShotgun Shoulders @sbuffs @wScythe @sbolts a little more
+	~	@wScythe's @sprompt tips now respect rebound controls
+	*	Fixed @wBat Discs @snot returning to players in portals
+	*	Fixed @wTrident @snot blinking at max charge
+	*	Fixed @yGolden Trident @snot pulling back if you start a run with it after recently starting the session
+	*	Fixed @rQuasar Rings @sleaving behind ghostly @rQuasar Beams @sif destroyed
+	*	Fixed NT:TE's grenade-style projectiles not getting baseballed by @bLightning Hammer
+	
+	               @(sprite:menu/banners/sprGoldPets.png:1)
+	PETS
+	+	@wSalamander @spet now gives invulnerability @sto its rider, and melts projectiles while charging
+	+	@pThrone Butt @sincreases @wSalamander @spet's enemy punting chance by about @w1.5x
+	~	Increased @wSalamander @spet's bashing damage by about @w2.5x, @sand made it pierce more
+	~	@wSalamander @spet's @w"MOUNT" @sprompt no longer overrides weapon pickup prompts
+	~	Tripled @bSlaughter @spet's bite damage + radius, and gave them a bigger hurt explosion
+	*	Fixed pets attacking @wSeal King @swhile he's out at sea
+	*	Fixed @rTwins @spet visually reorienting @gGuardian Orbs
+	
 2.02 ~ Sludge Party
+	
 	         @(sprite:menu/banners/sprSludgeMain.png:1)
 	+	Gave @pMom @sa @gSludge Nest
 	+	New weapon, @pElectroplasma Cannon
@@ -19,6 +86,7 @@
 	*	Fixed an error from opening a normal @yGold Chest
 	
 2.01 ~ Time to Fix
+	
 	+	Net Launcher projectiles now support melee baseball
 	+	Gave the Crib's TV and giant chests slightly better shadows
 	+	Added a chat command helper for the '/ntte' command

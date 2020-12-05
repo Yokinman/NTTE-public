@@ -751,8 +751,21 @@
 	 // Sticky Sludge:
 	with(instance_rectangle_bbox(bbox_left, bbox_top, bbox_right, bbox_bottom, instances_matching_lt(instances_matching_gt(hitme, "speed", 0), "size", 6))){
 		if(position_meeting(x, bbox_bottom, other)){
-			x = lerp(xprevious, x, 2/3);
-			y = lerp(yprevious, y, 2/3);
+			var _slow = true;
+			
+			 // Footsteps:
+			if(instance_is(self, Player)){
+				mod_script_call("mod", "ntte", "footprint_give", 40, other.fx_color, 1.1);
+				if(skill_get(mut_extra_feet) > 0){
+					_slow = false;
+				}
+			}
+			
+			 // Slow:
+			if(_slow){
+				x = lerp(xprevious, x, 2/3);
+				y = lerp(yprevious, y, 2/3);
+			}
 			
 			 // Somethins comin up bro:
 			if(other.alarm1 > 0){

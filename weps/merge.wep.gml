@@ -2334,7 +2334,6 @@
 #define weapon_auto(_wep)         return wep_stat(_wep, "auto");
 #define weapon_melee(_wep)        return wep_stat(_wep, "mele");
 #define weapon_laser_sight(_wep)  return wep_stat(_wep, "lasr");
-#define weapon_blood(_wep)        return (wep_stat(_wep, "blod") ? max(floor(weapon_get_cost(_wep) / 2), 1) : 0);
 
 #define weapon_sprt(_wep)
 	var _spr = wep_stat(_wep, "sprt");
@@ -2369,6 +2368,39 @@
 		_wep = _fire.wep;
 		
 		GunCont(lq_defget(_wep, "base", wepDefault), x, y, team, _fire.creator, gunangle, accuracy);
+	}
+	
+#define step(_primary)
+	var _wep = (_primary ? wep : bwep);
+	
+	 // Blood for Ammo:
+	if(wep_stat(_wep, "blod") && infammo == 0){
+		if(
+			_primary
+			? (drawempty  == 30 && canfire && button_pressed(index, "fire"))
+			: (drawemptyb == 30 && canspec && button_pressed(index, "spec") && race == "steroids")
+		){
+			var	_type = weapon_get_type(_wep),
+				_cost = weapon_get_cost(_wep),
+				_ammo = ammo[_type],
+				_amax = typ_amax[_type];
+				
+			if(_ammo < _cost && _cost < _amax){
+				var _add = min(_cost, _amax - _ammo);
+				ammo[_type] += _add;
+				
+				 // Damage:
+				lasthit = [weapon_get_sprt(_wep), weapon_get_name(_wep)];
+				projectile_hit_raw(self, floor(sqrt(_add)), true);
+				sound_play_hit(sndBloodHurt, 0.1);
+				sleep(40);
+				
+				 // Insta-Use Ammo:
+				if(_primary && can_shoot == true){
+					clicked = true;
+				}
+			}
+		}
 	}
 	
 #define GunCont(_wep, _x, _y, _team, _creator, _gunangle, _accuracy)

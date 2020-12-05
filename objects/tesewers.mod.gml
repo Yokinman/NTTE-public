@@ -110,8 +110,8 @@
 		ammo = ammo_max;
 		
 		 // Warning:
-		sound_play_pitchvol(sndSniperTarget,     0.8 + random(0.2),  0.6);
-		sound_play_pitchvol(sndUltraGrenadeSuck, 2.5 + orandom(0.5), 0.7);
+		sound_play_pitchvol(sndSniperTarget,     0.8 + random(0.2), 0.6);
+		sound_play_pitchvol(sndUltraGrenadeSuck, 2.0 + random(1.0), 0.7);
 		repeat(6) scrFX(x, y, [image_angle + 180, random(3)], Smoke);
 	}
 	
@@ -486,7 +486,7 @@
 	
 	 // Baseball:
 	if(place_meeting(x, y, projectile)){
-		var _inst = instances_meeting(x, y, [Slash, GuitarSlash, BloodSlash, EnergySlash, EnergyHammerSlash, CustomSlash]);
+		var _inst = instances_meeting(x, y, [Slash, GuitarSlash, BloodSlash, EnergySlash, EnergyHammerSlash, LightningSlash, CustomSlash]);
 		if(array_length(_inst)) with(_inst){
 			if(place_meeting(x, y, other)){
 				event_perform(ev_collision, Grenade);
@@ -1455,7 +1455,7 @@ var _extraScale = argument_count > 1 ? argument[1] : 0.5;
 		target        = noone;
 		target_offdis = 32;
 		target_offdir = random(360);
-
+		
 		return id;
 	}
 
@@ -1543,25 +1543,26 @@ var _extraScale = argument_count > 1 ? argument[1] : 0.5;
 	with(instance_create(_x, _y, CustomProjectile)){
 		 // Visual:
 		sprite_index = spr.BatDisc;
-		mask_index   = mskFlakBullet;
+		image_speed  = 0;
 		depth        = -2;
 		
 		 // Vars:
-		friction  = 0.4;
-		maxspeed  = 12;
-		damage    = 3;
-		typ       = 2;
-		setup     = true;
-		wep       = noone;
-		ammo      = 1;
-		has_hit   = false;
-		returning = false;
-		return_to = noone;
-		big       = false;
-		key       = "";
-		seek      = 40;
-		in_wall   = false;
-		speed     = maxspeed;
+		mask_index = mskFlakBullet;
+		friction   = 0.4;
+		maxspeed   = 12;
+		damage     = 2;
+		typ        = 2;
+		setup      = true;
+		wep        = noone;
+		ammo       = 1;
+		has_hit    = false;
+		returning  = false;
+		target     = noone;
+		big        = false;
+		key        = "";
+		seek       = 48 * skill_get(mut_bolt_marrow);
+		walled     = false;
+		speed      = maxspeed;
 		
 		return id;
 	}
@@ -1571,16 +1572,13 @@ var _extraScale = argument_count > 1 ? argument[1] : 0.5;
 	
 	 // Big:
 	if(big){
-		 // Visual:
-		sprite_index = spr.BatDiscBig;
-		mask_index = mskSuperFlakBullet;
-		
-		 // Vars:
-		damage = 8;
-		seek = 64;
-		
-		 // Explodo Timer:
-		alarm0 = 30;
+		if(sprite_index == spr.BatDisc){
+			sprite_index = spr.BatDiscBig;
+		}
+		if(alarm0 < 0){
+			alarm0 = 30;
+		}
+		seek *= 4/3;
 	}
 	
 #define BatDisc_step
@@ -1594,74 +1592,82 @@ var _extraScale = argument_count > 1 ? argument[1] : 0.5;
 	image_angle += 40 * current_time_scale;
 	
 	 // Targeting:
-	var	_disMax = infinity,
-		_wepVar = ["wep", "bwep"];
-		
-	for(var i = 0; i < array_length(_wepVar); i++){
-		with(instances_matching([Player, WepPickup, ThrownWep], _wepVar[i], wep)){
-			var _dis = point_distance(x, y, other.x, other.y);
-			if(_dis < _disMax){
-				_disMax = _dis;
-				other.return_to = id;
-			}
+	var _disMax = infinity;
+	with(instances_matching([Player, WepPickup, ThrownWep, ProtoChest], "wep", wep)){
+		var _dis = point_distance(x, y, other.x, other.y);
+		if(_dis < _disMax){
+			_disMax = _dis;
+			other.target = id;
 		}
 	}
-	if(!instance_exists(return_to)) return_to = creator;
+	with(instances_matching(Player, "bwep", wep)){
+		var _dis = point_distance(x, y, other.x, other.y);
+		if(_dis < _disMax){
+			_disMax = _dis;
+			other.target = id;
+		}
+	}
+	if(!instance_exists(target)){
+		target = creator;
+	}
 	
-	 // Effects:
-	if(in_wall){
+	 // Inside Wall:
+	if(walled){
+		 // Effects:
 		if(current_frame_active){
 			view_shake_max_at(x, y, 4);
 		}
-		
-		 // Dust trail:
 		if(chance_ct(1, 3)){
 			with(instance_create(x, y, Dust)){
 				depth = -7;
 			}
 		}
 		
-		 // Exit wall:
-		if(place_meeting(x, y, Floor) && !place_meeting(x, y, Wall)){
-			in_wall = false;
+		 // Exit Wall:
+		visible = place_meeting(x, y, Floor);
+		if(visible && !place_meeting(x, y, Wall)){
+			walled = false;
 			
 			 // Effects:
-			var d = direction;
-			
-			with(instance_create(x, y, Debris)) motion_set(d + orandom(40), 4 + random(4));
+			with(instance_create(x, y, Debris)){
+				motion_set(other.direction + orandom(40), 4 + random(4));
+			}
 			instance_create(x, y, Smoke);
 		}
-		
-		 // Be invisible inside walls:
-		if(place_meeting(x, y, TopSmall) || !place_meeting(x, y, Floor)){
-			visible = false;
-		}
-		else visible = true;
 	}
 	
+	 // Outside Wall:
 	else{
 		 // Baseball:
 		if(place_meeting(x, y, projectile)){
-			var _inst = instances_meeting(x, y, [Slash, GuitarSlash, BloodSlash, EnergySlash, EnergyHammerSlash, CustomSlash]);
+			var _inst = instances_meeting(x, y, [Slash, GuitarSlash, BloodSlash, EnergySlash, EnergyHammerSlash, LightningSlash, CustomSlash]);
 			if(array_length(_inst)) with(_inst){
 				if(place_meeting(x, y, other)){
 					with(other){
 						deflected = true;
-					    direction = other.direction;
-					    speed     = 16;
-					    
-					     // Effects:
-					    sleep(10);
-					    view_shake_at(x, y, 3);
-					    with(instance_create(x, y, Deflect)){
-					        image_angle = other.direction;
-					    }
+						returning = false;
+						has_hit   = false;
+						seek      = max(seek, 48 * skill_get(mut_bolt_marrow));
+						direction = other.direction;
+						speed     = maxspeed + 8;
+						
+						 // Game Feel:
+						//x -= hspeed;
+						//y -= vspeed;
+						
+						 // Effects:
+						sleep_max(12);
+						view_shake_at(x, y, 3);
+						sound_play_hit_ext(sndDiscBounce, 1.3 + random(0.3), 0.5);
+						with(instance_create(x, y, Deflect)){
+							image_angle = other.direction;
+						}
 					}
 				}
 			}
 		}
 		 
-		 // Disc trail:
+		 // Trail:
 		if(current_frame_active){
 			with(instance_create(x, y, DiscTrail)){
 				sprite_index = (other.big ? spr.BigDiscTrail : sprDiscTrail);
@@ -1670,15 +1676,15 @@ var _extraScale = argument_count > 1 ? argument[1] : 0.5;
 	}
 	
 	 // Bolt Marrow:
-	var	_seekInst = noone,
-		_seekDis = (seek * skill_get(mut_bolt_marrow));
+	var	_seekDis  = seek,
+		_seekInst = noone;
 		
 	if(_seekDis > 0 && instance_near(x, y, creator, 160)){
-		with(instances_matching_ne(instances_matching_ne(hitme, "team", team, 0), "mask_index", mskNone, sprVoid)){
+		with(instances_matching_ne(instances_matching_ne(hitme, "team", team, 0), "mask_index", mskNone)){
 			if(!instance_is(self, prop)){
 				var _dis = point_distance(x, y, other.x, other.y);
 				if(_dis < _seekDis){
-					_seekDis = _dis;
+					_seekDis  = _dis;
 					_seekInst = id;
 				}
 			}
@@ -1697,13 +1703,18 @@ var _extraScale = argument_count > 1 ? argument[1] : 0.5;
 		image_index = 0;
 		
 		if(returning){
-			var	_tx = (instance_exists(return_to) ? return_to.x : xstart),
-				_ty = (instance_exists(return_to) ? return_to.y : ystart);
+			var	_tx = xstart,
+				_ty = ystart;
 				
+			if(instance_exists(target)){
+				_tx = target.x;
+				_ty = target.y;
+			}
+			
 			 // Returning:
 			if(
-				instance_exists(return_to)
-				? (distance_to_object(return_to) > 0)
+				(instance_exists(target) && place_meeting(_tx, _ty, target))
+				? (distance_to_object(target) > 0)
 				: (point_distance(x, y, _tx, _ty) > speed_raw)
 			){
 				var _speed = friction * 2;
@@ -1719,34 +1730,36 @@ var _extraScale = argument_count > 1 ? argument[1] : 0.5;
 			
 			 // Returned:
 			else{
-				var	_wep = wep,
-					_dir = direction;
-					
-				with(instance_exists(return_to) ? return_to : self){
-					 // Epic:
+				 // Kick:
+				with(target){
 					if("gunangle" in self){
-						var _kick = 6 * sign(angle_difference(_dir, gunangle + 90));
-						if("wkick" in self && variable_instance_get(self, "wep") == _wep){
+						var _kick = 6 * sign(angle_difference(other.direction, gunangle + 90)) * (weapon_is_melee(other.wep) ? -1 : 1);
+						if("wkick" in self && variable_instance_get(self, "wep") == other.wep){
 							wkick  = _kick;
 						}
-						if("bwkick" in self && variable_instance_get(self, "bwep") == _wep){
+						if("bwkick" in self && variable_instance_get(self, "bwep") == other.wep){
 							bwkick  = _kick;
 						}
 					}
-					
-					 // Effects:
+				}
+				
+				 // Effects:
+				with(instance_exists(target) ? target : self){
 					view_shake_max_at(x, y, 12);
-					if(friction > 0) motion_add(_dir, 2);
+					if(friction > 0){
+						motion_add(other.direction, 2);
+					}
 					sound_play_hit_ext(sndDiscgun,     0.8 + random(0.4), 0.6);
 					sound_play_hit_ext(sndCrossReload, 0.6 + random(0.4), 0.8);
 				}
 				
+				 // Die:
 				instance_destroy();
 			}
 		}
 		
-		 // Return when slow:
-		else if(!big && speed <= 5){
+		 // Return When Slow:
+		else if(speed <= 5 && !big){
 			returning = true;
 		}
 	}
@@ -1754,35 +1767,37 @@ var _extraScale = argument_count > 1 ? argument[1] : 0.5;
 #define BatDisc_end_step
 	if(setup) BatDisc_setup();
 	
-	 // Go through walls:
-	if(returning && place_meeting(x + hspeed_raw, y + vspeed_raw, Wall)){
-		if(place_meeting(x + hspeed_raw, y, Wall)) x += hspeed_raw;
-		if(place_meeting(x, y + vspeed_raw, Wall)) y += vspeed_raw;
+	 // Pass Through Walls:
+	if(
+		x == xprevious &&
+		y == yprevious &&
+		place_meeting(x + hspeed_raw, y + vspeed_raw, Wall)
+	){
+		x += hspeed_raw;
+		y += vspeed_raw;
 	}
-	
-	 // Unstick:
-	if(x == xprevious && hspeed_raw != 0) x += hspeed_raw;
-	if(y == yprevious && vspeed_raw != 0) y += vspeed_raw;
 	
 #define BatDisc_alrm0
 	 // Projectiles:
-	for(var _dir = direction; _dir < direction + 360; _dir += (360 / 7)){
-		with(projectile_create(x, y, "BatDisc", _dir, 0)){
-			visible = other.visible;
-			in_wall = other.in_wall;
-			wep     = other.wep;
-			ammo   *= sign(other.ammo);
-		}
-		
-		 // Effects:
-		repeat(irandom_range(1, 2)){
-			with(scrFX(x, y, random(6), Smoke)){
-				if(other.in_wall){
-					depth = -7;
-					speed /= 2;
+	if(ammo > 0){
+		for(var _dir = direction; _dir < direction + 360; _dir += (360 / ammo)){
+			with(projectile_create(x, y, "BatDisc", _dir, 0)){
+				wep     = other.wep;
+				walled  = other.walled;
+				visible = other.visible;
+			}
+			
+			 // Effects:
+			repeat(irandom_range(1, 2)){
+				with(scrFX(x, y, random(6), Smoke)){
+					if(other.walled){
+						depth = -7;
+						speed /= 2;
+					}
 				}
 			}
 		}
+		ammo = 0;
 	}
 	
 	 // Effects:
@@ -1790,45 +1805,44 @@ var _extraScale = argument_count > 1 ? argument[1] : 0.5;
 	sound_play_pitch(sndClusterLauncher, 0.8 + random(0.4));
 	
 	 // Goodbye:
-	ammo = 0;
 	instance_destroy();
 	
 #define BatDisc_hit
-	if(projectile_canhit(other)){
-		projectile_hit_raw(other, damage, sndDiscHit);
-		
+	if(projectile_canhit(other) && current_frame_active){
+		projectile_hit_push(other, damage, force);
 		has_hit = true;
 		
 		 // Effects:
-		instance_create(x, y, Smoke);
-		
-		var _big = ((instance_exists(other) && other.size >= 3 && big));
-		
+		var _big = (instance_exists(other) && other.size >= 3 && big);
 		view_shake_max_at(x, y, (_big ? 12 : 6));
-		
 		if(!instance_exists(other) || other.my_health <= 0){
 			sleep_max(_big ? 48 : 24);
 			view_shake_max_at(x, y, (_big ? 32 : 16))
 		}
+		instance_create(x, y, Smoke);
+		
+		 // Less Bolt Marrow Seeking:
+		seek *= 0.8;
 	}
 	
 #define BatDisc_wall
-	if(!returning && !has_hit && instance_exists(return_to)){
-		if(!big) returning = true;
-		
-		 // Bounce towards creator:
-		direction = point_direction(x, y, return_to.x, return_to.y);
+	 // Bounce Back:
+	if(!returning && !has_hit && instance_exists(target)){
+		direction = point_direction(x, y, target.x, target.y);
+		if(!big){
+			returning = true;
+		}
 		
 		 // Effects:
 		sound_play_hit(sndDiscBounce, 0.4);
-		with(instance_create(x + hspeed, y + vspeed, MeleeHitWall)){
-			image_angle = other.direction;
+		with(instance_create(x - hspeed_raw, y - vspeed_raw, MeleeHitWall)){
+			image_angle = other.direction + 180;
 		}
 	}
 	
 	 // Enter Wall:
-	else if(!in_wall){
-		in_wall = true;
+	else if(!walled){
+		walled = true;
 		
 		 // Effects:
 		instance_create(x, y, Smoke);
@@ -1837,7 +1851,7 @@ var _extraScale = argument_count > 1 ? argument[1] : 0.5;
 		
 		 // Sounds:
 		sound_play_hit(sndPillarBreak, 0.4);
-		sound_play_hit(sndDiscHit, 0.4);
+		sound_play_hit(sndDiscHit,     0.4);
 	}
 	
 #define BatDisc_destroy
@@ -1850,19 +1864,32 @@ var _extraScale = argument_count > 1 ? argument[1] : 0.5;
 	}
 	
 #define BatDisc_cleanup
-	 // Hold up:
-	with(instances_matching(Player, "wep", wep)){
-		can_shoot = false;
-	}
-	with(instances_matching(Player, "bwep", wep)){
-		bcan_shoot = false;
+	 // Restore:
+	if("ammo" in wep){
+		wep.ammo += ammo;
+		if("amax" in wep){
+			wep.ammo = min(wep.ammo, wep.amax);
+		}
 	}
 	
-	 // Restore:
-	with(wep){
-		ammo += other.ammo;
-		if("amax" in self){
-			ammo = min(ammo, amax);
+	 // Hold up:
+	if(!lq_defget(wep, "canload", true)){
+		 // Activate:
+		if(lq_defget(wep, "ammo", 0) >= lq_defget(wep, "amax", 0)){
+			wep.canload = true;
+		}
+		
+		 // No Shooting:
+		else{
+			with(instances_matching(Player, "wep",  wep)) can_shoot  = false;
+			with(instances_matching(Player, "bwep", wep)) bcan_shoot = false;
+		}
+	}
+	
+	 // Update Weapon Sprite:
+	if(instance_is(target, WepPickup) || instance_is(target, ThrownWep)){
+		with(target){
+			sprite_index = weapon_get_sprt(wep);
 		}
 	}
 	
@@ -2152,8 +2179,14 @@ var _extraScale = argument_count > 1 ? argument[1] : 0.5;
 	 // Explodin':
 	sound_play(sndExplosionL);
 	sound_play(sndFlameCannonEnd);
-	instance_create(x, y, Explosion);
-	repeat(1 + irandom(2)) instance_create(x, y, SmallExplosion);
+	with(projectile_create(x, y, Explosion, 0, 0)){
+		team = -1;
+	}
+	repeat(1 + irandom(2)){
+		with(projectile_create(x, y, SmallExplosion, 0, 0)){
+			team = -1;
+		}
+	}
 	
 	var _l = 12;
 	for(var _d = 0; _d < 360; _d += (360 / 20)){
@@ -3672,6 +3705,7 @@ var _extraScale = argument_count > 1 ? argument[1] : 0.5;
 		mask_index  = spr.ManholeOpen;
 		close_index = 6;
 		target      = noone;
+		hole        = noone;
 		
 		 // don't mess with the big boy
 		with(instances_meeting(x, y, instances_matching(CustomObject, "name", "CatHoleBig"))){
@@ -3709,10 +3743,8 @@ var _extraScale = argument_count > 1 ? argument[1] : 0.5;
 			depth = min(depth, -6);
 			
 			 // Hole:
-			if(array_length(instances_matching(instances_matching(CustomObject, "name", "CatHoleOpen"), "creator", id)) <= 0){
-				with(obj_create(x, y, "CatHoleOpen")){
-					creator = other;
-				}
+			if(!instance_exists(hole)){
+				hole = obj_create(x, y, "ManholeOpen");
 			}
 			
 			 // Come Here Bro:
@@ -3761,7 +3793,7 @@ var _extraScale = argument_count > 1 ? argument[1] : 0.5;
 				depth = 5;
 				
 				 // Delete Hole:
-				with(instances_matching(instances_matching(CustomObject, "name", "CatHoleOpen"), "creator", id)){
+				with(hole){
 					instance_destroy();
 				}
 				
@@ -3955,9 +3987,10 @@ var _extraScale = argument_count > 1 ? argument[1] : 0.5;
 	
 #define CatHoleBig_destroy
 	 // Hole:
-	with(obj_create(x, y, "CatHoleOpen")){
+	with(obj_create(x, y, "ManholeOpen")){
 		sprite_index = spr.BigManholeOpen;
-		big = true;
+		canportal    = true;
+		big          = true;
 		
 		 // Launch Player:
 		var _oy = -8 * big;
@@ -4039,113 +4072,6 @@ var _extraScale = argument_count > 1 ? argument[1] : 0.5;
 	sound_play_pitchvol(sndHitMetal,  0.4, 1);
 	view_shake_at(x, y, 60);
 	sleep(60);
-	
-	
-#define CatHoleOpen_create(_x, _y)
-	with(instance_create(_x, _y, CustomObject)){
-		 // Visual:
-		sprite_index = spr.ManholeOpen;
-		depth        = 5;
-		
-		 // Vars:
-		mask_index = -1;
-		creator    = noone;
-		big        = false;
-		
-		return id;
-	}
-	
-#define CatHoleOpen_step
-	 // Collision:
-	var	_obj = [chestprop, Corpse, ChestOpen],
-		_dis = 4 + (min(bbox_width, bbox_height) / 2),
-		_spd = 3,
-		_oy  = -8 * big;
-		
-	if(big){
-		array_push(_obj, hitme);
-	}
-	
-	y += _oy;
-	
-	for(var i = 0; i < array_length(_obj); i++){
-		if(place_meeting(x, y, _obj[i])){
-			with(instances_meeting(x, y, _obj[i])){
-				if(place_meeting(x, y, other)){
-					var _dir = point_direction(other.x, other.y, x, y);
-					
-					 // Force Off:
-					if(
-						other.big
-						&& instance_is(self, Player)
-						&& point_distance(other.x, other.y, x, y) < _dis
-					){
-						x = other.x + lengthdir_x(_dis, _dir);
-						y = other.y + lengthdir_y(_dis, _dir);
-						direction = angle_lerp(direction, _dir, 1/12);
-					}
-					
-					 // Push:
-					else if(speed < _spd){
-						if(friction > 0){
-							motion_add_ct(_dir, friction + 0.4);
-						}
-						else{
-							x += lengthdir_x(_spd - 0.4, _dir);
-							y += lengthdir_y(_spd - 0.4, _dir);
-						}
-					}
-				}
-			}
-		}
-	}
-	
-	y -= _oy;
-	
-	 // Grab Portal:
-	if(big && instance_exists(Portal)){
-		with(instance_nearest_array(x, y, instances_matching(Portal, "type", 1))){
-			x = other.x;
-			y = other.y;
-			
-			if(image_alpha > 0){
-				image_alpha = 0;
-				mask_index = mskReviveArea;
-				
-				 // Relocating:
-				with(instance_nearest(xstart, ystart, PortalShock)){
-					x = other.x;
-					y = other.y;
-				}
-				repeat(5) with(instance_nearest(xstart, ystart, PortalL)){
-					x = other.x;
-					y = other.y;
-				}
-				
-				 // FX:
-				var _l = 18;
-				for(var _d = 0; _d < 360; _d += random_range(10, 12)){
-					scrFX(x + lengthdir_x(_l, _d), y + lengthdir_y(_l, _d), [_d, (chance(1, 6) ? 4 : 2.5)], Dust);
-					if(chance(1, 12)){
-						with(instance_create(x + lengthdir_x(_l, _d), y + lengthdir_y(_l, _d), Debris)){
-							sprite_index = sprDebris102;
-							direction = _d + orandom(30);
-							speed *= random_range(0.5, 1);
-						}
-					}
-				}
-			}
-			
-			 // No Zap:
-			if(place_meeting(x, y, PortalL)){
-				with(instances_meeting(x, y, PortalL)){
-					if(place_meeting(x, y, other)){
-						instance_destroy();
-					}
-				}
-			}
-		}
-	}
 	
 	
 #define CatLight_create(_x, _y)
@@ -4480,116 +4406,157 @@ var _extraScale = argument_count > 1 ? argument[1] : 0.5;
 	
 #define Manhole_step
 	if(visible){
-		 // Closed:
-		if(image_index < image_number - 1){
-			 // Effects:
-			if(area_get_underwater(GameCont.area) && chance_ct(1, 4)){
-				with(instance_create(x, y, Bubble)){
-					motion_set(90 + orandom(5), 4 + random(3));
-					friction = 0.2;
-				}
-			}
-			
-			 // Open:
-			if(place_meeting(x, y, Explosion) || (contact && place_meeting(x, y, Player))){
-				var _open = true;
-				
-				 // Boss Exists:
-				with(enemy) if(enemy_boss){
-					_open = false;
-					break;
-				}
-				
-				if(_open){
-					image_index++;
-					
-					if(image_index >= image_number - 1){
-						image_index = image_number - 1;
-						
-						 // Effects:
-						sleep(50);
-						view_shake_at(x, y, 20);
-						if(area_get_underwater(GameCont.area)){
-							repeat(10 + irandom(10)){
-								with(instance_create(x, y, Bubble)){
-									motion_set(random(360), 1 + random(2));
-								}
-							}
-						}
-						
-						 // Area-Specific:
-						switch(area){
-							
-							case "pizza":
-								
-								 // Splat:
-								var _ang = random(360);
-								for(var _dir = _ang; _dir < _ang + 360; _dir += (360 / 3)){
-									with(obj_create(x, y, "WaterStreak")){
-										direction   = _dir + orandom(20);
-										speed       = 4 + random(1);
-										image_angle = direction;
-										image_blend = c_orange;
-									}
-								}
-								
-								break;
-								
-							case "trench":
-								
-								 // Debris:
-								repeat(5 + irandom(5)){
-									with(instance_create(x, y, Debris)){
-										motion_set(random(360), 3 + random(5));
-									}
-								}
-								
-								 // Sound:
-								sound_play_pitchvol(sndPillarBreak,   0.8, 1.2);
-								sound_play_pitchvol(sndOasisPortal,   1,   0.3);
-								sound_play_pitchvol(sndSnowTankShoot, 0.6, 0.3);
-								
-								break;
-								
-						}
-						
-						 // Area:
-						area_set(area, subarea, loops);
-						
-						 // Portal:
-						GameCont.killenemies = true;
-						with(instance_create(x, y, Portal)){
-							image_alpha = 0;
-							mask_index = mskExploder;
-						}
-						sound_stop(sndPortalOpen);
-					}
-				}
+		 // Effects:
+		if(area_get_underwater(GameCont.area) && chance_ct(1, 4)){
+			with(instance_create(x, y, Bubble)){
+				motion_set(90 + orandom(5), 4 + random(3));
+				friction = 0.2;
 			}
 		}
 		
-		 // Opened:
-		else{
-			 // No Zap:
-			if(place_meeting(x, y, PortalL)){
-				with(instances_meeting(x, y, PortalL)){
-					if(place_meeting(x, y, other)){
-						instance_destroy();
-					}
+		 // Open:
+		if(place_meeting(x, y, Explosion) || (contact && place_meeting(x, y, Player))){
+			var _open = true;
+			
+			 // Boss Exists:
+			with(enemy) if(enemy_boss){
+				_open = false;
+				break;
+			}
+			
+			if(_open){
+				image_index++;
+				if(image_index >= image_number - 1){
+					instance_destroy();
+				}
+			}
+		}
+	}
+	
+	 // Activate:
+	else if(instance_exists(Portal)){
+		visible = true;
+		
+		 // Notice me bro:
+		sound_play_hit_ext(sndPillarBreak, 0.7 + random(0.1), 8);
+		repeat(3) scrFX(x, y, 2, Smoke);
+	}
+	
+#define Manhole_destroy
+	 // Hole:
+	with(obj_create(x, y, "ManholeOpen")){
+		sprite_index = other.sprite_index;
+		image_index  = image_number - 1;
+		mask_index   = mskExploder;
+		canportal    = true;
+	}
+	
+	 // Effects:
+	sleep(50);
+	view_shake_at(x, y, 20);
+	if(area_get_underwater(GameCont.area)){
+		repeat(10 + irandom(10)){
+			with(instance_create(x, y, Bubble)){
+				motion_set(random(360), 1 + random(2));
+			}
+		}
+	}
+	
+	 // Area-Specific:
+	switch(area){
+		
+		case "pizza":
+			
+			 // Splat:
+			var _ang = random(360);
+			for(var _dir = _ang; _dir < _ang + 360; _dir += (360 / 3)){
+				with(obj_create(x, y, "WaterStreak")){
+					direction   = _dir + orandom(20);
+					speed       = 4 + random(1);
+					image_angle = direction;
+					image_blend = c_orange;
 				}
 			}
 			
-			 // Clear Corpses:
-			var	_obj = [Corpse, ChestOpen],
-				_dis = 16,
-				_spd = 2;
-				
-			for(var i = 0; i < array_length(_obj); i++){
-				if(place_meeting(x, y, _obj[i])){
-					with(instances_matching_lt(instances_meeting(x, y, _obj[i]), "speed", _spd)){
-						if(place_meeting(x, y, other)){
-							var _dir = point_direction(other.x, other.y, x, y);
-							if(friction > 0){
+			break;
+			
+		case "trench":
+			
+			 // Debris:
+			repeat(5 + irandom(5)){
+				with(instance_create(x, y, Debris)){
+					motion_set(random(360), 3 + random(5));
+				}
+			}
+			
+			 // Sound:
+			sound_play_pitchvol(sndPillarBreak,   0.8, 1.2);
+			sound_play_pitchvol(sndOasisPortal,   1.0, 0.3);
+			sound_play_pitchvol(sndSnowTankShoot, 0.6, 0.3);
+			
+			break;
+			
+	}
+	
+	 // Area:
+	area_set(area, subarea, loops);
+	
+	 // Portal:
+	GameCont.killenemies = true;
+	instance_create(x, y, Portal);
+	sound_stop(sndPortalOpen);
+	
+	
+#define ManholeOpen_create(_x, _y)
+	with(instance_create(_x, _y, CustomObject)){
+		 // Visual:
+		sprite_index = spr.ManholeOpen;
+		image_speed  = 0;
+		depth        = 5;
+		
+		 // Vars:
+		mask_index = -1;
+		canportal  = false;
+		my_portal  = noone;
+		big        = false;
+		
+		return id;
+	}
+	
+#define ManholeOpen_step
+	 // Collision:
+	var	_obj = [Pickup, chestprop, ChestOpen, Corpse],
+		_dis = 4 + (min(bbox_width, bbox_height) / 2),
+		_spd = 3,
+		_oy  = -8 * big;
+		
+	y += _oy;
+	
+	if(big && !place_meeting(x, y, Portal)){
+		array_push(_obj, hitme);
+	}
+	
+	for(var i = array_length(_obj) - 1; i >= 0; i--){
+		if(instance_exists(_obj[i]) && place_meeting(x, y, _obj[i])){
+			with(instances_meeting(x, y, _obj[i])){
+				if(place_meeting(x, y, other)){
+					var _dir = point_direction(other.x, other.y, x, y);
+					
+					 // Force Off:
+					if(
+						other.big
+						&& instance_is(self, Player)
+						&& point_distance(other.x, other.y, x, y) < _dis
+					){
+						x = other.x + lengthdir_x(_dis, _dir);
+						y = other.y + lengthdir_y(_dis, _dir);
+						direction = angle_lerp(direction, _dir, 1/12);
+					}
+					
+					 // Push:
+					else if(speed < _spd){
+						if(("size" not in self || size < 4) && !instance_is(self, crystaltype)){
+							if(friction > 0 && object_index != Rad){
 								motion_add_ct(_dir, friction + 0.4);
 							}
 							else{
@@ -4603,13 +4570,57 @@ var _extraScale = argument_count > 1 ? argument[1] : 0.5;
 		}
 	}
 	
-	 // Activate:
-	else if(instance_exists(Portal)){
-		visible = true;
+	y -= _oy;
+	
+	 // Grab Portal:
+	if(canportal && instance_exists(Portal)){
+		if(my_portal == noone){
+			my_portal = instance_nearest_array(x, y, instances_matching_ge(instances_matching(instances_matching(instances_matching(Portal, "object_index", Portal), "type", 1), "endgame", 100), "image_alpha", 1));
+			with(my_portal){
+				image_alpha = 0;
+				mask_index  = ((other.mask_index < 0) ? other.sprite_index : other.mask_index);
+				
+				 // Relocating:
+				x = other.x;
+				y = other.y;
+				with(instance_nearest(xstart, ystart, PortalShock)){
+					x = other.x;
+					y = other.y;
+				}
+				repeat(5) with(instance_nearest(xstart, ystart, PortalL)){
+					x = other.x;
+					y = other.y;
+				}
+				
+				 // FX:
+				if(other.big){
+					var _l = _dis - 6;
+					for(var _d = 0; _d < 360; _d += random_range(10, 12)){
+						scrFX(x + lengthdir_x(_l, _d), y + lengthdir_y(_l, _d), [_d, (chance(1, 6) ? 4 : 2.5)], Dust);
+						if(chance(1, 12)){
+							with(instance_create(x + lengthdir_x(_l, _d), y + lengthdir_y(_l, _d), Debris)){
+								sprite_index = sprDebris102;
+								direction = _d + orandom(30);
+								speed *= random_range(0.5, 1);
+							}
+						}
+					}
+				}
+			}
+		}
 		
-		 // Notice me bro:
-		sound_play_hit_ext(sndPillarBreak, 0.7 + random(0.1), 8);
-		repeat(3) scrFX(x, y, 2, Smoke);
+		 // No Zap:
+		if(instance_exists(my_portal)){
+			with(my_portal){
+				if(place_meeting(x, y, PortalL)){
+					with(instances_meeting(x, y, PortalL)){
+						if(place_meeting(x, y, other)){
+							instance_destroy();
+						}
+					}
+				}
+			}
+		}
 	}
 	
 	
@@ -4872,14 +4883,14 @@ var _extraScale = argument_count > 1 ? argument[1] : 0.5;
 		}
 		
 		 // Generate the Realm:
-		var _lastArea = GameCont.area;
-		if(!instance_exists(Portal)){
-			var _scrSetup = null;
-			if(crown_current == "red"){
-				_scrSetup = script_ref_create_ext("crown", "red", "step");
-			}
-			area_generate(area, subarea, loops, _sx + 16, _sy - 16, true, 0, _scrSetup);
+		var	_lastArea = GameCont.area,
+			_scrSetup = null;
+			
+		if(crown_current == "red"){
+			_scrSetup = script_ref_create_ext("crown", "red", "step");
 		}
+		
+		area_generate(area, subarea, loops, _sx + 16, _sy - 16, true, 0, _scrSetup);
 		
 		 // Finish Path:
 		var _minID = GameObject.id;
@@ -5334,7 +5345,7 @@ var _extraScale = argument_count > 1 ? argument[1] : 0.5;
 					if(_num <= 1) _ox = 0;
 					for(var i = 0; i < _num; i++){
 						chest_create(
-							x + orandom(1) + lerp(-_ox, _ox, i / (_num - 1)),
+							x + orandom(1) + lerp(-_ox, _ox, i / max(1, _num - 1)),
 							y + orandom(1),
 							_obj[i % array_length(_obj)],
 							true
@@ -5376,18 +5387,24 @@ var _extraScale = argument_count > 1 ? argument[1] : 0.5;
 					
 				case "RedSpider":
 					
-					with(floors){
-						if(chance(2, 3) && !place_meeting(x, y, Wall) && !place_meeting(x, y, hitme)){
-							 // Props:
-							if(chance(1, 3)){
-								obj_create(bbox_center_x + orandom(8), bbox_center_y + orandom(8), "CrystalPropRed");
-							}
-							
-							 // Enemies:
-							else{
-								obj_create(bbox_center_x, bbox_center_y, _roomType);
+					var _num = irandom_range(2, 5);
+					with(array_shuffle(floors)){
+						if(_num > 0){
+							if(!place_meeting(x, y, Wall)){
+								_num--;
+								
+								 // Props:
+								if((_num % 2) == 1){
+									obj_create(bbox_center_x + orandom(8), bbox_center_y + orandom(8), "CrystalPropRed");
+								}
+								
+								 // Enemies:
+								else{
+									obj_create(bbox_center_x, bbox_center_y, _roomType);
+								}
 							}
 						}
+						else break;
 					}
 					
 					break;
@@ -5411,7 +5428,7 @@ var _extraScale = argument_count > 1 ? argument[1] : 0.5;
 						var _num = 2 + skill_get(mut_open_mind);
 						for(var i = 0; i < _num; i++){
 							chest_create(
-								x + orandom(1) + lerp(-_ox, _ox, i / (_num - 1)),
+								x + orandom(1) + lerp(-_ox, _ox, i / max(1, _num - 1)),
 								y + orandom(1),
 								choose(AmmoChest, WeaponChest),
 								true
@@ -5685,7 +5702,7 @@ var _extraScale = argument_count > 1 ? argument[1] : 0.5;
 				}
 				
 				 // Manhole Cover:
-				var _inst = instances_matching(instances_matching(CustomObject, "name", "PizzaManholeCover"), "visible", true);
+				var _inst = instances_matching(CustomObject, "name", "PizzaManholeCover");
 				if(array_length(_inst)){
 					 // Circle:
 					if(_gray){
@@ -5707,7 +5724,7 @@ var _extraScale = argument_count > 1 ? argument[1] : 0.5;
 				
 				 // Boss Manhole:
 				if(_gray){
-					var _inst = instances_matching(instances_matching(CustomObject, "name", "CatHoleBig"), "visible", true);
+					var _inst = instances_matching(CustomObject, "name", "CatHoleBig");
 					if(array_length(_inst)) with(_inst){
 						draw_circle(x, y, 192 + random(2), false);
 					}
@@ -5716,20 +5733,17 @@ var _extraScale = argument_count > 1 ? argument[1] : 0.5;
 			
 			 // TV:
 			if(instance_exists(TV)){
-				var _inst = instances_matching(TV, "visible", true);
-				if(array_length(_inst)){
-					 // Circle:
-					if(_gray){
-						with(_inst){
-							draw_circle(x, y, 64 + random(2), false);
-						}
+				 // Circle:
+				if(_gray){
+					with(TV){
+						draw_circle(x, y, 64 + random(2), false);
 					}
-					
-					 // TV Beam:
-					else with(_inst){
-						var _off = orandom(1);
-						draw_catlight(x + 1, y - 6, 12 + abs(_off), 48 + _off, 48, 8 + _off, 0);
-					}
+				}
+				
+				 // TV Beam:
+				else with(TV){
+					var _off = orandom(1);
+					draw_catlight(x + 1, y - 6, 12 + abs(_off), 48 + _off, 48, 8 + _off, 0);
 				}
 			}
 			

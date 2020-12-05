@@ -149,9 +149,15 @@
 	}
 	
 	 // Gone:
-	if(_wep.ammo <= 0 && _fire.wepheld && !_fire.roids){
+	if(_wep.ammo <= 0 && _fire.wepheld){
 		with(_fire.creator){
-			step(true);
+			if(!_fire.primary){
+				player_swap();
+			}
+			step(_fire.primary);
+			if(!_fire.primary){
+				player_swap();
+			}
 		}
 	}
 	
@@ -266,11 +272,13 @@
 		 // Auto Swap to Secondary:
 		if(_primary && instance_is(self, Player)){
 			player_swap();
+			swapmove  = true;
+			drawempty = 30;
 			
 			 // Prevent Shooting Until Trigger Released:
 			if(wep != wep_none && fork()){
 				while(instance_exists(self) && canfire && button_check(index, "fire")){
-					reload    = max(2, reload);
+					reload    = max(2 * reloadspeed * current_time_scale, reload);
 					can_shoot = false;
 					clicked   = false;
 					wait 0;

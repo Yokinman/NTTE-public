@@ -1,5 +1,5 @@
 #define init
-	ntte_version = 2.018;
+	ntte_version = 2.03;
 	
 	 // Debug Lag:
 	lag = false;
@@ -45,6 +45,9 @@
 				 // Eyes Maggot Shadow:
 				shd.EyesMenu = sprite(p + "shdEyesMenu", 24, 16, 18);
 				
+				 // Alt Route Area Icons:
+				RouteIcon = sprite(p + "sprRouteIcon", 2, 4, 4);
+			
 				 // Unlock Icons:
 				p = m + "unlocks/";
 				UnlockIcon = {
@@ -275,6 +278,15 @@
 			msk.AnglerHidden =[sprite(p + "mskAnglerHidden1", 1, 32, 32),
 			                   sprite(p + "mskAnglerHidden2", 1, 32, 32)];
 			
+			 // Angler (Gold):
+			p = m + "GoldAngler/";
+			AnglerGoldIdle    = sprite(p + "sprGoldAnglerIdle",    8, 32, 32);
+			AnglerGoldWalk    = sprite(p + "sprGoldAnglerWalk",    8, 32, 32);
+			AnglerGoldHurt    = sprite(p + "sprGoldAnglerHurt",    3, 32, 32);
+			AnglerGoldDead    = sprite(p + "sprGoldAnglerDead",    7, 32, 32);
+			AnglerGoldAppear  = sprite(p + "sprGoldAnglerAppear",  4, 32, 32);
+			AnglerGoldScreech = sprite(p + "sprGoldAnglerScreech", 8, 48, 48);
+			
 			 // Baby Gator:
 			p = m + "BabyGator/";
 			BabyGatorIdle = sprite(p + "sprBabyGatorIdle", 6, 12, 12);
@@ -415,6 +427,22 @@
 			CrabTankWalk = sprCrabWalk;
 			CrabTankHurt = sprCrabHurt;
 			CrabTankDead = sprCrabDead;
+			
+			 // Crystal Bat:
+			p = m + "CrystalBat/";
+			CrystalBatIdle = sprite(p + "sprCrystalBatIdle", 6, 16, 16);
+			CrystalBatHurt = sprite(p + "sprCrystalBatHurt", 3, 16, 16);
+			CrystalBatDead = sprite(p + "sprCrystalBatDead", 8, 16, 16);
+			CrystalBatTell = sprite(p + "sprCrystalBatTell", 2, 16, 16);
+			CrystalBatDash = sprite(p + "sprCrystalBatDash", 4, 16, 16);
+			
+			 // Crystal Bat (Cursed):
+			p = m + "InvCrystalBat/";
+			InvCrystalBatIdle = sprite(p + "sprInvCrystalBatIdle", 6, 16, 16);
+			InvCrystalBatHurt = sprite(p + "sprInvCrystalBatHurt", 3, 16, 16);
+			InvCrystalBatDead = sprite(p + "sprInvCrystalBatDead", 8, 16, 16);
+			InvCrystalBatTell = sprite(p + "sprInvCrystalBatTell", 2, 16, 16);
+			InvCrystalBatDash = sprite(p + "sprInvCrystalBatDash", 4, 16, 16);
 			
 			 // Crystal Brain:
 			p = m + "CrystalBrain/";
@@ -838,6 +866,24 @@
 			WallSpiderBot       = sprite(p + "sprWallSpiderBot",       2, 0, 0);
 			WallSpiderling      = sprite(p + "sprWallSpiderling",      4, 8, 8);
 			WallSpiderlingTrans = sprite(p + "sprWallSpiderlingTrans", 4, 8, 8);
+			
+			 // Cave Hole:
+			CaveHole	   = sprite(p + "sprCaveHole",		 1, 64, 64);
+			CaveHoleCursed = sprite(p + "sprCaveHoleCursed", 1, 64, 64);
+			msk.CaveHole   = sprite(p + "mskCaveHole",		 1, 64, 64);
+			with(msk.CaveHole){
+				mask = [false, 0];
+			}
+			
+			//#region PROPS
+			p = m + "Props/";
+			
+				 // Big Crystal Prop:
+				BigCrystalPropIdle = sprite(p + "sprBigCrystalPropIdle", 1, 16, 16);
+				BigCrystalPropHurt = sprite(p + "sprBigCrystalPropHurt", 3, 16, 16);
+				BigCrystalPropDead = sprite(p + "sprBigCrystalPropDead", 4, 16, 16);
+			
+			//#endregion
 			
 		//#endregion
 		
@@ -1476,12 +1522,14 @@
 			FloorCrate   = sprite(p + "sprFloorCrate",   1, 18, 18);
 			
 			 // Bone:
-			BonePickup    = [sprite(p + "sprBonePickup0",    1, 4, 4, shn8),
-			                 sprite(p + "sprBonePickup1",    1, 4, 4, shn8),
-			                 sprite(p + "sprBonePickup2",    1, 4, 4, shn8),
-			                 sprite(p + "sprBonePickup3",    1, 4, 4, shn8)];
-			BonePickupBig = [sprite(p + "sprBoneBigPickup0", 1, 8, 8, shn16),
-			                 sprite(p + "sprBoneBigPickup1", 1, 8, 8, shn16)];
+			BonePickup    = array_create(4, -1);
+			BonePickupBig = array_create(2, -1);
+			for(var i = 0; i < array_length(BonePickup); i++){
+				BonePickup[i] = sprite(p + `sprBonePickup${i}`, 1, 4, 4, shn8);
+			}
+			for(var i = 0; i < array_length(BonePickupBig); i++){
+				BonePickupBig[i] = sprite(p + `sprBoneBigPickup${i}`, 1, 8, 8, shn16);
+			}
 			
 			 // Bonus Pickups:
 			BonusFX                    = sprite(p + "sprBonusFX",                    13,  4, 12);
@@ -1493,6 +1541,12 @@
 			BonusShell                 = sprite(p + "sprBonusShell",                  1,  1,  2);
 			BonusShellHeavy            = sprite(p + "sprBonusShellHeavy",             1,  2,  3);
 			BonusText                  = sprite(p + "sprBonusText",                  12,  0,  0);
+			BonusHUDText               = sprite(p + "sprBonusHUDText",                1,  6,  3);
+			BonusAmmoHUD               = sprite(p + "sprBonusAmmoHUD",                1,  2,  3);
+			BonusAmmoHUDFill           = sprite(p + "sprBonusAmmoHUDFill",            7,  0,  0);
+			BonusAmmoHUDFillDrain      = sprite(p + "sprBonusAmmoHUDFillDrain",       7,  0,  0);
+			BonusHealthHUDFill         = sprite(p + "sprBonusHealthHUDFill",          7,  0,  0);
+			BonusHealthHUDFillDrain    = sprite(p + "sprBonusHealthHUDFillDrain",     7,  0,  0);
 			BonusAmmoPickup            = sprite(p + "sprBonusAmmoPickup",             1,  5,  5, shn10);
 			BonusHealthPickup          = sprite(p + "sprBonusHealthPickup",           1,  5,  5, shn10);
 			BonusAmmoChest             = sprite(p + "sprBonusAmmoChest",             15,  8,  8);
@@ -1555,6 +1609,10 @@
 			SunkenChestOpen = sprite(p + "sprSunkenChestOpen", 1, 12, 12);
 			SunkenCoin      = sprite(p + "sprCoin",            1,  3,  3, shn8);
 			SunkenCoinBig   = sprite(p + "sprCoinBig",         1,  3,  3, shn8);
+			
+			 // Lead Ribs Upgraded Rads:
+			RadUpg    = sprite(p + "sprRadUpg",    1, 5, 5, shn10);
+			BigRadUpg = sprite(p + "sprBigRadUpg", 1, 8, 8, shn16);
 			
 		//#endregion
 		
@@ -1644,24 +1702,75 @@
 		//#region SKINS
 		m = "skins/";
 			
-			 // Red Crystal:
+			//#region ANGLER FISH
+			var p = m + "FishAngler/";
+				
+				 // Player:
+				FishAnglerIdle  = sprite(p + "sprFishAnglerIdle",  4, 12, 12);
+				FishAnglerWalk  = sprite(p + "sprFishAnglerWalk",  6, 12, 12);
+				FishAnglerHurt  = sprite(p + "sprFishAnglerHurt",  3, 12, 12);
+				FishAnglerDead  = sprite(p + "sprFishAnglerDead",  6, 12, 12);
+				FishAnglerGoSit = sprite(p + "sprFishAnglerGoSit", 3, 12, 12);
+				FishAnglerSit   = sprite(p + "sprFishAnglerSit",   1, 12, 12);
+				
+				 // Menu:
+				FishAnglerPortrait = sprite(p + "sprFishAnglerPortrait", 1, 20, 229);
+				FishAnglerLoadout  = sprite(p + "sprFishAnglerLoadout",  2, 16,  16);
+				FishAnglerMapIcon  = sprite(p + "sprFishAnglerMapIcon",  1, 10,  10);
+				
+				 // Eye Trail:
+				FishAnglerTrail = sprite(p + "sprFishAnglerTrail", 4, 12, 12);
+				
+			//#endregion
+			
+			//#region ORCHID PLANT
+			var p = m + "PlantOrchid/";
+				
+				 // Player:
+				PlantOrchidIdle  = sprite(p + "sprPlantOrchidIdle",  4, 16, 16);
+				PlantOrchidWalk  = sprite(p + "sprPlantOrchidWalk",  4, 16, 16);
+				PlantOrchidHurt  = sprite(p + "sprPlantOrchidHurt",  3, 16, 16);
+				PlantOrchidDead  = sprite(p + "sprPlantOrchidDead",  9, 16, 16);
+				PlantOrchidGoSit = sprite(p + "sprPlantOrchidGoSit", 3, 16, 16);
+				PlantOrchidSit   = sprite(p + "sprPlantOrchidSit",   1, 16, 16);
+				
+				 // Menu:
+				PlantOrchidPortrait = sprite(p + "sprPlantOrchidPortrait", 1, 20, 229);
+				PlantOrchidLoadout  = sprite(p + "sprPlantOrchidLoadout",  2, 16,  16);
+				PlantOrchidMapIcon  = sprite(p + "sprPlantOrchidMapIcon",  1, 10,  10);
+				
+				 // Snare:
+				PlantOrchidTangle     = sprite(p + "sprPlantOrchidTangle",     6, 24, 24);
+				PlantOrchidTangleSeed = sprite(p + "sprPlantOrchidTangleSeed", 2,  4,  4);
+				
+			//#endregion
+			
+			//#region RED CRYSTAL
 			p = m + "CrystalRed/";
-			CrystalRedPortrait        = sprite(p + "sprCrystalRedPortrait",        1, 20, 229);
-			CrystalRedIdle            = sprite(p + "sprCrystalRedIdle",            4, 12,  12);
-			CrystalRedWalk            = sprite(p + "sprCrystalRedWalk",            6, 12,  12);
-			CrystalRedHurt            = sprite(p + "sprCrystalRedHurt",            3, 12,  12);
-			CrystalRedDead            = sprite(p + "sprCrystalRedDead",            6, 12,  12);
-			CrystalRedGoSit           = sprite(p + "sprCrystalRedGoSit",           3, 12,  12);
-			CrystalRedSit             = sprite(p + "sprCrystalRedSit",             1, 12,  12);
-			CrystalRedLoadout         = sprite(p + "sprCrystalRedLoadout",         2, 16,  16);
-			CrystalRedMapIcon         = sprite(p + "sprCrystalRedMapIcon",         1, 10,  10);
-			CrystalRedShield          = sprite(p + "sprCrystalRedShield",          4, 32,  42);
-			CrystalRedShieldDisappear = sprite(p + "sprCrystalRedShieldDisappear", 6, 32,  42);
-			CrystalRedShieldIdleFront = sprite(p + "sprCrystalRedShieldIdleFront", 1, 32,  42);
-			CrystalRedShieldWalkFront = sprite(p + "sprCrystalRedShieldWalkFront", 8, 32,  42);
-			CrystalRedShieldIdleBack  = sprite(p + "sprCrystalRedShieldIdleBack",  1, 32,  42);
-			CrystalRedShieldWalkBack  = sprite(p + "sprCrystalRedShieldWalkBack",  8, 32,  42);
-			CrystalRedTrail           = sprite(p + "sprCrystalRedTrail",           5,  8,   8);
+				
+				 // Player:
+				CrystalRedIdle  = sprite(p + "sprCrystalRedIdle",  4, 12, 12);
+				CrystalRedWalk  = sprite(p + "sprCrystalRedWalk",  6, 12, 12);
+				CrystalRedHurt  = sprite(p + "sprCrystalRedHurt",  3, 12, 12);
+				CrystalRedDead  = sprite(p + "sprCrystalRedDead",  6, 12, 12);
+				CrystalRedGoSit = sprite(p + "sprCrystalRedGoSit", 3, 12, 12);
+				CrystalRedSit   = sprite(p + "sprCrystalRedSit",   1, 12, 12);
+				
+				 // Menu:
+				CrystalRedPortrait = sprite(p + "sprCrystalRedPortrait", 1, 20, 229);
+				CrystalRedLoadout  = sprite(p + "sprCrystalRedLoadout",  2, 16,  16);
+				CrystalRedMapIcon  = sprite(p + "sprCrystalRedMapIcon",  1, 10,  10);
+				
+				 // Shield:
+				CrystalRedShield          = sprite(p + "sprCrystalRedShield",          4, 32, 42);
+				CrystalRedShieldDisappear = sprite(p + "sprCrystalRedShieldDisappear", 6, 32, 42);
+				CrystalRedShieldIdleFront = sprite(p + "sprCrystalRedShieldIdleFront", 1, 32, 42);
+				CrystalRedShieldWalkFront = sprite(p + "sprCrystalRedShieldWalkFront", 8, 32, 42);
+				CrystalRedShieldIdleBack  = sprite(p + "sprCrystalRedShieldIdleBack",  1, 32, 42);
+				CrystalRedShieldWalkBack  = sprite(p + "sprCrystalRedShieldWalkBack",  8, 32, 42);
+				CrystalRedTrail           = sprite(p + "sprCrystalRedTrail",           5,  8,  8);
+				
+			//#endregion
 			
 		//#endregion
 		
@@ -1834,11 +1943,12 @@
 			amb = {};
 			
 			 // Areas:
-			Coast  = sound_add(p + "musCoast.ogg");
-			CoastB = sound_add(p + "musCoastB.ogg");
-			Trench = sound_add(p + "musTrench.ogg");
-			Lair   = sound_add(p + "musLair.ogg");
-			Red    = sound_add(p + "musRed.ogg");
+			Coast   = sound_add(p + "musCoast.ogg");
+			CoastB  = sound_add(p + "musCoastB.ogg");
+			Trench  = sound_add(p + "musTrench.ogg");
+			TrenchB = sound_add(p + "musTrenchB.ogg");
+			Lair    = sound_add(p + "musLair.ogg");
+			Red     = sound_add(p + "musRed.ogg");
 			
 			 // Bosses:
 			SealKing      = sound_add(p + "musSealKing.ogg");

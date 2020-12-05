@@ -1419,7 +1419,7 @@
 	
 	 // Baseball:
 	if(place_meeting(x, y, projectile)){
-		var _inst = instances_meeting(x, y, [Slash, GuitarSlash, BloodSlash, EnergySlash, EnergyHammerSlash, CustomSlash]);
+		var _inst = instances_meeting(x, y, [Slash, GuitarSlash, BloodSlash, EnergySlash, EnergyHammerSlash, LightningSlash, CustomSlash]);
 		if(array_length(_inst)) with(_inst){
 			if(place_meeting(x, y, other)){
 				event_perform(ev_collision, Grenade);
@@ -1589,6 +1589,7 @@
 		zfriction    = 1;
 		zgoal        = 0;
 		corpse       = false;
+		team         = 0;
 		
 		 // Alarms:
 		alarm0 = -1;
@@ -1780,13 +1781,6 @@
 		 // Hold Off Seals:
 		with(Seal){
 			attack_delay = 15 + random(30);
-		}
-		
-		 // Enable/Disable Players:
-		var _active = (intro_pan <= 0);
-		with(Player){
-			canfire = _active;
-			canspec = _active;
 		}
 	}
 	else{
@@ -2079,7 +2073,8 @@
 				
 				if(!active){
 					active = true;
-					zgoal = 12;
+					team   = 1;
+					zgoal  = 12;
 					alarm0 = 30;
 				}
 				else{
@@ -2164,12 +2159,6 @@
 			image_index = 0;
 			sprite_index = spr_call;
 			sound_play(snd.PalankingCall);
-		}
-		
-		 // Music:
-		with(MusCont){
-			alarm_set(2, 1);
-			alarm_set(3, -1);
 		}
 	}
 	
@@ -4306,8 +4295,8 @@
 	
 #define SealHeavy_death
 	pickup_drop(50, 0);
-
-
+	
+	
 #define SealMine_create(_x, _y)
 	with(instance_create(_x, _y, CustomHitme)){
 		 // Visual:
@@ -5121,7 +5110,7 @@
 			
 			 // Divers:
 			if(instance_exists(CustomEnemy)){
-				var _inst = instances_matching(instances_matching(CustomEnemy, "name", "Diver"), "visible", true);
+				var _inst = instances_matching(CustomEnemy, "name", "Diver");
 				if(array_length(_inst)){
 					var _r = 16 + (24 * _gray);
 					with(_inst){

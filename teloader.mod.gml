@@ -47,11 +47,17 @@
 			"areas/lair.area.gml",
 			"areas/red.area.gml",
 			"races/parrot.race.gml",
+			"skins/angler fish.skin.gml",
 			"skins/red crystal.skin.gml",
+			"skins/orchid plant.skin.gml",
 			"skills/compassion.skill.gml",
 			"skills/silver tongue.skill.gml",
 			"skills/reroll.skill.gml",
 			"skills/annihilation.skill.gml",
+			"skills/lead ribs.skill.gml",
+			"skills/toad breath.skill.gml",
+			"skills/bat ears.skill.gml",
+			"skills/magnetic pulse.skill.gml",
 			"crowns/bonus.crown.gml",
 			"crowns/crime.crown.gml",
 			"crowns/red.crown.gml",
@@ -66,6 +72,7 @@
 			"weps/tunneller.wep.gml",
 			"weps/bat disc launcher.wep.gml",
 			"weps/bat disc cannon.wep.gml",
+			"weps/pizza cutter.wep.gml",
 			"weps/harpoon launcher.wep.gml",
 			"weps/net launcher.wep.gml",
 			"weps/clam shield.wep.gml",
@@ -1910,7 +1917,7 @@
 														_key  = _path + ":" + string(_num);
 														
 													if(!ds_map_exists(_sprList, _key)){
-														_sprList[? _path] = -1;
+														_sprList[? _key] = -1;
 														
 														 // Load File Manually & Make Sure it Exists:
 														if(file_loaded(_path)){
@@ -1936,8 +1943,6 @@
 														if(file_exists(_path)){
 															_sprList[? _key] = sprite_add(_path, _num, 0, 0);
 														}
-														
-														file_unload(_path);
 													}
 													if(ds_map_exists(_sprList, _key)){
 														_spr = _sprList[? _key];
@@ -2067,8 +2072,9 @@
 	if(changelog_exists(_index)){
 		 // Unload Sprites:
 		with(changelog_get(_index)){
-			with(ds_map_values(sprites)){
-				sprite_delete(self);
+			with(ds_map_keys(sprites)){
+				file_unload(string_split(self, ":")[0]);
+				sprite_delete(other.sprites[? self]);
 			}
 			ds_map_destroy(sprites);
 		}

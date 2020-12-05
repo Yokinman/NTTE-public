@@ -27,7 +27,7 @@
 	_wep = _fire.wep;
 	
 	 // New Beam:
-	if(!instance_exists(_wep.beam) || (_fire.spec && !_fire.roids)){
+	if(!instance_exists(_wep.beam) || (_fire.spec && _fire.primary)){
 		 // Quasar Beam:
 		with(projectile_create(x, y, "QuasarBeam", gunangle + orandom(6 * accuracy), 0)){
 			image_yscale = 0.6;
@@ -70,7 +70,7 @@
 	 // Keep Setting:
 	with(_wep.beam){
 		shrink_delay = weapon_get_load(_wep) + 1;
-		roids = _fire.roids;
+		primary      = _fire.primary;
 	}
 	
 	

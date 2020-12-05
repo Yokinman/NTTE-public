@@ -364,7 +364,7 @@
 		var _meeting = instances_meeting(x, y - z, [enemy, projectile]);
 		
 		 // Baseball:
-		var _inst = instances_matching(_meeting, "object_index", Slash, GuitarSlash, BloodSlash, EnergySlash, EnergyHammerSlash, CustomSlash);
+		var _inst = instances_matching(_meeting, "object_index", Slash, GuitarSlash, BloodSlash, EnergySlash, EnergyHammerSlash, LightningSlash, CustomSlash);
 		if(array_length(_inst)) with(_inst){
 			if(place_meeting(x, y + other.z, other)){
 				with(other){
@@ -599,7 +599,7 @@
 		
 		 // Vars:
 		mask_index = mskSlash;
-		damage     = 8;
+		damage     = 16;
 		force      = 12;
 		walled     = false;
 		

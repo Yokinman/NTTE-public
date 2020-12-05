@@ -33,17 +33,17 @@
 		yprevious = y;
 		
 		 // Visual:
-		spr_idle      = spr.AnglerIdle;
-		spr_walk      = spr.AnglerWalk;
-		spr_hurt      = spr.AnglerHurt;
-		spr_dead      = spr.AnglerDead;
-		spr_appear    = spr.AnglerAppear;
-		//spr_shadow    = shd64;
-		//spr_shadow_y  = 6;
-		hitid         = [spr_idle, "ANGLER"];
-		sprite_index  = spr_appear;
-		image_speed   = 0.4;
-		depth         = -2;
+		spr_idle     = spr.AnglerIdle;
+		spr_walk     = spr.AnglerWalk;
+		spr_hurt     = spr.AnglerHurt;
+		spr_dead     = spr.AnglerDead;
+		spr_appear   = spr.AnglerAppear;
+	//	spr_shadow   = shd64;
+	//	spr_shadow_y = 6;
+		hitid        = [spr_idle, "ANGLER"];
+		sprite_index = spr_appear;
+		image_speed  = 0.4;
+		depth        = -2;
 		
 		 // Sound:
 		var _water = area_get_underwater(GameCont.area);
@@ -52,8 +52,9 @@
 		
 		 // Vars:
 		mask_index  = -1;
-		maxhealth   = 50;
+		maxhealth   = 45;
 		raddrop     = 25;
+	//	rad_max     = raddrop;
 		meleedamage = 4;
 		size        = 3;
 		walk        = 0;
@@ -61,9 +62,11 @@
 		maxspeed    = 3;
 		hiding      = true;
 		ammo        = 0;
+		gold        = false;
 		
 		 // Alarms:
 		alarm1 = 30 + irandom(30);
+	//	alarm2 = -1;
 		
 		 // Hide:
 		scrAnglerHide();
@@ -74,6 +77,7 @@
 #define Angler_step
 	 // Alarms:
 	if(alarm1_run) exit;
+	//if(alarm2_run) exit;
 	
 	 // Movement:
 	enemy_walk(walkspeed, maxspeed + (8 * (ammo >= 0 && walk > 0)));
@@ -94,6 +98,7 @@
 		 // Charging Up:
 		if(ammo >= 0){
 			speed *= power(0.85, current_time_scale);
+			//wall_clear(x + hspeed, y + vspeed);
 		}
 	}
 	
@@ -105,11 +110,12 @@
 	
 #define Angler_alrm1
 	alarm1 = 6 + irandom(6);
+	
 	enemy_target(x, y);
 	
 	 // Hiding:
 	if(hiding){
-		if(instance_seen(x, y, target) && instance_near(x, y, target, 48)){
+		if(instance_seen(x, y, target) && instance_near(x, y, target, ((gold && my_health < maxhealth) ? 96 : 48))){
 			scrAnglerAppear(); // Unhide
 		}
 	}
@@ -118,7 +124,7 @@
 		 // Charging:
 		if(ammo > 0){
 			ammo--;
-			alarm1 = 8;
+			alarm1 = (gold ? 6 : 8);
 			
 			 // Charge:
 			scrWalk((instance_seen(x, y, target) ? point_direction(x, y, target.x, target.y) : direction) + orandom(40), 5);
@@ -127,14 +133,25 @@
 			 // Effects:
 			sound_play_pitchvol(sndRoll, 1.4 + random(0.4), 1.2);
 			sound_play_pitchvol(sndBigBanditMeleeStart, 1.2 + random(0.2), 0.5);
-			repeat(4) with(instance_create(x + orandom(16), y + orandom(16), Dust)){
-				motion_add(other.direction + 180, random(4));
+			repeat(4){
+				scrFX([x, 16], [y, 16], [direction + 180, random(4)], Dust);
 			}
 			sprite_index = spr_hurt; // Temporary?
-			image_index = 1;
+			image_index  = 1;
+			
+			 // Gold:
+			if(gold){
+				wall_clear(x + hspeed, y + vspeed);
+				/*with(projectile_create(x, y, "BatScreech", 0, 0)){
+					sprite_index = spr.AnglerGoldScreech;
+					image_xscale = 0.5;
+					image_yscale = 0.5;
+					image_index  = 1;
+				}*/
+			}
 		}
 		else if(ammo == 0){
-			ammo = -1;
+			ammo   = -1;
 			alarm1 = 15;
 			
 			 // Back up:
@@ -146,10 +163,30 @@
 			alarm1 = 20 + irandom(20);
 			
 			 // Move Toward Player:
-			if(instance_seen(x, y, target) && instance_near(x, y, target, 96)){
+			if((gold || instance_seen(x, y, target)) && instance_near(x, y, target, 96 * (1 + gold))){
 				scrWalk(point_direction(x, y, target.x, target.y) + orandom(20), [25, 50]);
 				if(chance(1, 2)){
-					ammo = irandom_range(1, 3);
+					ammo = irandom_range(1, 3) + (2 * gold);
+					if(gold){
+						alarm1 = ceil(alarm1 * 0.4);
+						direction += 180;
+						
+						 // Screech:
+						with(projectile_create(x, y, "BatScreech", 0, 0)){
+							sprite_index = spr.AnglerGoldScreech;
+						}
+						
+						 // Sounds:
+						audio_sound_gain(sound_play_hit_ext(sndLilHunterLaunch, 0.5 + orandom(0.1), 1.6), 0, 750);
+						audio_sound_set_track_position(sound_play_hit_ext(sndNothing2DeadStart, 1, 1.3), 1);
+						
+						 // Call the bros:
+						with(instances_matching_lt(instances_matching(object_index, "name", "Angler", "AnglerGold"), "gold", gold)){
+							if(hiding && instance_near(x, y, other, 128)){
+								scrAnglerAppear();
+							}
+						}
+					}
 				}
 			}
 			
@@ -170,11 +207,44 @@
 		}
 	}
 	
-#define Angler_hurt(_hitdmg, _hitvel, _hitdir)
-	my_health -= _hitdmg;          // Damage
-	nexthurt = current_frame + 6;  // I-Frames
-	motion_add(_hitdir, _hitvel);  // Knockback
-	sound_play_hit(snd_hurt, 0.3); // Sound
+//#define Angler_alrm2
+//	alarm2 = 2 + random(4);
+//	
+//	 // Call Rads to Heal:
+//	if(!hiding && my_health <= maxhealth){
+//		if(instance_exists(Rad) || instance_exists(BigRad)){
+//			var _inst = instances_matching([Rad, BigRad], "goldanglerradattract_check", null);
+//			
+//			if(array_length(_inst)){
+//				with(instance_nearest_array(x, y, _inst)){
+//					goldanglerradattract_check = true;
+//					rad_path(id, other);
+//				}
+//			}
+//		}
+//	}
+//	
+//	 // Heal Up:
+//	if(raddrop > rad_max){
+//		repeat(min(irandom_range(1, 3), (raddrop - rad_max))){
+//			raddrop--;
+//			my_health++;
+//			instance_create(x + orandom(16), y + orandom(12), HorrorTB);
+//		}
+//	}
+	
+#define Angler_hurt(_damage, _force, _direction)
+	my_health -= _damage;           // Damage
+	nexthurt = current_frame + 6;   // I-Frames
+	motion_add(_direction, _force); // Knockback
+	
+	 // Sounds:
+	if(gold && snd_hurt == sndFreakPopoHurt){
+		sound_play_hit_ext(sndEnergyHammerUpg, 0.8 + random(0.2), 0.7);
+		sound_play_hit_ext(sndSwapGold,        0.9 + random(0.2), 0.4);
+		sound_play_hit_ext(snd_hurt,           0.7 + random(0.2), 1);
+	}
+	else sound_play_hit(snd_hurt, 0.3);
 	
 	 // Appear:
 	if(my_health > 0 && hiding){
@@ -188,10 +258,21 @@
 	}
 	
 	 // Emergency:
-	if(my_health < 30 && chance(2, 3) && ammo < 0){
+	if(my_health < maxhealth * 2/3 && chance(2, 3) && ammo < 0){
 		walk   = 0;
-		ammo   = 1;
+		ammo   = 1 + gold;
 		alarm1 = 4;
+		
+		if(gold){
+			 // Screech:
+			with(projectile_create(x, y, "BatScreech", 0, 0)){
+				sprite_index = spr.AnglerGoldScreech;
+			}
+			
+			 // Sounds:
+			audio_sound_gain(sound_play_hit_ext(sndLilHunterLaunch, 0.5 + orandom(0.1), 1.6), 0, 750);
+			audio_sound_set_track_position(sound_play_hit_ext(sndNothing2DeadStart, 1, 1.3), 1);
+		}
 	}
 	
 #define Angler_death
@@ -211,7 +292,7 @@
 		with(corpse_drop(direction + orandom(10), speed + random(2))){
 			x = _x;
 			y = _y;
-			sprite_index = sprRadChestCorpse;
+			sprite_index = (other.gold ? sprRadChestBigDead : sprRadChestCorpse);
 			mask_index = -1;
 			size = 2;
 		}
@@ -224,32 +305,57 @@
 		
 		 // most important part
 		if(raddrop > 0){
-			repeat(raddrop) with(instance_create(_x, _y, Rad)){
-				motion_add(random(360), random(5));
-				motion_add(other.direction, min(other.speed / 3, 3));
+			while(raddrop > 25){
+				raddrop -= 10;
+				with(instance_create(_x, _y, BigRad)){
+					motion_add(random(360), random(4));
+					motion_add(other.direction, min(other.speed / 3, 3));
+				}
+			}
+			repeat(raddrop){
+				with(instance_create(_x, _y, Rad)){
+					motion_add(random(360), random(5));
+					motion_add(other.direction, min(other.speed / 3, 3));
+				}
 			}
 			raddrop = 0;
 		}
 		
 		 // Effects:
 		sound_play(sndEXPChest);
+		repeat(4){
+			scrFX(_x, _y, random(3), Smoke);
+		}
 		with(instance_create(_x, _y, ExploderExplo)){
 			motion_add(other.direction, 1);
 		}
 		
+	 // Gold:
+	if(gold){
+		 // Sounds:
+		sound_play_hit_ext(sndEnergyHammerUpg, 0.9, 0.9);
+		audio_sound_gain(sound_play_hit_ext(sndLilHunterDeath, 0.5, 1.1), 0, 2500);
+		audio_sound_set_track_position(sound_play_hit_ext(sndNothing2DeadStart, 1, 0.5), 1);
+		
+		 // Angler Fish Skin Unlock:
+		if(player_count_race(char_fish) > 0 && !unlock_get("skin:angler fish")){
+			unlock_set("skin:angler fish", true);
+		}
+	}
+	
 #define scrAnglerAppear()
 	hiding = false;
 	
 	 // Anglers rise up
-	mask_index = mskFrogQueen;
-	spr_shadow = shd64B;
-	spr_shadow_y = 3;
+	mask_index   = mskFrogQueen;
+	spr_shadow   = shd64B;
 	spr_shadow_x = 0;
-	instance_create(x, y, PortalClear);
+	spr_shadow_y = 3;
+	wall_clear(x, y);
 	
 	 // Time 2 Charge
 	alarm1 = 15 + orandom(2);
-	ammo = 3;
+	ammo   = 3 + (2 * gold);
 	
 	 // Effects:
 	sound_play_pitch(sndBigBanditMeleeStart, 0.8 + random(0.2));
@@ -261,10 +367,26 @@
 	}
 	
 	 // Call the bros:
-	with(instances_matching(object_index, "name", name)){
-		if(hiding && chance(1, 2) && instance_near(x, y, other, 64)){
+	with(instances_matching_lt(instances_matching(object_index, "name", "Angler", "AnglerGold"), "gold", gold)){
+		if(
+			hiding
+			&& chance(1 + other.gold, 2)
+			&& instance_near(x, y, other, 64 * (1 + other.gold))
+		){
 			scrAnglerAppear();
 		}
+	}
+	
+	 // Screech:
+	if(gold){
+		with(projectile_create(x, y, "BatScreech", 0, 0)){
+			sprite_index = spr.AnglerGoldScreech;
+		}
+		
+		 // Sounds:	
+		sound_play_hit_ext(sndEnergyHammerUpg, 0.9, 0.9);
+		audio_sound_gain(sound_play_hit_ext(sndLilHunterLaunch, 0.5, 1.1), 0, 750);
+		audio_sound_set_track_position(sound_play_hit_ext(sndNothing2DeadStart, 1, 0.75), 1);
 	}
 	
 #define scrAnglerHide()
@@ -275,8 +397,8 @@
 	image_index  = image_number - 1 + image_speed;
 	mask_index   = msk.AnglerHidden[right < 0];
 	spr_shadow   = shd24;
-	spr_shadow_y = 9;
 	spr_shadow_x = 6 * right;
+	spr_shadow_y = 9;
 	walk         = 0;
 	
 	 // Effects:
@@ -287,6 +409,33 @@
 			waterbubble = true;
 			motion_add(random(360), 2)
 		}
+	}
+	
+	
+#define AnglerGold_create(_x, _y)
+	with(obj_create(_x, _y, "Angler")){
+		 // Visual:
+		spr_idle     = spr.AnglerGoldIdle;
+		spr_walk     = spr.AnglerGoldWalk;
+		spr_hurt     = spr.AnglerGoldHurt;
+		spr_dead     = spr.AnglerGoldDead;
+		spr_appear   = spr.AnglerGoldAppear;
+		sprite_index = spr_appear;
+		hitid        = [spr_idle, "GOLDEN ANGLER"];
+		
+		// Sounds:
+		snd_hurt = sndFreakPopoHurt;
+		
+		 // Vars:
+		maxhealth   = round(maxhealth * 1.6);
+		my_health   = round(my_health * 1.6);
+		maxspeed    = 5;
+	//	meleedamage = 6;
+		raddrop     = 45;
+	//	rad_max     = raddrop;
+		gold        = true;
+		
+		return id;
 	}
 	
 	
@@ -322,22 +471,19 @@
 		snd_mele = (_water ? sndOasisMelee : sndMaggotBite);
 		
 		 // Vars:
-		mask_index    = mskRat;
-		maxhealth     = 12;
-		raddrop       = 2;
-		meleedamage   = 2;
-		size          = 1;
-		walk          = 0;
-		walkspeed     = 1.2;
-		maxspeed      = 3.4;
-		pitDepth      = 0;
-		direction     = random(360);
-		arc_inst      = noone;
-		arcing        = 0;
-		wave          = random(100);
-		elite         = 0;
-		ammo          = 0;
-		canmelee_last = canmelee;
+		mask_index  = mskRat;
+		maxhealth   = 10;
+		raddrop     = 2;
+		meleedamage = 2;
+		size        = 1;
+		walk        = 0;
+		walkspeed   = 1.2;
+		maxspeed    = 3.4;
+		direction   = random(360);
+		arc_inst    = noone;
+		arcing      = 0;
+		elite       = 0;
+		wave        = random(100);
 		
 		 // Alarms:
 		alarm1 = 15 + random(45);
@@ -427,23 +573,29 @@
 	}
 	else arcing = 0;
 
-	 // Elite:
+	 // Eelite:
 	if(elite > 0){
 		elite -= current_time_scale;
 		
 		 // Zappin ?
-		if(canmelee_last && !canmelee){
+		if(
+			alarm11 > 0
+			&& ((alarm11 + 1) % 15) < 1
+			&& current_frame_active
+		){
 			var _dir = random(360);
 			if(instance_exists(Player)){
-				var n = instance_nearest(x, y, Player);
-				_dir = point_direction(x, y, n.x, n.y);
+				with(instance_nearest(x, y, Player)){
+					_dir = point_direction(other.x, other.y, x, y) + orandom(40);
+				}
 			}
 			with(projectile_create(x, y, EnemyLightning, _dir, 0)){
-				ammo = 6 + random(2);
+				ammo = 2 + random(2);
 				with(self){
 					event_perform(ev_alarm, 0);
 				}
 			}
+			walk = 0;
 		}
 		
 		 // Effects:
@@ -456,7 +608,6 @@
 			image_index  = 0;
 		}
 	}
-	canmelee_last = canmelee;
 	
 	 // Movement:
 	enemy_walk(walkspeed, maxspeed);
@@ -1061,15 +1212,23 @@
 		if(chance(1, 3) && instance_near(x, y, target, [32, 256])){
 			alarm1 += 30;
 			
-			 // Shoot lightning disc:
-			if(type > 2){
-				for(var a = _targetDir; a < _targetDir + 360; a += (360 / 3)){
-					with(projectile_create(x, y, "LightningDiscEnemy", a, 8)){
-						shrink /= 2; // Last twice as long
-					}
+			 // Shoot Lightning Disc:
+			var _inst = [];
+			if(type <= 2){
+				array_push(_inst, projectile_create(x, y, "LightningDisc", _targetDir, 8));
+			}
+			else for(var _dir = _targetDir; _dir < _targetDir + 360; _dir += (360 / 3)){
+				with(projectile_create(x, y, "LightningDisc", _dir, 8)){
+					shrink /= 2; // Last twice as long
+					array_push(_inst, id);
 				}
 			}
-			else projectile_create(x, y, "LightningDiscEnemy", _targetDir, 8);
+			with(_inst){
+				is_enemy    = true;
+				maxspeed   *= 4/5;
+				radius     *= 4/3;
+				charge_spd *= 0.7;
+			}
 			
 			 // Effects:
 			sound_play_hit(sndLightningHit, 0.25);
@@ -1127,11 +1286,11 @@
 	
 	with(instance_create(_x, _y, CustomProp)){
 		 // Visual:
-		spr_idle = spr.KelpIdle;
-		spr_hurt = spr.KelpHurt;
-		spr_dead = spr.KelpDead;
+		spr_idle    = spr.KelpIdle;
+		spr_hurt    = spr.KelpHurt;
+		spr_dead    = spr.KelpDead;
 		image_speed = random_range(0.2, 0.3);
-		depth = -2;
+		depth       = -2;
 		
 		 // Sounds:
 		snd_hurt = sndOasisHurt;
@@ -1139,7 +1298,7 @@
 		
 		 // Vars:
 		maxhealth = 2;
-		size = 1;
+		size      = 1;
 		
 		return id;
 	}
@@ -1162,34 +1321,34 @@
 			stretch        - The width of the ring (How fat the ring looks)
 			super          - Describes the minimum size of the ring before splitting into more rings, -1 == no splitting
 			creator_follow - True/false, should follow its creator while charging up
-			roids          - Shot by steroids' secondary weapon
+			primary        - Shot by a player's primary weapon (true) or secondary weapon (false)
 	*/
 	
 	with(instance_create(_x, _y, CustomProjectile)){
 		 // Visual:
 		sprite_index = sprLightning;
-		image_speed = 0.4;
-		depth = -3;
+		image_speed  = 0.4;
+		depth        = -3;
 		
 		 // Vars:
-		mask_index = mskWepPickup;
-		rotspeed = random_range(10, 20) * choose(-1, 1);
-		rotation = 0;
-		radius = 12;
-		charge = 1;
-		charge_spd = 2;
-		ammo = 10;
-		typ = 0;
-		shrink = 1/160;
-		maxspeed = 2.5;
-		is_enemy = false;
-		image_xscale = 0;
-		image_yscale = 0;
-		stretch = 1;
-		super = -1;
+		mask_index     = mskWepPickup;
+		image_xscale   = 0;
+		image_yscale   = 0;
+		rotspeed       = random_range(10, 20) * choose(-1, 1);
+		rotation       = 0;
+		radius         = 12;
+		charge         = 1;
+		charge_spd     = 2;
+		ammo           = 10;
+		typ            = 0;
+		shrink         = 1/160;
+		maxspeed       = 2.5;
+		stretch        = 1;
+		super          = -1;
+		is_enemy       = false;
 		creator_follow = true;
-		roids = false;
-		setup = true;
+		primary        = true;
+		setup          = true;
 		
 		return id;
 	}
@@ -1197,11 +1356,18 @@
 #define LightningDisc_setup
 	setup = false;
 	
+	 // Enemy:
+	if(is_enemy){
+		if(sprite_index == sprLightning){
+			sprite_index = sprEnemyLightning;
+		}
+	}
+	
 	 // Laser Brain:
-	if(!is_enemy){
+	else{
 		var _skill = skill_get(mut_laser_brain);
-		charge *= power(1.2, _skill);
-		stretch *= power(1.2, _skill);
+		charge      *= power(1.2,  _skill);
+		stretch     *= power(1.2,  _skill);
 		image_speed *= power(0.75, _skill);
 	}
 
@@ -1225,7 +1391,7 @@
 		if(creator_follow){
 			if(instance_exists(creator)){
 				x = creator.x;
-				y = creator.y - (4 * roids);
+				y = creator.y + (primary ? 0 : -4);
 				
 				if("gunangle" in creator){
 					direction = creator.gunangle;
@@ -1249,7 +1415,7 @@
 				}
 				
 				 // Chargin'
-				var _kick = (roids ? "bwkick" : "wkick");
+				var _kick = (primary ? "" : "b") + "wkick";
 				if(_kick in creator){
 					variable_instance_set(creator, _kick, 5 * (image_xscale / charge));
 				}
@@ -1281,8 +1447,10 @@
 			
 			 // Creator Stuff:
 			with(creator){
-				var	_kick = (other.roids ? "bwkick" : "wkick");
-				if(_kick in self) variable_instance_set(id, _kick, -4);
+				var	_kick = (other.primary ? "" : "b") + "wkick";
+				if(_kick in self){
+					variable_instance_set(id, _kick, -4);
+				}
 				
 				 // Player Papa:
 				if(instance_is(self, Player)){
@@ -1490,25 +1658,6 @@
 			_ang = point_direction(_x1, _y1, _x2, _y2);
 			
 		draw_sprite_ext(_spr, _img, _x1, _y1, _xsc, _ysc, _ang, _blend, _alpha);
-	}
-
-
-#define LightningDiscEnemy_create(_x, _y)
-	/*
-		Basic enemy lightning ring
-	*/
-	
-	with(obj_create(_x, _y, "LightningDisc")){
-		 // Visual:
-		sprite_index = sprEnemyLightning;
-		
-		 // Vars:
-		is_enemy = true;
-		maxspeed = 2;
-		radius = 16;
-		charge_spd = 1.4;
-		
-		return id;
 	}
 	
 	
@@ -1772,9 +1921,7 @@
 					 // Boss Intro:
 					if(!intro){
 						intro = true;
-						with(boss_intro("PitSquid")){
-							delay += 2;
-						}
+						boss_intro("PitSquid");
 						sound_play(sndBigDogIntro);
 						sound_play_pitchvol(sndNothing2Taunt, 0.7, 0.8);
 						view_shake_at(xpos, ypos, 30);
@@ -2254,17 +2401,17 @@
 		}
 	}
 
-#define PitSquid_hurt(_hitdmg, _hitvel, _hitdir)
+#define PitSquid_hurt(_damage, _force, _direction)
 	x = xpos;
 	y = ypos;
 	
-	my_health -= _hitdmg;
+	my_health -= _damage;
 	nexthurt = current_frame + 6;
 	sound_play_hit_ext(snd_hurt, 1.4 + orandom(0.4), 3);
 	
 	 // Half HP:
-	var h = (maxhealth / 2);
-	if(in_range(my_health, h - _hitdmg + 1, h)){
+	var _h = (maxhealth / 2);
+	if(in_range(my_health, _h - _damage + 1, _h)){
 		if(snd_lowh == sndNothing2HalfHP){
 			sound_play_pitch(snd_lowh, 0.6);
 		}
@@ -2646,13 +2793,13 @@
 	draw_self_enemy();
 	if(_hurt) draw_set_fog(false, 0, 0, 0);
 	
-#define PitSquidArm_hurt(_hitdmg, _hitvel, _hitdir)
+#define PitSquidArm_hurt(_damage, _force, _direction)
 	var _armHealth = my_health;
-	my_health -= _hitdmg;
+	my_health -= _damage;
 	
 	 // Hurt Papa Squid:
 	with(other) with(other.creator){
-		PitSquid_hurt(min(_hitdmg, max(0, _armHealth)), _hitvel, _hitdir);
+		PitSquid_hurt(min(_damage, max(0, _armHealth)), _force, _direction);
 	}
 	with(instances_matching(instances_matching(object_index, "name", name), "creator", creator)){
 		nexthurt = current_frame + 6;
@@ -2662,7 +2809,7 @@
 	sound_play_hit(snd_hurt, 0.3);
 	
 	 // Visual:
-	scrRight(_hitdir + 180);
+	scrRight(_direction + 180);
 	if(sprite_index != spr_appear && sprite_index != spr_disappear){
 		sprite_index = spr_hurt;
 		image_index  = 0;
@@ -2931,7 +3078,7 @@
 			spr_strt       - The start of the laser sprite
 			spr_stop       - The end of the laser sprite
 			loop_snd       - The index of the beam's looping sound, used to stop the sound when destroyed
-			roids          - Created by steroids' secondary weapon, true/false
+			primary        - Shot by a player's primary weapon (true) or secondary weapon (false)
 			hit_time       - Custom frame count for custom invincibility frames system
 			hit_list       - ds_map of hit enemies and what 'hit_time' they were hit at
 			blast_hit      - Initial hit, true/false, does more damage and effects
@@ -2973,7 +3120,7 @@
 		image_xscale   = 1;
 		image_yscale   = image_xscale;
 		creator        = noone;
-		roids          = false;
+		primary        = true;
 		damage         = 12;
 		force          = 4;
 		typ            = 0;
@@ -3078,27 +3225,25 @@
 			 // Visually Force Player's Gunangle:
 			if(instance_is(self, Player)) with(other){
 				var _ang = angle_difference(image_angle, other.gunangle);
-				if(array_length(instances_matching(instances_matching(instances_matching(CustomEndStep, "name", "QuasarBeam_wepangle"), "creator", creator), "roids", roids)) <= 0){
+				if(array_length(instances_matching(instances_matching(instances_matching(CustomEndStep, "name", "QuasarBeam_wepangle"), "creator", creator), "primary", primary)) <= 0){
 					with(script_bind_end_step(QuasarBeam_wepangle, 0)){
 						name    = script[2];
 						creator = other.creator;
-						roids   = other.roids;
+						primary = other.primary;
 						angle   = 0;
 					}
 				}
-				with(instances_matching(instances_matching(instances_matching(CustomEndStep, "name", "QuasarBeam_wepangle"), "creator", creator), "roids", roids)){
+				with(instances_matching(instances_matching(instances_matching(CustomEndStep, "name", "QuasarBeam_wepangle"), "creator", creator), "primary", primary)){
 					angle = _ang;
 				}
 			}
 			
 			 // Kickback:
 			if(other.shrink_delay > 0){
-				var k = (8 * (1 + (max(other.image_xscale - 1, 0)))) / max(1, abs(_ang / 30));
-				if(other.roids){
-					if("bwkick" in self) bwkick = max(bwkick, k);
-				}
-				else{
-					if("wkick" in self) wkick = max(wkick, k);
+				var _kick = (other.primary ? "" : "b") + "wkick";
+				if(_kick in self){
+					var _num = (8 * (1 + (max(other.image_xscale - 1, 0)))) / max(1, abs(_ang / 30))
+					variable_instance_set(self, _kick, max(_num, variable_instance_get(self, _kick)));
 				}
 			}
 			
@@ -3109,7 +3254,7 @@
 			
 			 // Follow Player:
 			other.hold_x = x;
-			other.hold_y = y - (4 * other.roids);
+			other.hold_y = y + (other.primary ? 0 : -4);
 			if(!place_meeting(x + hspeed_raw, y, Wall)) other.hold_x += hspeed_raw;
 			if(!place_meeting(x, y + vspeed_raw, Wall)) other.hold_y += vspeed_raw;
 			if("gunangle" in self) other.line_dir_goal = gunangle;
@@ -3188,26 +3333,27 @@
 		}
 		
 		 // Position Beams:
-		var	o = _yoff + (6 * image_yscale),
-			t = 4 * current_time_scale,
-			_x = x + hspeed,
-			_y = y + vspeed,
-			n = 0;
+		if(array_length(ring_lasers)){
+			var	_l = _yoff + (6 * image_yscale),
+				_t = 4 * current_time_scale,
+				_x = x + hspeed,
+				_y = y + vspeed,
+				_n = 0;
+				
+			ring_lasers = instances_matching(ring_lasers, "", null);
 			
-		with(ring_lasers){
-			if(instance_exists(self)){
-				hold_x = _x + lengthdir_x(o, image_angle);
-				hold_y = _y + lengthdir_y(o, image_angle);
-				line_dir_goal += t * sin((wave / 30) + array_length(ring_lasers) + n);
-				n++;
+			with(ring_lasers){
+				hold_x = _x + lengthdir_x(_l, image_angle);
+				hold_y = _y + lengthdir_y(_l, image_angle);
+				line_dir_goal += _t * sin((wave / 30) + array_length(other.ring_lasers) + _n);
+				_n++;
 			}
-			else other.ring_lasers = array_delete_value(other.ring_lasers, self);
 		}
 	}
 	else{
-		var o = (sprite_get_width(spr_strt) / 2) * image_xscale;
-		_lx -= lengthdir_x(o, _dir);
-		_ly -= lengthdir_y(o, _dir);
+		var _l = (sprite_get_width(spr_strt) / 2) * image_xscale;
+		_lx -= lengthdir_x(_l, _dir);
+		_ly -= lengthdir_y(_l, _dir);
 	}
 	
 	line_seg = [];
@@ -3399,13 +3545,16 @@
 
 	 // Visually Connect Laser to Quasar Ring:
 	if(ring){
-		with(ring_lasers) if(instance_exists(self)){
-			draw_set_alpha(image_alpha);
-			draw_set_color(image_blend);
-			draw_circle(x - 1, y - 1, 6 * image_yscale, false);
-		}
-		with(ring_lasers) if(instance_exists(self)){
-			QuasarBeam_draw();
+		if(array_length(ring_lasers)){
+			var _inst = instances_matching(ring_lasers, "", null);
+			with(_inst){
+				draw_set_alpha(image_alpha);
+				draw_set_color(image_blend);
+				draw_circle(x - 1, y - 1, 6 * image_yscale, false);
+			}
+			with(_inst){
+				QuasarBeam_draw();
+			}
 		}
 		draw_set_alpha(1);
 		
@@ -3488,6 +3637,13 @@
 		ds_map_destroy(hit_list);
 	}
 	
+	 // Clear Ring Beams:
+	if(array_length(ring_lasers)){
+		with(instances_matching(ring_lasers, "", null)){
+			instance_destroy();
+		}
+	}
+	
 #define QuasarBeam_draw_laser(_xscale, _yscale, _alpha)
 	var	_lastColor = draw_get_color(),
 		_angle = image_angle,
@@ -3555,14 +3711,14 @@
 #define QuasarBeam_wepangle
 	if(instance_exists(creator) && abs(angle) > 1){
 		with(creator){
-			if(string_pos("quasar", string(wep_raw(other.roids ? bwep : wep))) == 1){
-				if(other.roids){
-					bwepangle += other.angle;
-				}
-				else{
+			if(string_pos("quasar", string(wep_raw(other.primary ? wep : bwep))) == 1){
+				if(other.primary){
 					wepangle += other.angle;
 					back = (((((gunangle + other.angle) + 360) % 360) > 180) ? -1 : 1);
 					scrRight(gunangle + other.angle);
+				}
+				else{
+					bwepangle += other.angle;
 				}
 			}
 		}
@@ -3621,7 +3777,7 @@
 		target_x     = x;
 		target_y     = y;
 		dist_max     = 96;
-		roids        = false;
+		primary      = true;
 		purple       = false;
 		
 		 // Alarms:
@@ -3678,14 +3834,13 @@
 	if(instance_exists(creator)){
 		 // Follow Creator:
 		if(instance_exists(creator)){
-			var	_xdis = creator_offx - (variable_instance_get(creator, (roids ? "bwkick" : "wkick"), 0) / 3),
+			var	_xdis = creator_offx - (variable_instance_get(creator, (primary ? "" : "b") + "wkick", 0) / 3),
 				_xdir = (("gunangle" in creator) ? creator.gunangle : direction),
 				_ydis = creator_offy * variable_instance_get(creator, "right", 1),
 				_ydir = _xdir - 90;
 				
 			x = creator.x + creator.hspeed_raw + lengthdir_x(_xdis, _xdir) + lengthdir_x(_ydis, _ydir);
-			y = creator.y + creator.vspeed_raw + lengthdir_y(_xdis, _xdir) + lengthdir_y(_ydis, _ydir);
-			if(roids) y -= 4;
+			y = creator.y + creator.vspeed_raw + lengthdir_y(_xdis, _xdir) + lengthdir_y(_ydis, _ydir) + (primary ? 0 : -4);
 		}
 		
 		 // Targeting:
@@ -3746,7 +3901,7 @@
 		
 		 // Effects:
 		view_shake_max_at(x, y, 3);
-		var _kick = (roids ? "bwkick" : "wkick");
+		var _kick = (primary ? "" : "b") + "wkick";
 		if(_kick in creator){
 			variable_instance_set(creator, _kick, 3);
 		}
@@ -3948,9 +4103,10 @@
 		maxspeed   = 2.4;
 		pit_height = 0;
 		elite      = 10;
+		target     = noone;
 		
 		 // Alarms:
-		alarm1 = 30;
+		alarm1 = irandom_range(150, 600);
 		alarm2 = -1;
 		
 		 // No Portals:
@@ -4099,21 +4255,6 @@
 	
 	
 /// GENERAL
-//#define ntte_begin_step
-	 // Lightring Trigger Fingers Interaction:
-	/*if(skill_get(mut_trigger_fingers) > 0){
-		var n = array_length(instances_matching_le(enemy, "my_health", 0));
-		if(n > 0){
-			with(instances_matching(instances_matching(CustomProjectile, "name", "LightningDisc"), "is_enemy", false)){
-				if(image_xscale < charge){
-					image_xscale *= (n / 0.6) * skill_get(mut_trigger_fingers);
-					image_xscale = min(image_xscale, charge);
-					image_yscale = image_xscale;
-				}
-			}
-		}
-	}*/
-	
 #define ntte_end_step
 	 // Open Pits:
 	if(instance_exists(PortalClear)){
@@ -4170,7 +4311,7 @@
 #define ntte_bloom
 	 // Canister Bloom:
 	if(instance_exists(CustomEnemy)){
-		var _inst = instances_matching(instances_matching(CustomEnemy, "name", "Angler"), "hiding", true);
+		var _inst = instances_matching(instances_matching(CustomEnemy, "name", "Angler", "AnglerGold"), "hiding", true);
 		if(array_length(_inst)) with(_inst){
 			draw_sprite_ext(sprRadChestGlow, image_index, x + (6 * right), y + 8, image_xscale * 2 * right, image_yscale * 2, image_angle, image_blend, image_alpha * 0.1);
 		}
@@ -4298,7 +4439,7 @@
 			
 			 // Kelp:
 			if(_gray && instance_exists(CustomProp)){
-				var _inst = instances_matching(instances_matching(CustomProp, "name", "Kelp"), "visible", true);
+				var _inst = instances_matching(CustomProp, "name", "Kelp");
 				if(array_length(_inst)) with(_inst){
 					draw_circle(x, y, 32 + orandom(1), false);
 				}
@@ -4307,7 +4448,7 @@
 			 // Projectiles:
 			if(instance_exists(CustomProjectile)){
 				 // Electroplasma:
-				var _inst = instances_matching(instances_matching(CustomProjectile, "name", "ElectroPlasma", "ElectroPlasmaBig"), "visible", true);
+				var _inst = instances_matching(CustomProjectile, "name", "ElectroPlasma", "ElectroPlasmaBig");
 				if(array_length(_inst)){
 					var _r = 24 + (24 * _gray);
 					with(_inst){
@@ -4316,7 +4457,7 @@
 				}
 				
 				 // Lightning Discs:
-				var _inst = instances_matching(instances_matching(CustomProjectile, "name", "LightningDisc", "LightningDiscEnemy"), "visible", true);
+				var _inst = instances_matching(CustomProjectile, "name", "LightningDisc");
 				if(array_length(_inst)){
 					var _scale  = 1.5 + (1.5 * _gray),
 						_border = 4;
@@ -4327,7 +4468,7 @@
 				}
 				
 				 // Quasar Beams:
-				var _inst = instances_matching(instances_matching(CustomProjectile, "name", "QuasarBeam", "QuasarRing"), "visible", true);
+				var _inst = instances_matching(CustomProjectile, "name", "QuasarBeam", "QuasarRing");
 				if(array_length(_inst)){
 					var _beamScale  = 2   + (3 * _gray),
 						_ringRadius = 120 + (160 * _gray);
@@ -4370,7 +4511,7 @@
 			 // Enemies:
 			if(instance_exists(CustomEnemy)){
 				 // Anglers:
-				var _inst = instances_matching(instances_matching(CustomEnemy, "name", "Angler"), "visible", true);
+				var _inst = instances_matching(CustomEnemy, "name", "Angler", "AnglerGold");
 				if(array_length(_inst)){
 					draw_set_fog(true, draw_get_color(), 0, 0);
 					if(!_gray){
@@ -4395,7 +4536,7 @@
 				}
 				
 				 // Jellies:
-				var _inst = instances_matching(instances_matching(CustomEnemy, "name", "Jelly", "JellyElite"), "visible", true);
+				var _inst = instances_matching(CustomEnemy, "name", "Jelly", "JellyElite");
 				if(array_length(_inst)){
 					var _r = 40 + (40 * _gray);
 					with(_inst){
@@ -4415,7 +4556,7 @@
 				}
 				
 				 // Elite Eels:
-				var _inst = instances_matching(instances_matching_gt(instances_matching(CustomEnemy, "name", "Eel"), "elite", 0), "visible", true);
+				var _inst = instances_matching_gt(instances_matching(CustomEnemy, "name", "Eel"), "elite", 0);
 				if(array_length(_inst)) with(_inst){
 					var _r = (
 						_gray
@@ -4435,7 +4576,7 @@
 				}
 				
 				 // Pit Squid:
-				var _inst = instances_matching(instances_matching_ge(instances_matching(CustomEnemy, "name", "PitSquid"), "pit_height", 1), "visible", true);
+				var _inst = instances_matching_ge(instances_matching(CustomEnemy, "name", "PitSquid"), "pit_height", 1);
 				if(array_length(_inst)){
 					if(_gray){
 						with(_inst){
@@ -4459,80 +4600,104 @@
 	}
 	
 #define draw_anglertrail
-	var _inst = instances_matching(instances_matching(instances_matching(CustomEnemy, "name", "Angler"), "hiding", false), "visible", true);
-	
-	if(array_length(_inst)){
-		if(lag) trace_time();
+	if(instance_exists(CustomEnemy) || instance_exists(Player)){
+		var _inst = [[], []];
 		
-		var	_vx = view_xview_nonsync,
-			_vy = view_yview_nonsync,
-			_gw = game_width,
-			_gh = game_height;
+		 // Gather Instances:
+		if(instance_exists(CustomEnemy)){
+			_inst[0] = instances_matching(instances_matching(instances_matching(CustomEnemy, "name", "Angler", "AnglerGold"), "hiding", false), "visible", true);
+		}
+		if(instance_exists(Player)){
+			_inst[1] = instances_matching(instances_matching(Player, "bskin", "angler fish"), "visible", true);
+		}
+		
+		 // Draw:
+		if(array_length(_inst[0]) || array_length(_inst[1])){
+			if(lag) trace_time();
 			
-		with(surface_setup("AnglerTrail", _gw * 2, _gh * 2, option_get("quality:minor"))){
-			x = pfloor(_vx, _gw);
-			y = pfloor(_vy, _gh);
-			
-			var	_surfX     = x,
-				_surfY     = y,
-				_surfScale = scale;
+			var	_vx = view_xview_nonsync,
+				_vy = view_yview_nonsync,
+				_gw = game_width,
+				_gh = game_height;
 				
-			surface_set_target(surf);
-			
-			 // Reset:
-			if(reset){
-				reset = false;
-				draw_clear_alpha(0, 0);
-			}
-			
-			 // Clear Over Time:
-			with(other){
-				var	_x = 32 * dcos(current_frame * 20),
-					_y =  8 * dsin(current_frame * 17);
+			with(surface_setup("AnglerTrail", _gw * 2, _gh * 2, option_get("quality:minor"))){
+				x = pfloor(_vx, _gw);
+				y = pfloor(_vy, _gh);
+				
+				var	_surfX     = x,
+					_surfY     = y,
+					_surfScale = scale;
 					
-				draw_set_blend_mode_ext(bm_zero, bm_inv_src_alpha);
-				draw_sprite_tiled_ext(sprBullet1, 0, (_x - _surfX) * _surfScale, (_y - _surfY) * _surfScale, _surfScale, _surfScale, c_white, 1);
+				surface_set_target(surf);
+				
+				 // Reset:
+				if(reset){
+					reset = false;
+					draw_clear_alpha(0, 0);
+				}
+				
+				 // Clear Over Time:
+				with(other){
+					var	_x = 32 * dcos(current_frame * 20),
+						_y =  8 * dsin(current_frame * 17);
+						
+					draw_set_blend_mode_ext(bm_zero, bm_inv_src_alpha);
+					draw_sprite_tiled_ext(sprBullet1, 0, (_x - _surfX) * _surfScale, (_y - _surfY) * _surfScale, _surfScale, _surfScale, c_white, 1);
+					draw_set_blend_mode(bm_normal);
+				}
+				
+				 // Draw Trails:
+				if(array_length(_inst[0])){
+					_inst[0] = instances_matching_ge(_inst[0], "ammo", 0);
+				}
+				if(array_length(_inst[1])){
+					_inst[1] = instances_matching_ne(_inst[1], "roll", 0);
+				}
+				with(_inst){
+					if(array_length(self)) with(self){
+						var _isPlayer = instance_is(self, Player);
+						
+						if(_isPlayer || sprite_index != spr_appear){
+							var	_x1    = xprevious,
+								_y1    = yprevious,
+								_x2    = x,
+								_y2    = y,
+								_dis   = point_distance(_x1, _y1, _x2, _y2),
+								_dir   = point_direction(_x1, _y1, _x2, _y2),
+								_spr   = (_isPlayer ? spr.FishAnglerTrail : spr.AnglerTrail),
+								_img   = image_index,
+								_xsc   = image_xscale * _surfScale * right,
+								_ysc   = image_yscale * _surfScale,
+								_ang   = (_isPlayer ? (sprite_angle + angle) : image_angle),
+								_col   = image_blend,
+								_alp   = image_alpha,
+								_charm = (_col == c_white && "ntte_charm" in self && ntte_charm.charmed);
+								
+							if(_charm){
+								draw_set_fog(true, make_color_rgb(56, 252, 0), 0, 0);
+							}
+							
+							for(var i = 0; i <= _dis; i++){
+								draw_sprite_ext(_spr, _img, (_x1 - _surfX + lengthdir_x(i, _dir)) * _surfScale, (_y1 - _surfY + lengthdir_y(i, _dir)) * _surfScale, _xsc, _ysc, _ang, _col, _alp);
+							}
+							
+							if(_charm){
+								draw_set_fog(false, 0, 0, 0);
+							}
+						}
+					}
+				}
+				
+				surface_reset_target();
+				
+				 // Draw Surface:
+				draw_set_blend_mode(bm_add);
+				draw_surface_scale(surf, x, y, 1 / scale);
 				draw_set_blend_mode(bm_normal);
 			}
 			
-			 // Draw Trails:
-			var _instActive = instances_matching_ge(_inst, "ammo", 0);
-			if(array_length(_instActive)) with(_instActive){
-				if(sprite_index != spr_appear){
-					var	_x1    = xprevious,
-						_y1    = yprevious,
-						_x2    = x,
-						_y2    = y,
-						_dis   = point_distance(_x1, _y1, _x2, _y2),
-						_dir   = point_direction(_x1, _y1, _x2, _y2),
-						_spr   = spr.AnglerTrail,
-						_img   = image_index,
-						_xsc   = image_xscale * _surfScale * right,
-						_ysc   = image_yscale * _surfScale,
-						_ang   = image_angle,
-						_col   = image_blend,
-						_alp   = image_alpha,
-						_charm = (_col == c_white && "ntte_charm" in self && ntte_charm.charmed);
-						
-					if(_charm) draw_set_fog(true, make_color_rgb(56, 252, 0), 0, 0);
-					
-					for(var i = 0; i <= _dis; i++){
-						draw_sprite_ext(_spr, _img, (_x1 - _surfX + lengthdir_x(i, _dir)) * _surfScale, (_y1 - _surfY + lengthdir_y(i, _dir)) * _surfScale, _xsc, _ysc, _ang, _col, _alp);
-					}
-					
-					if(_charm) draw_set_fog(false, 0, 0, 0);
-				}
-			}
-			
-			surface_reset_target();
-			
-			 // Draw Surface:
-			draw_set_blend_mode(bm_add);
-			draw_surface_scale(surf, x, y, 1 / scale);
-			draw_set_blend_mode(bm_normal);
+			if(lag) trace_time(script[2]);
 		}
-		
-		if(lag) trace_time(script[2]);
 	}
 	
 	

@@ -1,11 +1,7 @@
 #define init
-	spr = mod_variable_get("mod", "teassets", "spr");
-	
 	 // Sprites:
 	global.sprSkillHUD = sprite_add("../sprites/skills/Annihilation/sprSkillAnnihilationHUD.png", 1, 9, 9);
 	
-#macro spr global.spr
-
 #macro annihilation_list variable_instance_get(GameCont, "annihilation_list", [])
 
 #define skill_name   return "ANNIHILATION";
@@ -121,6 +117,7 @@
 	}
 	
 	 // Add Enemy Info to List:
+	var _canFX = true;
 	with(_inst){
 		with({
 			"object_index" : object_index,
@@ -153,6 +150,20 @@
 			if(_add){
 				array_push(annihilation_list, self);
 			}
+		}
+		
+		 // Effects:
+		if(_canFX){
+			_canFX = false;
+			
+			 // Text:
+			with(instance_create(x, y - 8, PopupText)){
+				text = `${instance_get_name(other)}# @(color:${area_get_back_color("red")})ANNIHILATED!`;
+			}
+			
+			 // Sound:
+			sound_play_pitchvol(sndNothingSmallball, random_range(0.4, 0.6), 1.5);
+			sound_play_pitchvol(sndNothingLowHP,     random_range(3.0, 4.0), 0.4);
 		}
 	}
 	

@@ -1,5 +1,8 @@
 #define init
+	 // Sprites:
 	global.sprSkillHUD = sprite_add("../sprites/skills/Reroll/sprSkillRerollHUD.png", 1, 8, 8);
+	
+	 // Reset:
 	game_start();
 	
 #define game_start
