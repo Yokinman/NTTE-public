@@ -1,6 +1,11 @@
 #define init
+	mod_script_call("mod", "teassets", "ntte_init", script_ref_create(init));
+	
 	 // Sprites:
 	global.sprSkillHUD  = sprite_add("../sprites/skills/Magnetic Pulse/sprMagneticPulseHUD.png",  1,  8,  8);
+	
+#define cleanup
+	mod_script_call("mod", "teassets", "ntte_cleanup", script_ref_create(cleanup));
 	
 #define skill_name   return "MAGNETIC PULSE";
 #define skill_text   return "@bIDPD @sHAVE @wHALF HEALTH";

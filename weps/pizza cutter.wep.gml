@@ -1,48 +1,12 @@
 #define init
-	 // Sprites:
-	global.sprWep       = sprTemp;
-	global.sprWepAmmo   = [];
-	global.sprWepHoming = sprite_add_weapon("../sprites/weps/sprPizzaCutterHoming.png", 2, 7);
-	global.sprWepHUD    = sprite_add_weapon("../sprites/weps/sprPizzaCutterHoming.png", 9, 7);
-	global.sprWepLocked = mskNone;
+	mod_script_call("mod", "teassets", "ntte_init", script_ref_create(init));
 	
-	 // Manually Split Sprite:
-	if(fork()){
-		var _path = "../sprites/weps/sprPizzaCutter.png";
-		
-		file_load(_path);
-		
-		while(!file_loaded(_path)){
-			wait 0;
-		}
-		
-		if(file_exists(_path)){
-			var	_spr  = sprite_add(_path, 3, 2, 7),
-				_sprX = sprite_get_xoffset(_spr),
-				_sprY = sprite_get_yoffset(_spr),
-				_surf = surface_create(sprite_get_width(_spr), sprite_get_height(_spr));
-				
-			surface_set_target(_surf);
-			
-			 // Load Each Frame as a Weapon Sprite:
-			for(var i = 0; i < sprite_get_number(_spr); i++){
-				draw_clear_alpha(0, 0);
-				draw_sprite(_spr, i, _sprX, _sprY);
-				surface_save(_surf, "sprWep.png");
-				array_push(global.sprWepAmmo, sprite_add_weapon("sprWep.png", _sprX, _sprY));
-			}
-			global.sprWep = global.sprWepAmmo[array_length(global.sprWepAmmo) - 1];
-			
-			 // Done:
-			surface_reset_target();
-			surface_destroy(_surf);
-			sprite_delete(_spr);
-		}
-		
-		file_unload(_path);
-		
-		exit;
-	}
+	 // Sprites:
+	global.sprWep       = sprite_add(       "../sprites/weps/sprPizzaCutter.png",       3, 2, 7);
+	global.sprWepHoming = sprite_add_weapon("../sprites/weps/sprPizzaCutterHoming.png",    2, 7);
+	global.sprWepHUD    = sprite_add_weapon("../sprites/weps/sprPizzaCutterHoming.png",    9, 7);
+	global.sprWepLocked = sprTemp;
+	global.sprWepImage  = [];
 	
 	 // LWO:
 	global.lwoWep = {
@@ -58,9 +22,14 @@
 		"chrg_max" : 9
 	};
 	
+#macro spr global.spr
+
+#define cleanup
+	mod_script_call("mod", "teassets", "ntte_cleanup", script_ref_create(cleanup));
+	
 #define weapon_name        return (weapon_avail() ? "PIZZA CUTTER" : "LOCKED");
 #define weapon_text        return "FOR THE CIVILIZED TURTLE";
-#define weapon_swap        return sndSwapHammer;
+#define weapon_swap        return sndSwapMotorized;
 #define weapon_area        return (weapon_avail() ? 7 : -1); // 3-2
 #define weapon_type        return type_melee;
 #define weapon_load        return 24; // 0.8 Seconds
@@ -74,7 +43,7 @@
 #define weapon_sprt(_wep)
 	if(weapon_avail()){
 		 // Indicators:
-		if(is_object(_wep) && array_length(global.sprWepAmmo) > 0){
+		if(is_object(_wep) && array_length(global.sprWepImage)){
 			var	_ammo = (lq_defget(_wep, "canload", false) ? lq_defget(_wep, "ammo", 0) : 0),
 				_amax = lq_defget(_wep, "amax", 1),
 				_cost = lq_defget(_wep, "cost", 1);
@@ -87,7 +56,7 @@
 			}
 			
 			 // Ammo:
-			return global.sprWepAmmo[ceil(clamp((floor(_ammo / _cost) * _cost) / _amax, 0, 1) * (array_length(global.sprWepAmmo) - 1))];
+			return global.sprWepImage[ceil(clamp((floor(_ammo / _cost) * _cost) / _amax, 0, 1) * (array_length(global.sprWepImage) - 1))];
 		}
 		
 		 // Normal:
@@ -114,88 +83,53 @@
 	var _fire = weapon_fire_init(_wep);
 	_wep = _fire.wep;
 	
-	var _num = (_wep.chrg_num / _wep.chrg_max);
+	var _charge = (_wep.chrg_num / _wep.chrg_max);
 	
 	 // Charging:
 	if(_wep.chrg){
 		 // Pullback:
-		var _kick = -3 * _num;
+		var _kick = -3 * _charge;
 		if(wkick != _kick){
-			weapon_post(_kick, 8 * _num * current_time_scale, 0);
+			weapon_post(_kick, 8 * _charge * current_time_scale, 0);
 		}
 		
 		 // Effects:
 		if(_wep.chrg == 1){
-			sound_play_pitch(sndMeleeFlip, 1 / (1 - (0.25 * _num)));
-			sound_play_pitchvol(sndSwapBow, 0.3 + (2 * _num), 0.3);
+			 // Sound:
+			sound_play_pitch(sndMeleeFlip, 1 / (1 - (0.25 * _charge)));
+			sound_play_pitchvol(sndSwapBow, 0.3 + (2 * _charge), 0.3);
 			
 			 // Full:
-			if(_num >= 1){
-				var	_l = 16,
-					_d = gunangle;
+			if(_charge >= 1){
+				 // Sound:
+				sound_play_pitchvol(sndSwapMotorized, 1.4,               0.5);
+				sound_play_pitchvol(sndDiscBounce,    1.4 + random(0.2), 0.8);
+				
+				 // Flash:
+				var	_l = 18 - wkick,
+					_d = gunangle + (wepangle * (1 - (wkick / 20)));
 					
-				instance_create(x + lengthdir_x(_l, _d), y + lengthdir_y(_l, _d), ThrowHit);
-				instance_create(x + lengthdir_x(_l, _d), y + lengthdir_y(_l, _d), ImpactWrists);
-				sound_play_pitch(sndCrystalRicochet, 3);
-				sound_play_pitch(sndSewerDrip,       3);
+				with(instance_create(
+					x + hspeed_raw + lengthdir_x(_l, _d) + lengthdir_x(wepflip * 2, _d - 90),
+					y + vspeed_raw + lengthdir_y(_l, _d) + lengthdir_y(wepflip * 2, _d - 90),
+					DiscTrail
+				)){
+					sprite_index = spr.BigDiscTrail;
+					image_speed  = 0.4;
+					depth        = other.depth - 1;
+				}
 				sleep(5);
 			}
 		}
-		
-		 // Fully Charged - Blink:
-		else if((current_frame % 12) < current_time_scale){
-			with(_fire.creator) if(instance_is(self, Player)){
-				gunshine = 2;
-			}
-		}
 	}
 	
-	 // Charged Disc Slash:
-	else if(_num > 0){
-		var _skill = skill_get(mut_long_arms),
-			_len   = (20 * _skill),
-			_dir   = gunangle + orandom(8 * accuracy);
-			
-		with(projectile_create(
-			x + lengthdir_x(_len, _dir),
-			y + lengthdir_y(_len, _dir),
-			Slash,
-			_dir,
-			3 + (2 * _skill)
-		)){
-			sprite_index = sprHeavySlash;
-			damage       = 20;
-		}
-		
-		 // Sounds:
-		var _pitch = random_range(0.8, 1.2);
-		sound_play_pitchvol(sndDiscHit, 1.7 * _pitch, 1.0);
-		sound_play_pitchvol(sndHammer,  0.8 * _pitch, 1.4);
-		sound_play_pitchvol(sndShovel,  1.5 * _pitch, 0.3);
-		
-		 // Effects:
-		weapon_post(-4, -5, 8);
-		motion_add(_dir, 3.5);
-		sleep(15);
-		
-		 // Fully Charged - Launch Disc:
-		if(_num >= 1){
-			if(weapon_ammo_fire(_wep)){
-				with(projectile_create(x, y, "BatDisc", gunangle + orandom(4 * accuracy), 0)){
-					ammo = _wep.cost;
-					wep  = _wep;
-				}
-			}
-			weapon_post(8, 40, 5);
-		}
-	}
-	
-	 // Disc-less Slash:
+	 // Fire:
 	else{
 		var _skill = skill_get(mut_long_arms),
 			_len   = 20 * _skill,
 			_dir   = gunangle + orandom(8 * accuracy);
 			
+		 // Slash:
 		with(projectile_create(
 			x + lengthdir_x(_len, _dir),
 			y + lengthdir_y(_len, _dir),
@@ -203,19 +137,48 @@
 			_dir,
 			3 + (2 * _skill)
 		)){
-			damage = 8;
-			force  = 6;
+			 // Disc Slash:
+			if(_charge > 0){
+				sprite_index = sprHeavySlash;
+				damage       = 20;
+			}
+			
+			 // Disc-less Slash:
+			else{
+				damage = 8;
+				force  = 6;
+			}
 		}
 		
 		 // Sounds:
 		var _pitch = random_range(0.8, 1.2);
-		sound_play_pitchvol(sndDiscBounce, 1.2 * _pitch, 0.7);
-		sound_play_pitchvol(sndHammer,     1.4 * _pitch, 1.4);
-		sound_play_pitchvol(sndWrench,     0.8 * _pitch, 0.3);
+		if(_charge > 0){
+			sound_play_pitchvol(sndDiscHit, 1.7 * _pitch, 1.0);
+		}
+		else{
+			sound_play_pitchvol(sndDiscBounce, 1.2 * _pitch, 0.7);
+		}
+		sound_play_pitchvol(sndHammer, ((_charge > 0) ? 0.8 : 1.4) * _pitch, 1.4);
+		sound_play_pitchvol(sndShovel, ((_charge > 0) ? 1.5 : 0.8) * _pitch, 0.3);
 		
 		 // Effects:
 		weapon_post(-4, -5, 8);
 		motion_add(_dir, 3.5);
+		if(_charge > 0){
+			sleep(15);
+		}
+		
+		 // Fully Charged - Launch Disc:
+		if(_charge >= 1){
+			if(weapon_ammo_fire(_wep)){
+				with(projectile_create(x, y, "BatDisc", gunangle + orandom(4 * accuracy), 0)){
+					ammo = _wep.cost;
+					wep  = _wep;
+				}
+				sound_play_gun(sndDiscDie, 0.4, 0.3);
+				weapon_post(8, 40, 5);
+			}
+		}
 	}
 	
 #define step(_primary)
@@ -223,8 +186,14 @@
 	
 	 // LWO Setup:
 	if(!is_object(_wep)){
-		_wep = lq_clone(global.lwoWep);
+		_wep = { "wep" : _wep };
 		wep_set(_primary, "wep", _wep);
+	}
+	for(var i = lq_size(global.lwoWep) - 1; i >= 0; i--){
+		var _key = lq_get_key(global.lwoWep, i);
+		if(_key not in _wep){
+			lq_set(_wep, _key, lq_get_value(global.lwoWep, i));
+		}
 	}
 	
 	 // Inherit:
@@ -248,7 +217,7 @@
 #define weapon_fire_init(_wep)                                                          return  mod_script_call     ('mod', 'telib', 'weapon_fire_init', _wep);
 #define weapon_ammo_fire(_wep)                                                          return  mod_script_call     ('mod', 'telib', 'weapon_ammo_fire', _wep);
 #define weapon_ammo_hud(_wep)                                                           return  mod_script_call     ('mod', 'telib', 'weapon_ammo_hud', _wep);
-#define weapon_get_red(_wep)                                                            return  mod_script_call_self('mod', 'telib', 'weapon_get_red', _wep);
+#define weapon_get(_name, _wep)                                                         return  mod_script_call     ('mod', 'telib', 'weapon_get', _name, _wep);
 #define wep_raw(_wep)                                                                   return  mod_script_call_nc  ('mod', 'telib', 'wep_raw', _wep);
 #define wep_get(_primary, _name, _default)                                              return  variable_instance_get(self, (_primary ? '' : 'b') + _name, _default);
 #define wep_set(_primary, _name, _value)                                                        variable_instance_set(self, (_primary ? '' : 'b') + _name, _value);

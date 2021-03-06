@@ -1,29 +1,26 @@
 #define init
-	spr = mod_variable_get("mod", "teassets", "spr");
-	snd = mod_variable_get("mod", "teassets", "snd");
-	lag = false;
+	mod_script_call("mod", "teassets", "ntte_init", script_ref_create(init));
+	
+	 // Mod Lists:
+	ntte_mods = mod_variable_get("mod", "teassets", "mods");
 	
 	 // Bind Events:
-	lag_bind = ds_map_create();
-	lag_bind[? "begin_step"]   = script_bind("LagBeginStep",  CustomBeginStep, script_ref_create(obj_step, "begin_step"), 0, false);
-	lag_bind[? "step"      ]   = script_bind("LagStep",       CustomStep,      script_ref_create(obj_step, "step"),       0, false);
-	lag_bind[? "end_step"  ]   = script_bind("LagEndStep",    CustomEndStep,   script_ref_create(obj_step, "end_step"),   0, false);
-	global.portal_pickups_bind = script_bind("PortalPickups", CustomStep,      script_ref_create(portal_pickups_step),    0, false);
-	global.floor_reveal_bind   = script_bind("FloorReveal",   CustomDraw,      script_ref_create(floor_reveal_draw),     -8, false);
-	global.rad_path_bind       = script_bind("RadPath",       CustomEndStep,   script_ref_create(rad_path_step),          0, false);
+	global.portal_pickups_bind = script_bind(CustomStep,      portal_pickups_step,                        0, false);
+	global.rad_path_bind       = script_bind(CustomEndStep,   rad_path_step,                              0, false);
+	global.floor_reveal_bind   = script_bind(CustomDraw,      floor_reveal_draw,                         -8, false);
 	
 	 // Object List (Used for cheats mod, basically):
 	ntte_obj_list = ds_map_create();
-	ntte_obj_list[? "tegeneral"  ] = ["AlertIndicator", "BigDecal", "BigIDPDSpawn", "BoneArrow", "BoneSlash", "BoneFX", "BuriedVault", "BuriedShrine", "CustomBullet", "CustomFlak", "CustomShell", "CustomPlasma", "GroundFlameGreen", "Igloo", "MergeFlak", "Pet", "PetRevive", "PetWeaponBecome", "PetWeaponBoss", "PortalBullet", "PortalGuardian", "PortalPrevent", "ReviveNTTE", "SmallGreenExplosion", "TopDecal", "TopObject", "TopTiny", "WallDecal", "WallEnemy"];
-	ntte_obj_list[? "tepickups"  ] = ["Backpack", "Backpacker", "BackpackPickup", "BatChest", /*"BloodLustPickup",*/ "BoneBigPickup", "BonePickup", "BonusAmmoChest", "BonusAmmoMimic", "BonusAmmoPickup", "BonusHealthChest", "BonusHealthMimic", "BonusHealthPickup", "BuriedVaultChest", "BuriedVaultChestDebris", "BuriedVaultPedestal", "CatChest", "ChestShop", "CursedAmmoChest", "CursedMimic", "CustomChest", "CustomPickup", "HammerHeadPickup", "HarpoonPickup", "OrchidBall", "OrchidChest", "OrchidSkill", "PalaceAltar", "PalankingStatue", "ParrotFeather", "ParrotChester", "Pizza", "PizzaChest", "PizzaStack", "Prompt", "RedAmmoChest", "RedAmmoPickup", "SpiritPickup", "SunkenChest", "SunkenCoin", "VaultFlower", "VaultFlowerSparkle", "WepPickupGrounded", "WepPickupStick"];
+	ntte_obj_list[? "tegeneral"  ] = ["AlertIndicator", "BigDecal", "BigIDPDSpawn", "BoneArrow", "BoneSlash", "BoneFX", "BuriedVault", "BuriedShrine", "CustomBullet", "CustomFlak", "CustomShell", "CustomPlasma", "GroundFlameGreen", "Igloo", "MergeFlak", "Pet", "PetRevive", "PetWeaponBecome", "PetWeaponBoss", "PortalPrevent", "ReviveNTTE", "SmallGreenExplosion", "TopDecal", "TopObject", "TopTiny", "WallDecal", "WallEnemy"];
+	ntte_obj_list[? "tepickups"  ] = ["Backpack", "Backpacker", "BackpackPickup", "BatChest", /*"BloodLustPickup",*/ "BoneBigPickup", "BonePickup", "BonusAmmoChest", "BonusAmmoMimic", "BonusAmmoPickup", "BonusHealthChest", "BonusHealthMimic", "BonusHealthPickup", "BuriedVaultChest", "BuriedVaultChestDebris", "BuriedVaultPedestal", "CatChest", "ChestShop", "CursedAmmoChest", "CursedMimic", "CustomChest", "CustomPickup", "GatorStatue", "GatorStatueFlak", "HammerHeadPickup", "HarpoonPickup", "OrchidBall", "OrchidChest", "OrchidSkill", "PalaceAltar", "ParrotFeather", "ParrotChester", "Pizza", "PizzaChest", "PizzaStack", "Prompt", "RedAmmoChest", "RedAmmoPickup", "SpiritPickup", "SunkenChest", "SunkenCoin", "VaultFlower", "VaultFlowerSparkle", "WepPickupGrounded", "WepPickupStick"];
 	ntte_obj_list[? "tedesert"   ] = ["BabyScorpion", "BabyScorpionGold", "BanditCamper", "BanditHiker", "BanditTent", "BigCactus", "BigMaggotSpawn", "Bone", "CoastBossBecome", "CoastBoss", "CowSkull", "FlySpin", "VenomBlast", "ScorpionRock", "SilverScorpion", "SilverScorpionDevastator", "SilverScorpionFlak", "VenomFlak", "VenomPellet", "VenomPelletBack", "WantBigMaggot"];
-	ntte_obj_list[? "tecoast"    ] = ["BloomingAssassin", "BloomingAssassinHide", "BloomingBush", "BloomingCactus", "BuriedCar", "ClamShield", "ClamShieldSlash", "CoastBigDecal", "CoastDecal", "CoastDecalCorpse", "Creature", "Diver", "DiverHarpoon", "Gull", "Harpoon", "HarpoonStick", "NetNade", "Palanking", "PalankingDie", "PalankingSlash", "PalankingSlashGround", "PalankingToss", "Palm", "Pelican", "Seal", "SealAnchor", "SealDisc", "SealHeavy", "SealMine", "TrafficCrab", "Trident"];
+	ntte_obj_list[? "tecoast"    ] = ["BloomingAssassin", "BloomingAssassinHide", "BloomingBush", "BloomingCactus", "BuriedCar", "ClamShield", "ClamShieldSlash", "CoastBigDecal", "CoastDecal", "CoastDecalCorpse", "Creature", "Diver", "DiverHarpoon", "Gull", "Harpoon", "HarpoonStick", "NetNade", "Palanking", "PalankingDie", "PalankingSlash", "PalankingSlashGround", "PalankingStatue", "PalankingToss", "Palm", "Pelican", "Seal", "SealAnchor", "SealDisc", "SealHeavy", "SealMine", "TrafficCrab", "Trident"];
 	ntte_obj_list[? "teoasis"    ] = ["BubbleBomb", "BubbleExplosion", "BubbleExplosionSmall", "BubbleSlash", "CrabTank", "HammerShark", "HyperBubble", "OasisPetBecome", "Puffer", "SunkenRoom", "SunkenSealSpawn", "WaterStreak"];
 	ntte_obj_list[? "tetrench"   ] = ["Angler", "AnglerGold", "Eel", "EelSkull", "ElectroPlasma", "ElectroPlasmaBig", "ElectroPlasmaImpact", "Jelly", "JellyElite", "Kelp", "LightningDisc", "PitSpark", "PitSquid", "PitSquidArm", "PitSquidBomb", "PitSquidDeath", "QuasarBeam", "QuasarRing", "TeslaCoil", "TopDecalWaterMine", "TrenchFloorChunk", "Vent", "WantEel"];
-	ntte_obj_list[? "tesewers"   ] = ["AlbinoBolt", "AlbinoGator", "AlbinoGrenade", "BabyGator", "Bat", "BatBoss", "BatCloud", "BatDisc", "BatScreech", "BoneGator", /*"BossHealFX",*/ "Cabinet", "Cat", "CatBoss", "CatBossAttack", "CatDoor", "CatDoorDebris", "CatGrenade", "CatHole", "CatHoleBig", "CatLight", "ChairFront", "ChairSide", "Couch", "GatorStatue", "GatorStatueFlak", "Manhole", "ManholeOpen", "NewTable", "Paper", "PizzaDrain", "PizzaManholeCover", "PizzaRubble", "PizzaTV", "SewerDrain", "SewerRug", "TurtleCool"];
+	ntte_obj_list[? "tesewers"   ] = ["AlbinoBolt", "AlbinoGator", "AlbinoGrenade", "BabyGator", "Bat", "BatBoss", "BatCloud", "BatDisc", "BatScreech", "BoneGator", /*"BossHealFX",*/ "Cabinet", "Cat", "CatBoss", "CatBossAttack", "CatDoor", "CatDoorDebris", "CatGrenade", "CatHole", "CatHoleBig", "CatLight", "ChairFront", "ChairSide", "Couch", "LairBorder", "Manhole", "ManholeOpen", "NewTable", "Paper", "PizzaDrain", "PizzaManholeCover", "PizzaRubble", "PizzaTV", "SewerDrain", "SewerRug", "TurtleCool"];
 	ntte_obj_list[? "tescrapyard"] = ["BoneRaven", "SawTrap", "SludgePool", "TopRaven", "TrapSpin", "Tunneler"];
-	ntte_obj_list[? "tecaves"    ] = ["BigCrystalProp", "ChaosHeart", "CrystalBat", "CrystalBrain", "CrystalBrainDeath", "CrystalClone", "CrystalHeart", "CrystalHeartBullet", "CrystalPropRed", "CrystalPropWhite", "EnergyBatSlash", "InvCrystalBat", "InvMortar", "MinerBandit", "Mortar", "MortarPlasma", "NewCocoon", "PlasmaImpactSmall", "RedBullet", "RedExplosion", "RedShank", "RedSlash", "RedSpider", "Spiderling", "TwinOrbital", "VlasmaBullet", "VlasmaCannon", "WallFake", "Warp", "WarpPortal"];
-	ntte_obj_list[? "telabs"     ] = ["Button", "ButtonChest", "ButtonOld", "ButtonPickup", "ButtonReviveArea", "FreakChamber", "MutantVat", "PickupReviveArea", "PopoSecurity", "WallSlide"];
+	ntte_obj_list[? "tecaves"    ] = ["BigCrystalProp", "ChaosHeart", "CrystalBat", "CrystalBrain", "CrystalBrainDeath", "CrystalBrainEffect", "CrystalClone", "CrystalHeart", "CrystalHeartBullet", "CrystalPropRed", "CrystalPropWhite", "EnergyBatSlash", "InvCrystalBat", "InvMortar", "MinerBandit", "Mortar", "MortarPlasma", "NewCocoon", "PlasmaImpactSmall", "RedBullet", "RedExplosion", "RedShank", "RedSlash", "RedSpider", "Spiderling", "Tesseract", "TesseractArmDeath", "TesseractDeath", "TesseractStrike", /*"TesseractWarp",*/ "TwinOrbital", "VlasmaBullet", "VlasmaCannon", "WallFake", "Warp", "WarpPortal"];
+	ntte_obj_list[? "telabs"     ] = ["Button", "ButtonChest", "ButtonOld", "ButtonPickup", "ButtonReviveArea", "FreakChamber", "MutantVat", "PickupReviveArea", "PopoSecurity", "PortalBullet", "PortalGuardian", "WallSlide"];
 	
 	 // Object Create Event Script References:
 	ntte_obj_scrt = ds_map_create();
@@ -47,9 +44,9 @@
 					array_push(_eventList, self);
 				}
 			}
-			instance_delete(id);
+			instance_delete(self);
 		}
-		if(array_exists(_eventList, "step")){
+		if(array_find_index(_eventList, "step") >= 0){
 			for(var i = ntte_alarm_min; i < ntte_alarm_max; i++){
 				array_push(_eventList, `alrm${i}`);
 			}
@@ -59,11 +56,10 @@
 	
 	 // Object Script Binding:
 	ntte_obj_bind      = ds_map_create();
-	ntte_obj_bind_list = ds_map_create();
-	ntte_obj_bind[? "begin_step"] = script_bind("ObjectBeginStep", CustomBeginStep, script_ref_create(obj_bind, "begin_step"), 0, true);
-	ntte_obj_bind[? "step"      ] = script_bind("ObjectStep",      CustomStep,      script_ref_create(obj_bind, "step"),       0, true);
-	ntte_obj_bind[? "end_step"  ] = script_bind("ObjectEndStep",   CustomEndStep,   script_ref_create(obj_bind, "end_step"),   0, true);
-	ntte_obj_bind[? "draw"      ] = ds_map_create();
+	ntte_obj_bind_draw = ds_map_create();
+	
+	 // Lag Debugging:
+	lag_bind = ds_map_create();
 	
 	 // Projectile Team Variants:
 	var _teamGrid = [
@@ -129,8 +125,12 @@
 			
 		for(var i = 0; i < _teamSize; i++){
 			var _team = _teamList[i];
-			if(array_length(_team) > 0) _sprtList[i] = _team[0];
-			if(array_length(_team) > 1) _objsList[i] = _team[1];
+			if(array_length(_team)){
+				_sprtList[i] = _team[0];
+				if(array_length(_team) > 1){
+					_objsList[i] = _team[1];
+				}
+			}
 		}
 		
 		 // Compiling Sprite Maps:
@@ -161,8 +161,12 @@
 							
 						for(var i = 0; i < _tSize; i++){
 							var _team = _tList[i];
-							if(array_length(_team) > 0) _sList[i] = _team[0];
-							if(array_length(_team) > 1) _oList[i] = _team[1];
+							if(array_length(_team)){
+								_sList[i] = _team[0];
+								if(array_length(_team) > 1){
+									_oList[i] = _team[1];
+								}
+							}
 						}
 						
 						for(var i = 0; i < _tSize; i++){
@@ -186,6 +190,9 @@
 	 // sleep_max():
 	global.sleep_max = 0;
 	
+#define cleanup
+	mod_script_call("mod", "teassets", "ntte_cleanup", script_ref_create(cleanup));
+	
 #macro spr global.spr
 #macro msk spr.msk
 #macro snd global.snd
@@ -193,6 +200,8 @@
 
 #macro lag      global.debug_lag
 #macro lag_bind global.debug_lag_bind
+
+#macro ntte_mods global.mods
 
 #macro area_campfire     0
 #macro area_desert       1
@@ -215,11 +224,11 @@
 
 #macro mod_current_type script_ref_create(0)[0]
 
+#macro instance_max instance_create(0, 0, DramaCamera)
+
 #macro current_frame_active ((current_frame % 1) < current_time_scale)
 
 #macro anim_end (image_index + image_speed_raw >= image_number || image_index + image_speed_raw < 0)
-
-#macro enemy_boss (("boss" in self && boss) || array_exists([BanditBoss, ScrapBoss, LilHunter, Nothing, Nothing2, FrogQueen, HyperCrystal, TechnoMancer, Last, BigFish, OasisBoss], object_index))
 
 #macro bbox_center_x (bbox_left + bbox_right + 1) / 2
 #macro bbox_center_y (bbox_top + bbox_bottom + 1) / 2
@@ -235,7 +244,7 @@
 #macro ntte_obj_list      global.object_list
 #macro ntte_obj_scrt      global.object_scrt
 #macro ntte_obj_bind      global.object_bind
-#macro ntte_obj_bind_list global.object_bind_list
+#macro ntte_obj_bind_draw global.object_bind_draw
 
 #macro sprite_team_start   1
 #macro sprite_team_map     global.sprite_team_map
@@ -282,7 +291,7 @@
 				with(
 					_isCustom
 					? ntte_obj_event[? object_index]
-					: ["step", "begin_step", "end_step", "draw"]
+					: ["begin_step", "step", "end_step", "draw"]
 				){
 					var _event = self;
 					if(("on_" + _event) not in _inst || is_undefined(variable_instance_get(_inst, "on_" + _event))){
@@ -295,58 +304,51 @@
 								
 								 // Auto Script Binding:
 								if(!_isCustom){
-									if(ds_map_exists(ntte_obj_bind, _event)){
-										var	_bind   = ntte_obj_bind[? _event],
-											_depth  = _inst.depth,
-											_isDraw = ds_map_valid(_bind);
-											
-										 // Bind Draw Event:
-										if(_isDraw && !ds_map_exists(_bind, _depth)){
-											_bind[? _depth] = script_bind(
-												"ObjectDraw" + string(_depth),
-												CustomDraw,
-												script_ref_create(obj_bind, _event),
-												_depth,
-												true
-											);
+									if(!ds_map_exists(ntte_obj_bind, _event)){
+										ntte_obj_bind[? _event] = {
+											"list"        : [],
+											"object_list" : []
+										};
+									}
+									var _bind = ntte_obj_bind[? _event];
+									
+									 // Bind Draw Event:
+									if(_event == "draw"){
+										if(!ds_map_exists(ntte_obj_bind_draw, _inst.depth)){
+											with(script_bind_draw(obj_draw, _inst.depth)){
+												persistent = true;
+												ntte_obj_bind_draw[? depth] = self;
+											}
+										}
+									}
+									
+									 // Add to Instance List:
+									array_push(_bind.list, _inst);
+									
+									 // Add to Object List:
+									var	_obj     = _inst.object_index,
+										_objList = _bind.object_list;
+										
+									if(array_length(_objList)){
+										 // Object/Parents Already in List:
+										for(var i = _obj; object_exists(i); i = object_get_parent(i)){
+											if(array_find_index(_objList, i) >= 0){
+												_obj = -1;
+												break;
+											}
+										}
+									}
+									if(object_exists(_obj)){
+										 // Remove Children From List:
+										with(_objList){
+											if(object_is_ancestor(self, _obj)){
+												_objList = array_delete_value(_objList, self);
+											}
 										}
 										
 										 // Add:
-										with(_isDraw ? _bind[? _depth] : _bind){
-											 // Add to Instance List:
-											if("inst" not in self){
-												inst = [];
-											}
-											array_push(inst, _inst);
-											
-											 // Add to Object List:
-											var _obj     = _inst.object_index,
-												_objList = [];
-												
-											if(ds_map_exists(ntte_obj_bind_list, _event)){
-												_objList = ntte_obj_bind_list[? _event];
-												
-												 // Object/Parents Already in List:
-												for(var i = _obj; object_exists(i); i = object_get_parent(i)){
-													if(array_exists(_objList, i)){
-														_obj = -1;
-														break;
-													}
-												}
-											}
-											if(object_exists(_obj)){
-												 // Remove Children From List:
-												with(_objList){
-													if(object_is_ancestor(self, _obj)){
-														_objList = array_delete_value(_objList, self);
-													}
-												}
-												
-												 // Add:
-												array_push(_objList, _obj);
-												ntte_obj_bind_list[? _event] = _objList;
-											}
-										}
+										array_push(_objList, _obj);
+										_bind.object_list = _objList;
 									}
 								}
 							}
@@ -357,12 +359,6 @@
 									switch(_event){
 										case "hurt":
 											on_hurt = enemy_hurt;
-											break;
-											
-										case "death":
-											if(instance_is(self, CustomEnemy)){
-												on_death = enemy_death;
-											}
 											break;
 											
 										case "draw":
@@ -415,191 +411,267 @@
 	
 	return noone;
 	
-#define obj_bind(_type)
-	/*
-		A script bind controller that calls scripts for NTTE's non-"Custom" objects
-	*/
-	
-	if(ds_map_exists(ntte_obj_bind_list, _type)){
-		if(lag) trace_time();
-		
-		var	_objList = ntte_obj_bind_list[? _type],
-			_bind    = ntte_obj_bind[? _type],
-			_isDraw  = ds_map_valid(_bind),
-			_varName = "ntte_bind_" + _type;
-			
-		 // Changed Depth:
-		if(_isDraw){
-			var _bindList = _bind;
-			if(ds_map_exists(_bindList, depth)){
-				_bind = _bindList[? depth];
-				if("inst" in _bind){
-					with(instances_matching_ne(_bind.inst, "depth", depth)){
-						if(!ds_map_exists(_bindList, depth)){
-							_bindList[? depth] = script_bind(
-								"ObjectDraw" + string(depth),
-								CustomDraw,
-								script_ref_create(obj_bind, _type),
-								depth,
-								true
-							);
+#define ntte_update(_newID)
+	 // Bound Events, 'instance_copy()' Fix:
+	if(ds_map_size(ntte_obj_bind)){
+		with(ds_map_keys(ntte_obj_bind)){
+			var	_event    = self,
+				_bind     = ntte_obj_bind[? _event],
+				_instList = _bind.list;
+				
+			with(_bind.object_list){
+				if(instance_exists(self) && self.id > _newID){
+					var _inst = instances_matching_ne(instances_matching_gt(self, "id", _newID), "ntte_bind_" + _event, null);
+					if(array_length(_inst)){
+						with(_inst){
+							if(array_find_index(_instList, self) < 0){
+								variable_instance_set(self, "ntte_bind_" + _event, array_clone(variable_instance_get(self, "ntte_bind_" + _event)));
+								array_push(_instList, self);
+							}
 						}
 					}
 				}
 			}
-			else exit; // use uhh normal script_bind_draw later maybe
-		}
-		
-		 // Collect Instances:
-		_bind.inst = instances_matching_ne(_objList, _varName, null);
-		if(_isDraw){
-			_bind.inst = instances_matching(_bind.inst, "depth", depth);
-		}
-		
-		 // Call Scripts:
-		if(array_length(_bind.inst)){
-			with(_isDraw ? instances_matching(_bind.inst, "visible", true) : _bind.inst){
-				var _scrt = variable_instance_get(self, _varName);
-				if(array_length(_scrt) > 2){
-					mod_script_call(_scrt[0], _scrt[1], _scrt[2]);
-				}
-			}
-		}
-		
-		 // Done, Clear Object List:
-		else{
-			var _clear = true;
-			if(_isDraw){
-				with(ds_map_values(ntte_obj_bind[? _type])){
-					if(array_length(inst)){
-						_clear = false;
-						break;
-					}
-				}
-			}
-			if(_clear){
-				ds_map_delete(ntte_obj_bind_list, _type);
-			}
-		}
-		
-		if(lag) trace_time(script[2] + "_" + _type + " (" + string(array_length(_bind.inst)) + ")");
-	}
-	
-#define obj_step(_type)
-	/*
-		Manually performs all "Custom" object step events (only when debugging lag)
-	*/
-	
-	if(visible){
-		var _obj = [CustomObject, CustomHitme, CustomEnemy, CustomProp, CustomProjectile];
-		
-		if(lag){
-			if(instance_is(self, CustomBeginStep)){
-				trace("");
-			}
-			
-			 // Enable Events:
-			with(instances_matching_ne(_obj, "ntte_" + _type, null)){
-				variable_instance_set(self, "on_" + _type, variable_instance_get(self, "ntte_" + _type));
-			}
-			
-			 // Call Events:
-			var _inst = instances_matching_ne(_obj, "on_" + _type, null);
-			if(array_length(_inst)){
-				trace_time();
-				switch(object_index){
-					case CustomBeginStep : with(_inst) event_perform(ev_step, ev_step_begin);  break;
-					case CustomStep      : with(_inst) event_perform(ev_step, ev_step_normal); break;	
-					case CustomEndStep   : with(_inst) event_perform(ev_step, ev_step_end);    break;
-				}
-				trace_time(`obj_${_type} (${array_length(_inst)})`);
-				
-				 // Disable Events:
-				with(instances_matching_ne(_inst, "", null)){
-					variable_instance_set(self, "ntte_" + _type, variable_instance_get(self, "on_" + _type));
-					variable_instance_set(self, "on_"   + _type, []);
-				}
-			}
-		}
-		
-		 // Goodbye:
-		else{
-			visible = false;
-			
-			 // Reset Events:
-			with(instances_matching_ne(_obj, "ntte_" + _type, null)){
-				variable_instance_set(self, "on_"   + _type, variable_instance_get(self, "ntte_" + _type));
-				variable_instance_set(self, "ntte_" + _type, null);
-			}
 		}
 	}
 	
-#define step
+#define ntte_begin_step
 	 // sleep_max():
 	if(global.sleep_max > 0){
 		sleep(global.sleep_max);
 		global.sleep_max = 0;
 	}
 	
+	 // Bound Begin Step Events:
+	if(!obj_bind_call("begin_step")){
+		ds_map_delete(ntte_obj_bind, "begin_step");
+	}
+	
 	 // Lag Debugging:
-	if(lag){
-		with(ds_map_values(lag_bind)){
-			with(id){
-				visible = true;
+	lag_bind_call("begin_step");
+	
+#define ntte_step
+	 // Bound Step Events:
+	if(!obj_bind_call("step")){
+		ds_map_delete(ntte_obj_bind, "step");
+	}
+	
+	 // Lag Debugging:
+	lag_bind_call("step");
+	
+#define ntte_end_step
+	 // Bound End Step Events:
+	if(!obj_bind_call("end_step")){
+		ds_map_delete(ntte_obj_bind, "end_step");
+	}
+	
+	 // Bound Draw Event Depth Update:
+	if(ds_map_exists(ntte_obj_bind, "draw")){
+		var _inst = ntte_obj_bind[? "draw"].list;
+		with(ds_map_keys(ntte_obj_bind_draw)){
+			_inst = instances_matching_ne(_inst, "depth", self);
+		}
+		if(array_length(_inst)){
+			with(_inst){
+				with(script_bind_draw(obj_draw, depth)){
+					persistent = true;
+					ntte_obj_bind_draw[? depth] = self;
+				}
 			}
 		}
 	}
 	
+	 // Lag Debugging:
+	lag_bind_call("end_step");
+	
+#define obj_draw
+	if(lag) trace_time();
+	
+	 // Bound Draw Events:
+	if(!obj_bind_call("draw")){
+		ds_map_delete(ntte_obj_bind_draw, depth);
+		if(!ds_map_size(ntte_obj_bind_draw)){
+			ds_map_delete(ntte_obj_bind, "draw");
+		}
+		instance_destroy();
+		exit;
+	}
+	
+	if(lag) trace_time(`obj_draw, ${depth}`);
+	
+#define obj_bind_call(_event)
+	/*
+		Calls the given event for the instances bound to it
+	*/
+	
+	if(ds_map_exists(ntte_obj_bind, _event)){
+		var _bind = ntte_obj_bind[? _event],
+			_inst = instances_matching_ne(_bind.list, "id", null);
+			
+		_bind.list = _inst;
+		
+		 // Match Depth:
+		if(_event == "draw"){
+			_inst = instances_matching(_inst, "depth", depth);
+		}
+		
+		 // Call Scripts:
+		if(array_length(_inst)){
+			switch(_event){
+				case "begin_step":
+					with(_inst){
+						mod_script_call_self(ntte_bind_begin_step[0], ntte_bind_begin_step[1], ntte_bind_begin_step[2]);
+					}
+					break;
+					
+				case "step":
+					with(_inst){
+						mod_script_call_self(ntte_bind_step[0], ntte_bind_step[1], ntte_bind_step[2]);
+					}
+					break;
+				
+				case "end_step":
+					with(_inst){
+						mod_script_call_self(ntte_bind_end_step[0], ntte_bind_end_step[1], ntte_bind_end_step[2]);
+					}
+					break;
+				
+				case "draw":
+					with(instances_matching(_inst, "visible", true)){
+						mod_script_call_self(ntte_bind_draw[0], ntte_bind_draw[1], ntte_bind_draw[2]);
+					}
+					break;
+			}
+			
+			return true;
+		}
+	}
+	
+	return false;
+	
+#define lag_bind_call(_event)
+	/*
+		Overrides all "Custom" object step events for debugging lag
+	*/
+	
+	if((ds_map_exists(lag_bind, _event) && lag_bind[? _event]) || lag){
+		lag_bind[? _event] = lag;
+		
+		var _obj = [CustomObject, CustomHitme, CustomEnemy, CustomProp, CustomProjectile];
+		
+		if(lag){
+			trace_time("pre-on_" + _event);
+			
+			 // Enable Events:
+			with(instances_matching_ne(_obj, "ntte_lag_" + _event, null)){
+				variable_instance_set(self, "on_" + _event, variable_instance_get(self, "ntte_lag_" + _event));
+			}
+			
+			 // Call Events:
+			var _inst = instances_matching_ne(_obj, "on_" + _event, null);
+			if(array_length(_inst)){
+				trace_time();
+				switch(_event){
+					case "begin_step" : with(_inst) event_perform(ev_step, ev_step_begin);  break;
+					case "step"       : with(_inst) event_perform(ev_step, ev_step_normal); break;	
+					case "end_step"   : with(_inst) event_perform(ev_step, ev_step_end);    break;
+				}
+				trace_time(`on_${_event} (${array_length(_inst)})`);
+				
+				 // Disable Events:
+				with(instances_matching_ne(_inst, "id", null)){
+					variable_instance_set(self, "ntte_lag_" + _event, variable_instance_get(self, "on_" + _event));
+					variable_instance_set(self, "on_"       + _event, []);
+				}
+			}
+			
+			trace_time();
+		}
+		
+		 // Reset Events:
+		else with(instances_matching_ne(_obj, "ntte_lag_" + _event, null)){
+			variable_instance_set(self, "on_"       + _event, variable_instance_get(self, "ntte_lag_" + _event));
+			variable_instance_set(self, "ntte_lag_" + _event, null);
+		}
+	}
 	
 /// SCRIPTS
+#define trace_error(_error)
+	trace(_error);
+	trace_color(" ^ Screenshot that error and post it on NT:TE's itch.io page, thanks!", c_yellow);
+	
 #define draw_self_enemy()
+	/*
+		'draw_self()' for enemies
+	*/
+	
 	image_xscale *= right;
 	draw_self(); // This is faster than draw_sprite_ext yea
 	image_xscale /= right;
 	
-#define draw_weapon(_sprite, _x, _y, _ang, _meleeAng, _wkick, _flip, _blend, _alpha)
-	draw_sprite_ext(_sprite, 0, _x - lengthdir_x(_wkick, _ang), _y - lengthdir_y(_wkick, _ang), 1, _flip, _ang + (_meleeAng * (1 - (_wkick / 20))), _blend, _alpha);
+#define draw_weapon(_sprite, _image, _x, _y, _angle, _angleMelee, _kick, _flip, _blend, _alpha)
+	/*
+		Drawing weapon sprites
+		
+		Ex:
+			draw_weapon(sprBanditGun, gunshine, x, y, gunangle, 0, wkick, right, image_blend, image_alpha)
+			draw_weapon(sprPipe, 0, x, y, gunangle, wepangle, wkick, wepflip, image_blend, image_alpha)
+	*/
 	
-#define draw_lasersight(_x, _y, _dir, _maxDistance, _width)
+	 // Melee Offset:
+	if(_angleMelee != 0){
+		_angle += _angleMelee * (1 - (_kick / 20));
+	}
+	
+	 // Kick:
+	if(_kick != 0){
+		_x -= lengthdir_x(_kick, _angle);
+		_y -= lengthdir_y(_kick, _angle);
+	}
+	
+	 // Draw:
+	draw_sprite_ext(_sprite, _image, _x, _y, 1, _flip, _angle, _blend, _alpha);
+	
+#define draw_lasersight(_x, _y, _dir, _disMax, _width)
 	/*
 		Performs hitscan and draws a laser sight line
 		Returns the line's ending position
 	*/
 	
-	var	_sx = _x,
-		_sy = _y,
-		_lx = _sx,
-		_ly = _ly,
-		_md = _maxDistance,
-		_d  = _md,
-		_m  = 0; // Minor hitscan increment distance
+	var	_dis  = _disMax,
+		_disX = lengthdir_x(_dis, _dir),
+		_disY = lengthdir_y(_dis, _dir);
 		
-	while(_d > 0){
-		 // Major Hitscan Mode (Start at max, go back until no collision line):
-		if(_m <= 0){
-			_lx = _sx + lengthdir_x(_d, _dir);
-			_ly = _sy + lengthdir_y(_d, _dir);
-			_d -= sqrt(_md);
+	 // Major Hitscan Mode (Start at max, halve distance until no collision line):
+	while(_dis >= 1 && collision_line(_x, _y, _x + _disX, _y + _disY, Wall, false, false)){
+		_dis  /= 2;
+		_disX /= 2;
+		_disY /= 2;
+	}
+	
+	 // Minor Hitscan Mode (Increment until walled):
+	if(_dis < _disMax){
+		var	_disAdd  = max(2, _dis / 32),
+			_disAddX = lengthdir_x(_disAdd, _dir),
+			_disAddY = lengthdir_y(_disAdd, _dir);
 			
-			 // Enter minor hitscan mode:
-			if(!collision_line(_sx, _sy, _lx, _ly, Wall, false, false)){
-				_m = 2;
-				_d = sqrt(_md);
-			}
-		}
-		
-		 // Minor Hitscan Mode (Move until collision):
-		else{
-			if(position_meeting(_lx, _ly, Wall)) break;
-			_lx += lengthdir_x(_m, _dir);
-			_ly += lengthdir_y(_m, _dir);
-			_d -= _m;
+		while(_dis > 0 && !position_meeting(_x + _disX, _y + _disY, Wall)){
+			_dis  -= _disAdd;
+			_disX += _disAddX;
+			_disY += _disAddY;
 		}
 	}
 	
-	draw_line_width(_sx, _sy, _lx, _ly, _width);
+	 // Draw:
+	draw_line_width(
+		_x - 1,
+		_y - 1,
+		_x - 1 + _disX,
+		_y - 1 + _disY,
+		_width
+	);
 	
-	return [_lx, _ly];
+	return [_x + _disX, _y + _disY];
 	
 #define draw_surface_scale(_surf, _x, _y, _scale)
 	/*
@@ -759,31 +831,11 @@
 	
 	return _string;
 	
-#define scrWalk(_dir, _walk)
-	walk      = (is_array(_walk) ? random_range(_walk[0], _walk[1]) : _walk);
-	speed     = max(speed, friction);
-	direction = _dir;
-	
-	if("gunangle" not in self){
-		scrRight(direction);
-	}
-	
-#define scrRight(_dir)
-	_dir = ((_dir % 360) + 360) % 360;
-	if(_dir < 90 || _dir > 270) right = 1;
-	if(_dir > 90 && _dir < 270) right = -1;
-	
-#define scrAim(_dir)
-	if("gunangle" in self){
-		gunangle = ((_dir % 360) + 360) % 360;
-	}
-	scrRight(_dir);
-	
 #define projectile_create(_x, _y, _obj, _dir, _spd)
 	/*
 		Creates a given projectile with the given motion applied
-		Automatically sets team, creator, and hitid based on the calling instance
-		Automatically applies Euphoria to NTTE's custom projectiles if the calling instance is an enemy
+		Automatically sets 'team', 'creator', and 'hitid' based on the calling instance
+		Automatically applies Euphoria to the projectile if the creator is an enemy
 		
 		Ex:
 			projectile_create(x, y, Bullet2, gunangle + orandom(30), 16)
@@ -795,7 +847,9 @@
 	with(_inst){
 		 // Motion:
 		direction += _dir;
-		if(_spd > 0) motion_add(_dir, _spd);
+		if(_spd != 0){
+			motion_add(_dir, _spd);
+		}
 		image_angle += direction;
 		
 		 // Auto Setup:
@@ -834,7 +888,7 @@
 			&& !instance_is(self, EnergyHammerSlash)
 			&& !instance_is(other, FireCont)
 		){
-			script_bind_begin_step(projectile_euphoria, 0, id);
+			script_bind_begin_step(projectile_euphoria, 0, self);
 		}
 	}
 	
@@ -846,19 +900,16 @@
 	}
 	instance_destroy();
 	
-#define enemy_hurt(_hitdmg, _hitvel, _hitdir)
-	my_health -= _hitdmg;          // Damage
-	motion_add(_hitdir, _hitvel);  // Knockback
-	nexthurt = current_frame + 6;  // I-Frames
-	sound_play_hit(snd_hurt, 0.3); // Sound
+#define enemy_hurt(_damage, _force, _direction)
+	my_health -= _damage;           // Damage
+	nexthurt = current_frame + 6;   // I-Frames
+	motion_add(_direction, _force); // Knockback
+	sound_play_hit(snd_hurt, 0.3);  // Sound
 	
 	 // Hurt Sprite:
 	sprite_index = spr_hurt;
 	image_index  = 0;
-
-#define enemy_death
-	pickup_drop(16, 0); // Bandit drop-ness
-
+	
 #define enemy_target(_x, _y)
 	/*
 		Base game targeting for consistency, cause with consistency u can have clever solutions
@@ -931,7 +982,7 @@
 		 // Only Ammo Chests:
 		if(crown_current == crwn_love){
 			if(!is_real(_obj) || !object_is(_obj, AmmoChest)){
-				if(!array_exists([ProtoChest, RogueChest, "Backpack", "BonusAmmoChest", "BonusAmmoMimic", "BuriedVaultChest", "CatChest", "CursedAmmoChest", "CursedMimic", "SunkenChest"], _obj)){
+				if(array_find_index([ProtoChest, RogueChest, "Backpack", "BonusAmmoChest", "BonusAmmoMimic", "BuriedVaultChest", "CatChest", "CursedAmmoChest", "CursedMimic", "SunkenChest"], _obj) < 0){
 					var _name = (is_real(_obj) ? object_get_name(_obj) : _obj);
 					if(string_pos("Mimic", _name) > 0){
 						_obj = Mimic;
@@ -972,7 +1023,7 @@
 	if(!_levelStart){
 		GameCont.norads = 0;
 		with(Player){
-			array_push(_health, [id, my_health]);
+			array_push(_health, [self, my_health]);
 			my_health = maxhealth;
 		}
 	}
@@ -998,72 +1049,56 @@
 	return _inst;
 	
 #define object_is(_object, _parent)
+	/*
+		Returns whether the given object is a child of, or equal to, the given parent object (true) or not (false)
+	*/
+	
 	return (_object == _parent || object_is_ancestor(_object, _parent));
 	
 #define chance(_numer, _denom)
-	return random(_denom) < _numer;
-
-#define chance_ct(_numer, _denom)
-	return random(_denom) < (_numer * current_time_scale);
-	
-#define instance_seen(_x, _y, _obj)
 	/*
-		Returns the nearest instance of the given object that is seen by the given position (no walls between)
+		Returns true or false randomly, based on the given probability
 		
-		Args:
-			x/y - The position to check
-			obj - An object, instance, or array of instances
-	*/
-	
-	var	_disMax = infinity,
-		_inst   = noone;
-		
-	with(_obj){
-		if(!collision_line(_x, _y, x, y, Wall, false, false)){
-			var _dis = point_distance(_x, _y, x, y);
-			if(_dis < _disMax){
-				_disMax = _dis;
-				_inst = id;
-			}
-		}
-	}
-	
-	return _inst;
-	
-#define instance_near(_x, _y, _obj, _dis)
-	/*
-		Returns the nearest instance of the given object that is within the given distance of the given position
-		
-		Args:
-			x/y - The position to check
-			obj - An object, instance, or array of instances
-			dis - The distance to check, can be a single number for max distance or a 2-element array for [min, max]
-			
 		Ex:
-			instance_near(x, y, Player, 96)
-			instance_near(x, y, instances_matching(hitme, "team", 2), [32, 64])
+			if(chance(1, 3)) trace("1/3 chance");
 	*/
 	
-	var	_inst   = noone,
-		_disMin = (is_array(_dis) ? _dis[0] : 0),
-		_disMax = (is_array(_dis) ? _dis[1] : _dis);
+	return (random(_denom) < _numer);
+	
+#define chance_ct(_numer, _denom)
+	/*
+		Like 'chance()', but used when being called every frame (for timescale support)
+	*/
+	
+	return (random(_denom) < _numer * current_time_scale);
+	
+#define lerp_ct(_val1, _val2, _amount)
+	/*
+		Like 'lerp()', but used when modifying a persistent value every frame (for timescale support)
+	*/
+	
+	return lerp(_val2, _val1, power(1 - _amount, current_time_scale));
+	
+#define angle_lerp(_ang1, _ang2, _num)
+	/*
+		Linearly interpolates between the two given angles
 		
-	with(
-		(is_real(_obj) && object_exists(_obj) && _disMin <= 0)
-		? instance_nearest(_x, _y, _obj)
-		: _obj
-	){
-		var _d = point_distance(_x, _y, x, y);
-		if(_d <= _disMax && _d >= _disMin){
-			_disMax = _d;
-			_inst = id;
-		}
-	}
+		Ex:
+			lerp(90, 180, 0.5) == 135
+			lerp(20, 270, 0.1) == 9
+	*/
 	
-	return _inst;
+	return _ang1 + (angle_difference(_ang2, _ang1) * _num);
 	
-#define script_bind(_name, _scriptObj, _scriptRef, _depth, _visible)
-	return mod_script_call_nc("mod", "teassets", "script_bind", _name, _scriptObj, _scriptRef, _depth, _visible);
+#define angle_lerp_ct(_ang1, _ang2, _num)
+	/*
+		Like 'angle_lerp()', but used when modifying a persistent value every frame (for timescale support)
+	*/
+	
+	return _ang2 + (angle_difference(_ang1, _ang2) * power(1 - _num, current_time_scale));
+	
+#define script_bind(_scriptObj, _scriptRef, _depth, _visible)
+	return mod_script_call_nc('mod', 'teassets', 'script_bind', script_ref_create(script_bind), _scriptObj, (is_real(_scriptRef) ? script_ref_create(_scriptRef) : _scriptRef), _depth, _visible);
 	
 #define save_get(_name, _default)
 	return mod_script_call_nc("mod", "teassets", "save_get", _name, _default);
@@ -1291,7 +1326,7 @@
 	
 #define unlock_splat(_name, _text, _sprite, _sound)
 	 // Make Sure UnlockCont Exists:
-	if(array_length(instances_matching(CustomObject, "name", "UnlockCont")) <= 0){
+	if(!array_length(instances_matching(CustomObject, "name", "UnlockCont"))){
 		obj_create(0, 0, "UnlockCont");
 	}
 	
@@ -1323,7 +1358,7 @@
 		creator = other;
 		depth   = other.depth;
 		
-		return id;
+		return self;
 	}
 	
 	return noone;
@@ -1372,7 +1407,7 @@
 			}
 			alert.x = (sprite_get_bbox_left(sprite_index) - sprite_get_xoffset(sprite_index));
 			
-			return id;
+			return self;
 		}
 	}
 	
@@ -1427,7 +1462,7 @@
 				}
 			}
 			
-			return id;
+			return self;
 		}
 	}
 	
@@ -1467,7 +1502,7 @@
 					event_perform(ev_alarm, 6);
 				}
 				sound_stop(sndBigBanditIntro);
-				instance_delete(id);
+				instance_delete(self);
 			}
 			
 			GameCont.subarea        = _lastSub;
@@ -1484,22 +1519,42 @@
 		instance_destroy();
 	}
 	
-#define scrFX(_x, _y, _motion, _obj)
-	if(!is_array(_x)) _x = [_x, 1];
-	while(array_length(_x) < 2) array_push(_x, 0);
-
-	if(!is_array(_y)) _y = [_y, 1];
-	while(array_length(_y) < 2) array_push(_y, 0);
-
-	if(!is_array(_motion)) _motion = [random(360), _motion];
-	while(array_length(_motion) < 2) array_push(_motion, 0);
-
-	with(obj_create(_x[0] + orandom(_x[1]), _y[0] + orandom(_y[1]), _obj)){
-		var _face = (image_angle == direction);
-		motion_add(_motion[0], _motion[1]);
-		if(_face) image_angle = direction;
+#define scrFX(_x, _y, _motion, _object)
+	/*
+		Creates a given Effect object with the given motion applied
+		Automatically reorients the effect towards its new direction
 		
-		return id;
+		Args:
+			x/y    - Spawn position, can be a 2-element array for [position, randomized offset]
+			motion - Can be a speed to apply toward a random direction, or a 2-element array to apply a [direction, speed]
+			object - The effect's object index, or an NT:TE object's name string
+			
+		Ex:
+			scrFX([x, 4], [y, 4], 3, Dust)
+			scrFX(x, y, [90 + orandom(30), random(3)], AcidStreak);
+	*/
+	
+	with(obj_create(
+		(is_array(_x) ? (_x[0] + orandom(_x[1])) : _x),
+		(is_array(_y) ? (_y[0] + orandom(_y[1])) : _y),
+		_object
+	)){
+		var _face = (image_angle == direction || (speed == 0 && (object_index == AcidStreak || object_index == BloodStreak)));
+		
+		 // Motion:
+		if(is_array(_motion)){
+			motion_add(_motion[0], _motion[1]);
+		}
+		else{
+			motion_add(random(360), _motion);
+		}
+		
+		 // Facing:
+		if(_face){
+			image_angle = direction;
+		}
+		
+		return self;
 	}
 	
 	return noone;
@@ -1528,7 +1583,7 @@
 		speed = min(speed, 16);
 		if(size > 0) speed /= size;
 		
-        return id;
+        return self;
 	}
 
 #define player_swap()
@@ -1598,9 +1653,15 @@
 				 // Rescue Players:
 				if(timer > 30){
 					with(instances_matching(instances_matching_ne(Player, "angle", 0), "roll", 0)){
-						if(instance_near(x, y, instance_seen(x, y, other), 48)){
-							if(skill_get(mut_throne_butt) > 0) angle = 0;
-							else roll = true;
+						if(point_distance(x, y, other.x, other.y) < 48){
+							if(!collision_line(x, y, other.x, other.y, Wall, false, false)){
+								if(skill_get(mut_throne_butt) > 0){
+									angle = 0;
+								}
+								else{
+									roll = true;
+								}
+							}
 						}
 					}
 				}
@@ -1625,7 +1686,7 @@
 	
 	with(global.portal_pickups_bind.id){
 		visible = true;
-		return id;
+		return self;
 	}
 	
 #define portal_pickups_step
@@ -1639,7 +1700,7 @@
 			 // Normal Pickups:
 			if(instance_exists(AmmoPickup) || instance_exists(HPPickup) || instance_exists(RoguePickup)){
 				var _attractDis = 30 + (40 * _pluto);
-				with(instances_matching([AmmoPickup, HPPickup, RoguePickup], "", null)){
+				with(instances_matching_ne([AmmoPickup, HPPickup, RoguePickup], "id", null)){
 					var _p = instance_nearest(x, y, Player);
 					if(point_distance(x, y, _p.x, _p.y) >= _attractDis){
 						var	_dis = 6 * current_time_scale,
@@ -1660,7 +1721,11 @@
 					
 				with(instances_matching([Rad, BigRad], "speed", 0)){
 					var _proto = instance_nearest(x, y, ProtoStatue);
-					if(distance_to_object(_proto) >= _attractDisProto || !instance_seen(x, y, _proto)){
+					if(
+						!instance_exists(_proto)
+						|| distance_to_object(_proto) >= _attractDisProto
+						|| collision_line(x, y, _proto.x, _proto.y, Wall, false, false)
+					){
 						if(distance_to_object(Player) >= _attractDis){
 							var	_p   = instance_nearest(x, y, Player),
 								_dis = 12 * current_time_scale,
@@ -1677,12 +1742,12 @@
 		}
 	}
 
-#define orandom(n)
+#define orandom(_num)
 	/*
 		For offsets
 	*/
 	
-	return random_range(-n, n);
+	return random_range(-_num, _num);
 	
 #define pround(_num, _precision)
 	/*
@@ -1725,9 +1790,6 @@
 	}
 	
 	return _num;
-	
-#define array_exists(_array, _value)
-	return (array_find_index(_array, _value) >= 0);
 	
 #define array_count(_array, _value)
 	/*
@@ -1890,7 +1952,7 @@
 			}
 			
 			 // Custom:
-			else if(is_array(_hitid) && array_length(_hitid) > 1){
+			else if(is_array(_hitid) && array_length(_hitid)){
 				_name = string(_hitid[1]);
 			}
 		}
@@ -1942,11 +2004,11 @@
 	var	_disMax  = infinity,
 		_nearest = noone;
 		
-	with(instances_matching(_obj, "", null)){
+	with(instances_matching_ne(_obj, "id", null)){
 		var _dis = point_distance(_x, _y, x, y);
 		if(_dis < _disMax){
 			_disMax  = _dis;
-			_nearest = id;
+			_nearest = self;
 		}
 	}
 	
@@ -1954,7 +2016,7 @@
 	
 #define instance_nearest_bbox(_x, _y, _obj)
 	/*
-		Returns the instance closest to a given point based on their bounding box, similar to how 'distance_to_point()' works
+		Returns the instance closest to a given point based on their bounding box
 		Accepts an array argument like 'instance_nearest_array()' does
 		
 		Ex:
@@ -1964,11 +2026,11 @@
 	var	_disMax  = infinity,
 		_nearest = noone;
 		
-	with(instances_matching(_obj, "", null)){
-		var _dis = point_distance(_x, _y, clamp(_x, bbox_left, bbox_right + 1), clamp(_y, bbox_top, bbox_bottom + 1));
+	with(instances_matching_ne(_obj, "id", null)){
+		var _dis = distance_to_point(_x, _y);
 		if(_dis < _disMax){
 			_disMax  = _dis;
-			_nearest = id;
+			_nearest = self;
 		}
 	}
 	
@@ -1990,14 +2052,14 @@
 		_disBMax = infinity,
 		_nearest = noone;
 		
-	with(instances_matching(_obj, "", null)){
-		var	_disA = point_distance(clamp(x, _x1, _x2), clamp(y, _y1, _y2), x, y),
-			_disB = point_distance(_cx, _cy, x, y);
+	with(instances_matching_ne(_obj, "id", null)){
+		var	_disA = point_distance(x, y, clamp(x, _x1, _x2), clamp(y, _y1, _y2)),
+			_disB = point_distance(x, y, _cx, _cy);
 			
 		if(_disA < _disAMax || (_disA == _disAMax && _disB < _disBMax)){
 			_disAMax = _disA;
 			_disBMax = _disB;
-			_nearest = id;
+			_nearest = self;
 		}
 	}
 	
@@ -2005,7 +2067,7 @@
 	
 #define instance_nearest_rectangle_bbox(_x1, _y1, _x2, _y2, _obj)
 	/*
-		Returns the instance closest to a given rectangle based on their bounding box, similar to how 'distance_to_object()' works
+		Returns the instance closest to a given rectangle based on their bounding box
 		If multiple instances are equally distant from the rectangle, a bias exists for the one closer to its center
 		Accepts an array argument like 'instance_nearest_array()' does
 		
@@ -2019,16 +2081,16 @@
 		_disBMax = infinity,
 		_nearest = noone;
 		
-	with(instances_matching(_obj, "", null)){
+	with(instances_matching_ne(_obj, "id", null)){
 		var	_x    = clamp(_cx, bbox_left, bbox_right + 1),
 			_y    = clamp(_cy, bbox_top, bbox_bottom + 1),
-			_disA = point_distance(clamp(_x, _x1, _x2), clamp(_y, _y1, _y2), _x, _y),
-			_disB = point_distance(_cx, _cy, _x, _y);
+			_disA = point_distance(_x, _y, clamp(_x, _x1, _x2), clamp(_y, _y1, _y2)),
+			_disB = point_distance(_x, _y, _cx, _cy);
 			
 		if(_disA < _disAMax || (_disA == _disAMax && _disB < _disBMax)){
 			_disAMax = _disA;
 			_disBMax = _disB;
-			_nearest = id;
+			_nearest = self;
 		}
 	}
 	
@@ -2148,7 +2210,7 @@
 		Also accepts an array of instances
 	*/
 	
-	var	_inst = instances_matching(_obj, "", null),
+	var	_inst = instances_matching_ne(_obj, "id", null),
 		_size = array_length(_inst);
 		
 	return (
@@ -2330,292 +2392,17 @@
 		Returns 'true' if the given variable on the given instance is read-only, 'false' otherwise
 	*/
 	
-	if(array_exists(["id", "object_index", "bbox_bottom", "bbox_top", "bbox_right", "bbox_left", "image_number", "sprite_yoffset", "sprite_xoffset", "sprite_height", "sprite_width"], _varName)){
+	if(array_find_index(["id", "object_index", "bbox_bottom", "bbox_top", "bbox_right", "bbox_left", "image_number", "sprite_yoffset", "sprite_xoffset", "sprite_height", "sprite_width"], _varName) >= 0){
 		return true;
 	}
 	
 	if(instance_is(_inst, Player)){
-		if(array_exists(["p", "index", "alias"], _varName)){
+		if(array_find_index(["p", "index", "alias"], _varName) >= 0){
 			return true;
 		}
 	}
 	
 	return false;
-	
-#define weapon_fire_init(_wep)
-	/*
-		Called from a 'weapon_fire' script to do some basic weapon firing setup
-		Returns a LWO with some useful variables
-		
-		Vars:
-			wep     - The weapon's value, may be modified from the given argument
-			creator - The actual instance firing, for 'player_fire_ext()' support
-			primary - The weapon is in the primary slot (true) or secondary slot (false)
-			wepheld - The weapon is physically stored in the creator's 'wep' variable
-			spec    - The weapon is being shot by an active (YV, Steroids, Skeleton)
-	*/
-	
-	var _fire = {
-		"wep"     : _wep,
-		"creator" : noone,
-		"primary" : true,
-		"wepheld" : false,
-		"spec"    : false
-	};
-	
-	 // Creator:
-	_fire.creator = self;
-	if(instance_is(self, FireCont) && "creator" in self){
-		_fire.creator = creator;
-	}
-	
-	 // Weapon Held by Creator:
-	_fire.wepheld = (variable_instance_get(_fire.creator, "wep") == _wep);
-	
-	 // Active / Secondary Firing:
-	_fire.spec = variable_instance_get(self, "specfiring", false);
-	if(race == "steroids" && _fire.spec){
-		_fire.primary = false;
-	}
-	
-	 // LWO Setup:
-	if(is_string(_fire.wep)){
-		var _lwo = mod_variable_get("weapon", _fire.wep, "lwoWep");
-		if(is_object(_lwo)){
-			_fire.wep = lq_clone(_lwo);
-			if(_fire.wepheld){
-				_fire.creator.wep = _fire.wep;
-			}
-		}
-	}
-	
-	 // Charge Weapon:
-	if(mod_script_call("weapon", wep_raw(_wep), "weapon_chrg", _wep) && _wep.chrg >= 0){
-		var	_load = variable_instance_get(self, "reloadspeed", 1) * current_time_scale,
-			_auto = ((race == "steroids") ? (weapon_get_auto(_wep) >= 0) : weapon_get_auto(_wep));
-			
-		 // Charging (chrg: -1==Released, 0==None, 1==Charging, 2==Charged):
-		_wep.chrg = ((_wep.chrg_num < _wep.chrg_max) ? 1 : 2);
-		if(_wep.chrg == 1){
-			_wep.chrg_num = min(_wep.chrg_num + _load, _wep.chrg_max);
-			
-			 // Pop Pop:
-			if(_fire.spec && _fire.primary){
-				_wep.chrg_num = _wep.chrg_max;
-			}
-		}
-		
-		 // Hold to Charge:
-		if(_auto || wep.chrg_num >= wep.chrg_max){
-			 // Manual Reload:
-			reload += _load - weapon_get_load(_wep);
-			
-			 // Charge Controller:
-			var _inst = instances_matching(instances_matching(CustomObject, "name", "WeaponCharger"), "wep", _wep);
-			if(!array_length(_inst)){
-				_inst = instance_create(x, y, CustomObject);
-				with(_inst){
-					name    = "WeaponCharger";
-					wep     = _wep;
-					on_step = weapon_chrg_step;
-				}
-			}
-			with(_inst){
-				x         = other.x;
-				y         = other.y;
-				direction = other.gunangle;
-				team      = other.team;
-				creator   = _fire.creator;
-				primary   = _fire.primary;
-				fire      = !_auto;
-			}
-		}
-	}
-	
-	 // Melee:
-	else if(weapon_is_melee(_wep)){
-		wepangle *= -1;
-	}
-	
-	return _fire;
-	
-#define weapon_chrg_step
-	if(fire){
-		if(is_object(wep) && "chrg" in wep){
-			if(wep.chrg){
-				wep.chrg = -1;
-				with(creator){
-					other.x = x;
-					other.y = y;
-					if(variable_instance_get(self, (other.primary ? "" : "b") + "wep") == other.wep){
-						 // Player:
-						if(instance_is(self, Player)){
-							 // Steroids:
-							if(!other.primary){
-								player_swap();
-								specfiring = true;
-							}
-							
-							 // Fire:
-							var	_type = weapon_get_type(wep),
-								_cost = weapon_get_cost(wep),
-								_rads = weapon_get_rads(wep),
-								_ammo = ammo[_type];
-								
-							if(infammo != 0 || (_ammo >= _cost && GameCont.rad >= _rads)){
-								var _lastTeam = team;
-								team = other.team;
-								player_fire(other.direction);
-								team = _lastTeam;
-							}
-							
-							 // Low Ammo:
-							else{
-								wkick     = -2;
-								clicked   = false;
-								drawempty = 30;
-								sound_play((_ammo < _cost) ? sndEmpty : sndUltraEmpty);
-								with(instance_create(x, y, PopupText)){
-									target = other.index;
-									text   = ((_ammo < _cost) ? ((_ammo > 0) ? "NOT ENOUGH " + other.typ_name[_type] : "EMPTY") : "NOT ENOUGH RADS");
-								}
-							}
-							
-							 // Steroids:
-							if(!other.primary){
-								specfiring = false;
-								player_swap();
-							}
-						}
-						
-						 // Non-Player:
-						else with(other){
-							player_fire_ext(direction, wep, x, y, team, other);
-						}
-					}
-				}
-				wep.chrg = 0;
-			}
-			wep.chrg_num = 0;
-		}
-		instance_destroy();
-	}
-	else fire = true;
-	
-#define weapon_ammo_fire(_wep)
-	/*
-		Called from a 'weapon_fire' script to process LWO weapons with internal ammo
-		Returns 'true' if the weapon had enough internal ammo to fire, 'false' otherwise
-	*/
-	
-	 // Gun Warrant:
-	if(infammo != 0){
-		return true;
-	}
-	
-	 // Ammo Cost:
-	var _cost = lq_defget(_wep, "cost", 1);
-	with(_wep) if(ammo >= _cost){
-		ammo -= _cost;
-		
-		 // Can Fire:
-		return true;
-	}
-	
-	 // Not Enough Ammo:
-	reload = variable_instance_get(self, "reloadspeed", 1) * current_time_scale;
-	if("anam" in _wep){
-		if(button_pressed(index, (specfiring ? "spec" : "fire"))){
-			wkick = -2;
-			sound_play(sndEmpty);
-			with(instance_create(x, y, PopupText)){
-				target = other.index;
-				text   = ((_wep.ammo > 0) ? "NOT ENOUGH " + _wep.anam : "EMPTY");
-			}
-		}
-	}
-	
-	return false;
-	
-#define weapon_ammo_hud(_wep)
-	/*
-		Called from a 'weapon_sprt_hud' script to draw HUD for LWO weapons with internal ammo
-		Returns the weapon's normal sprite for easy returning
-		
-		Ex:
-			#define weapon_sprt_hud(w)
-				return weapon_ammo_hud(w);
-	*/
-	
-	 // Draw Ammo:
-	if(
-		instance_is(self, Player)
-		&& (instance_is(other, TopCont) || instance_is(other, UberCont))
-		&& is_object(_wep)
-	){
-		var	_ammo    = lq_defget(_wep, "ammo", 0),
-			_ammoMax = lq_defget(_wep, "amax", _ammo),
-			_ammoMin = lq_defget(_wep, "amin", round(_ammoMax * 0.2));
-			
-		draw_ammo(index, (bwep != _wep), (race == "steroids"), _ammo, _ammoMin);
-	}
-	
-	 // Default Sprite:
-	return weapon_get_sprt(_wep);
-	
-#define draw_ammo(_index, _primary, _steroids, _ammo, _ammoMin)
-	/*
-		Draws ammo HUD text
-		
-		Args:
-			index    - The player to draw HUD for
-			primary  - Is a primary weapon, true/false
-			steroids - Player can dual wield, true/false
-			ammo     - Ammo, can be a string or number
-			ammoMin  - Low ammo threshold
-	*/
-	
-	var _local = player_find_local_nonsync();
-	
-	if(player_is_active(_local) && player_get_show_hud(_index, _local)){
-		if(!instance_exists(menubutton) || _index == _local){
-			var	_x = view_xview_nonsync + (_primary ? 42 : 86),
-				_y = view_yview_nonsync + 21;
-				
-			 // Co-op Offset:
-			var _active = 0;
-			for(var i = 0; i < maxp; i++){
-				_active += player_is_active(i);
-			}
-			if(_active > 1){
-				_x -= 19;
-			}
-			
-			 // Color:
-			var _text = "";
-			if(is_real(_ammo)){
-				_text += "@";
-				if(_ammo > 0){
-					if(_primary || _steroids){
-						if(_ammo > _ammoMin){
-							_text += "w";
-						}
-						else _text += "r";
-					}
-					else _text += "s";
-				}
-				else _text += "d";
-			}
-			_text += string(_ammo);
-			
-			 // !!!
-			draw_set_halign(fa_left);
-			draw_set_valign(fa_top);
-			draw_set_projection(2, _index);
-			draw_text_nt(_x, _y, _text);
-			draw_reset_projection();
-		}
-	}
 	
 #define skill_get_icon(_skill)
 	/*
@@ -2679,7 +2466,9 @@
 		GameCont.loops = 0;
 		if(!instance_exists(Player)){
 			_player = instance_create(0, 0, GameObject);
-			with(_player) instance_change(Player, false);
+			with(_player){
+				instance_change(Player, false);
+			}
 		}
 		
 		 // Call Boss Intro:
@@ -2689,14 +2478,16 @@
 				event_perform(ev_alarm, 6);
 			}
 			sound_stop(sndBigBanditIntro);
-			instance_delete(id);
+			instance_delete(self);
 		}
 		
 		 // Reset:
-		alarm2 = -1;
+		alarm2         = -1;
 		opt_bossintros = _lastIntro;
 		GameCont.loops = _lastLoops;
-		with(_player) instance_delete(id);
+		with(_player){
+			instance_delete(self);
+		}
 		
 		 // Unpause Game, Then Deactivate Objects:
 		event_perform(ev_alarm, 2);
@@ -2720,7 +2511,7 @@
 		Ex:
 			var _genID = area_generate(area_scrapyards, 3, GameCont.loops, x, y, false, 0, null);
 			with(instances_matching_gt(chestprop, "id", _genID)){
-				instance_delete(id);
+				instance_delete(self);
 			}
 	*/
 	
@@ -2872,7 +2663,7 @@
 					}
 				}
 				with(instance_rectangle_bbox(_x1, _y1, _x2, _y2, [chestprop, RadChest])){
-					instance_delete(id);
+					instance_delete(self);
 				}
 			}
 			
@@ -2882,10 +2673,10 @@
 			}
 			event_perform(ev_alarm, 0);
 			if(!_setArea){
-				with(WantPopo) instance_delete(id);
-				with(WantVan ) instance_delete(id);
+				with(WantPopo) instance_delete(self);
+				with(WantVan ) instance_delete(self);
 			}
-			var _clearID = GameObject.id;
+			var _clearID = instance_max;
 			event_perform(ev_alarm, 1);
 			
 			 // Player Reset:
@@ -2914,7 +2705,7 @@
 					repeat(4) with(instance_nearest(x, y, PortalL)){
 						instance_destroy();
 					}
-					instance_delete(id);
+					instance_delete(self);
 					break;
 				}
 			}
@@ -2957,17 +2748,17 @@
 		var	_overlapObject = [Floor, Wall, InvisiWall, TopSmall, TopPot, Bones],
 			_overlapObj    = array_clone(_overlapObject);
 			
-		while(array_length(_overlapObj) > 0){
+		while(array_length(_overlapObj)){
 			var _obj = _overlapObj[0];
 			
 			 // New Overwriting Old:
 			var _objNew = instances_matching_gt(_obj, "id", _genID);
 			with(instances_matching_lt(_overlapObj, "id", _genID)){
-				if(place_meeting(x, y, _obj) && array_length(instances_meeting(x, y, _objNew)) > 0){
+				if(place_meeting(x, y, _obj) && array_length(instances_meeting(x, y, _objNew))){
 					if(object_index == Floor){
 						array_push(_overlapFloorFill, [bbox_left, bbox_top, bbox_right, bbox_bottom]);
 					}
-					instance_delete(id);
+					instance_delete(self);
 				}
 			}
 			
@@ -2977,15 +2768,15 @@
 			 // Old Overwriting New:
 			var _objOld = instances_matching_lt(_obj, "id", _genID);
 			with(instances_matching_gt(_overlapObj, "id", _genID)){
-				if(place_meeting(x, y, _obj) && array_length(instances_meeting(x, y, _objOld)) > 0){
-					instance_delete(id);
+				if(place_meeting(x, y, _obj) && array_length(instances_meeting(x, y, _objOld))){
+					instance_delete(self);
 				}
 			}
 		}
 		var _wallOld = instances_matching_lt(Wall, "id", _genID);
 		with(instances_matching_lt(hitme, "id", _genID)){
-			if(place_meeting(x, y, Wall) && array_length(instances_meeting(x, y, _wallOld)) <= 0){
-				instance_budge(Wall, -1);
+			if(place_meeting(x, y, Wall) && !array_length(instances_meeting(x, y, _wallOld))){
+				wall_clear(x, y);
 			}
 		}
 		
@@ -3002,7 +2793,7 @@
 						if(!position_meeting(_fx, _fy, Floor)){
 							with(instance_create(_fx, _fy, FloorExplo)){
 								with(instances_meeting(x, y, _overlapObject)){
-									instance_delete(id);
+									instance_delete(self);
 								}
 							}
 						}
@@ -3295,233 +3086,12 @@
 	
 	return -1;
 	
-#define area_border(_y, _area, _color)
-	with(script_bind_draw(area_border_step, 1000, _y, _area, _color)){
-		cavein      = false;
-		cavein_dis  = 800;
-		cavein_inst = [];
-		cavein_pan  = 0;
-		
-		type = [
-			[Wall,		 0, [area_get_sprite(_area, sprWall1Bot), area_get_sprite(_area, sprWall1Top), area_get_sprite(_area, sprWall1Out)]],
-			[TopSmall,	 0, area_get_sprite(_area, sprWall1Trans)],
-			[FloorExplo, 0, area_get_sprite(_area, sprFloor1Explo)],
-			[Debris,	 0, area_get_sprite(_area, sprDebris1)]
-		];
-		
-		return id;
-	}
-	
-#define area_border_step(_y, _area, _color)
-	if(lag) trace_time();
-	
-	var	_fix = false,
-		_caveInst = cavein_inst;
-		
-	 // Cave-In:
-	if(cavein){
-		_fix = true;
-		if(cavein_dis > 0){
-			var d = 12;
-			if(array_length(instances_matching_gt(Player, "y", _y - 64)) <= 0) d *= 1.5;
-			cavein_dis = max(0, cavein_dis - (max(4, random(d)) * current_time_scale));
-			
-			 // Debris:
-			var _floor = instances_matching_gt(Floor, "bbox_bottom", _y);
-			with(_floor) if(point_seen_ext(bbox_center_x, bbox_center_y, 16, 16, -1)){
-				var n = 2 * array_length(instances_matching_gt(Floor, "y", y));
-				if(chance_ct(1, n) && (object_index != FloorExplo || chance(1, 10))){
-					with(instance_create(choose(bbox_left + 4, bbox_right - 4), choose(bbox_top + 4, bbox_bottom - 4), Debris)){
-						motion_set(90 + orandom(90), 4 + random(4));
-					}
-				}
-			}
-			
-			 // Caving Level In:
-			if(cavein_dis < 400){
-				script_bind_step(area_border_cavein, 0, _y, cavein_dis, _caveInst);
-				
-				 // Effects:
-				if(current_frame_active){
-					with(instances_matching_gt(_floor, "bbox_bottom", _y + cavein_dis)){
-						repeat(choose(1, choose(1, 2))){
-							with(instance_create(random_range(bbox_left - 12, bbox_right + 12), bbox_bottom, Dust)){
-								image_xscale *= 2;
-								image_yscale *= 2;
-								depth = -8;
-								vspeed -= 5;
-								sound_play_hit(choose(sndWallBreak, sndWallBreakBrick), 0.3);
-							}
-						}
-					}
-				}
-			}
-			
-			 // Saved Caved Instances:
-			var f = noone;
-			with(instances_matching_lt(instances_matching_gt(Floor, "bbox_bottom", _y), "bbox_top", _y)){
-				f = id;
-				break;
-			}
-			with(_caveInst){
-				if(instance_exists(self)){
-					visible = false;
-					y = _y + 16 + other.cavein_dis;
-					with(f) other.x += (bbox_center_x - other.x) * 0.1 * current_time_scale;
-					
-					 // Why do health chests break walls again
-					if(instance_is(self, HealthChest)) mask_index = mskNone;
-				}
-				else other.cavein_inst = array_delete_value(other.cavein_inst, self);
-			}
-			
-			 // Screenshake:
-			if(cavein_pan < 1) cavein_pan += 1/20 * current_time_scale;
-			for(var i = 0; i < maxp; i++){
-				view_shake[i] = max(view_shake[i], 5);
-				with(instance_exists(view_object[i]) ? view_object[i] : player_find(i)){
-					view_shake_max_at(x, _y + other.cavein_dis, 20);
-					
-					 // Pan Down:
-					view_shift(i, 270, clamp(y - (_y - 64), 0, min(20, other.cavein_dis / 10)) * other.cavein_pan);
-				}
-			}
-		}
-		
-		 // Finished Caving In:
-		else{
-			cavein = -1;
-			
-			 // Fix Camera:
-			with(Revive){
-				if(view_object[p] == id) view_object[p] = noone;
-			}
-			
-			 // Wallerize:
-			with(instances_matching_gt(Floor, "bbox_bottom", _y)){
-				floor_walls();
-			}
-			with(instances_matching_gt(Wall, "bbox_bottom", _y)){
-				wall_tops();
-			}
-			
-			 // Rubble:
-			with(_caveInst) if(instance_exists(self)){
-				visible = true;
-			}
-			with(instances_matching_gt(FloorNormal, "bbox_bottom", _y)){
-				with(obj_create(x + 16, _y, "PizzaRubble")){
-					inst = _caveInst;
-					with(self){
-						event_perform(ev_step, ev_step_normal);
-					}
-				}
-				
-				 // Fix Potential Softlockyness:
-				var _x2 = bbox_center_x;
-				with(instances_matching_lt(instances_matching_gt(FloorExplo, "bbox_bottom", _y - 4), "bbox_top", _y - 4)){
-					var	_x1 = bbox_center_x,
-						_y1 = bbox_center_y;
-						
-					if(collision_line(_x1, _y1, _x2, _y1, Wall, false, false)){
-						floor_tunnel(_x1, _y - 8, _x2, _y - 8);
-					}
-				}
-			}
-		}
-	}
-	else if(cavein == false){
-		 // Start Cave In:
-		if(array_length(instances_matching_lt(Player, "y", _y)) > 0){
-			cavein = true;
-			sound_play_pitchvol(sndStatueXP, 0.2 + random(0.2), 3);
-		}
-	}
-	if(cavein != -1){
-		with(Revive){
-			if(!instance_exists(view_object[p]) && !instance_exists(player_find(p))){
-				view_object[p] = id;
-			}
-		}
-	}
-	
-	 // Sprite Fixes:
-	with(type){
-		var	_obj = self[0],
-			_num = self[1];
-			
-		if(_num < 0 || _num != instance_number(_obj)){
-			_fix = true;
-			self[@1] = instance_number(_obj);
-		}
-	}
-	if(_fix) with(type){
-		var	_obj = self[0],
-			_spr = self[2];
-			
-		with(instances_matching(_obj, "cat_border_fix", null)){
-			cat_border_fix = true;
-			if(y >= _y){
-				switch(_obj){
-					case Wall:
-						sprite_index = _spr[0];
-						topspr = _spr[1];
-						outspr = _spr[2];
-						break;
-						
-					default:
-						sprite_index = _spr;
-				}
-			}
-		}
-	}
-	
-	 // Background:
-	var	_vx = view_xview_nonsync,
-		_vy = view_yview_nonsync;
-		
-	draw_set_color(_color);
-	draw_rectangle(_vx, _y, _vx + game_width, max(_y, _vy + game_height), 0);
-	
-	if(lag) trace_time("area_border_step");
-	
-#define area_border_cavein(_y, _caveDis, _caveInst)
-	 // Destroy:
-	with(instances_matching_ne(instances_matching_gt(GameObject, "y", _y + _caveDis), "object_index", Dust)){
-		if(instance_exists(self)){
-			 // Kill:
-			if(y > _y + 64 && instance_is(self, hitme) && my_health > 0){
-				my_health = 0;
-				if("lasthit" in self){
-					lasthit = [sprTurtleDead, "CAVE IN"];
-				}
-			}
-			
-			 // Save:
-			else if(persistent || (instance_is(self, Pickup) && !instance_is(self, Rad)) || instance_is(self, chestprop) || (instance_is(self, Corpse) && y < _y + 240) || (instance_is(self, CustomHitme) && "name" in self && name == "Pet")){
-				if(!array_exists(_caveInst, id)){
-					array_push(_caveInst, id);
-				}
-			}
-			
-			 // Destroy:
-			else instance_destroy();
-		}
-	}
-	
-	 // Hide Wall Shadows:
-	with(instances_matching_gt(Wall, "bbox_bottom", _y + _caveDis - 32)){
-		outspr = -1;
-	}
-	
-	instance_destroy();
-	
 #define floor_walls()
 	var	_x1    = bbox_left   - 16,
 		_y1    = bbox_top    - 16,
 		_x2    = bbox_right  + 16 + 1,
 		_y2    = bbox_bottom + 16 + 1,
-		_minID = GameObject.id;
+		_minID = instance_max;
 		
 	for(var _x = _x1; _x < _x2; _x += 16){
 		for(var _y = _y1; _y < _y2; _y += 16){
@@ -3564,7 +3134,7 @@
 					var _x = lerp(bbox_left, bbox_right + 1, _side);
 					with(obj_create(_x, _y, "WallDecal")){
 						image_xscale = ((_side > 0.5) ? -1 : 1);
-						array_push(_inst, id);
+						array_push(_inst, self);
 					}
 				}
 			}
@@ -3605,13 +3175,9 @@
 	
 	var _destroyInst = [FloorExplo, Explosion, PortalClear, EnergyHammerSlash];
 	
-	if("list" not in self){
-		list = [];
-	}
-	
 	with(list){
 		 // Revealing:
-		if(time > 0 && (time <= time_max || array_length(instance_rectangle_bbox(x1, y1, x2, y2, _destroyInst)) <= 0)){
+		if(time > 0 && (time <= time_max || !array_length(instance_rectangle_bbox(x1, y1, x2, y2, _destroyInst)))){
 			var	_num = clamp(time / time_max, 0, 1),
 				_col = ((time > time_max) ? color : merge_color(flash_color, color, (flash ? (1 - _num) : _num)));
 				
@@ -3628,7 +3194,7 @@
 	draw_set_alpha(1);
 	
 	 // Goodbye:
-	if(array_length(list) <= 0){
+	if(!array_length(list)){
 		visible = false;
 	}
 	
@@ -3785,7 +3351,9 @@
 		 // Clear Floors:
 		if(!instance_exists(FloorMaker)){
 			if(_obj == FloorExplo){
-				with(instances_matching(instances_matching(_obj, "x", _x), "y", _y)) instance_delete(id);
+				with(instances_matching(instances_matching(_obj, "x", _x), "y", _y)){
+					instance_delete(self);
+				}
 			}
 			else{
 				floor_delete(_x, _y, _x + _w - 1, _y + _h - 1);
@@ -3799,7 +3367,9 @@
 		if(!is_undefined(global.floor_style)){
 			GameCont.area = area_campfire;
 			with(instance_create(_x, _y, FloorMaker)){
-				with(instances_matching_gt(Floor, "id", id)) instance_delete(id);
+				with(instances_matching_gt(Floor, "id", id)){
+					instance_delete(self);
+				}
 				styleb = global.floor_style;
 				_floormaker = self;
 			}
@@ -3885,14 +3455,14 @@
 						_sleep = UberCont.opt_freeze,
 						_sound = sound_play_pitchvol(0, 0, 0);
 						
-					UberCont.opt_shake = 0;
+					UberCont.opt_shake  = 0;
 					UberCont.opt_freeze = 0;
 					
 					with(instances_matching_gt(GameObject, "id", instance_create(_x, _y, FloorExplo))){
-						instance_delete(id);
+						instance_delete(self);
 					}
 					
-					UberCont.opt_shake = _shake;
+					UberCont.opt_shake  = _shake;
 					UberCont.opt_freeze = _sleep;
 					
 					for(var i = _sound; audio_is_playing(i); i++){
@@ -3935,7 +3505,7 @@
 			}
 		}
 		
-		return id;
+		return self;
 	}
 	
 	return noone;
@@ -3956,7 +3526,7 @@
 			}
 	*/
 	
-	with(array_shuffle(instances_matching(_spawnFloor, "", null))){
+	with(array_shuffle(instances_matching_ne(_spawnFloor, "id", null))){
 		var	_x = bbox_center_x,
 			_y = bbox_center_y;
 			
@@ -4018,8 +3588,12 @@
 		_sx         = _x,
 		_sy         = _y;
 		
-	if(!is_array(_dirOff)) _dirOff = [_dirOff];
-	while(array_length(_dirOff) < 2) array_push(_dirOff, 0);
+	if(!is_array(_dirOff)){
+		_dirOff = [_dirOff];
+	}
+	while(array_length(_dirOff) < 2){
+		array_push(_dirOff, 0);
+	}
 	
 	while(_move){
 		var	_x1   = _x - _ow,
@@ -4039,7 +3613,7 @@
 		
 		 // Floors in Range:
 		_move = false;
-		if(array_length(_inst) > 0){
+		if(array_length(_inst)){
 			if(_floorDis <= 0){
 				_move = true;
 			}
@@ -4081,7 +3655,7 @@
 		_x2           = _x,
 		_y2           = _y;
 		
-	if(array_length(_floors) > 0){
+	if(array_length(_floors)){
 		with(_floors[0]){
 			_x1 = bbox_left;
 			_y1 = bbox_top;
@@ -4109,10 +3683,10 @@
 					if(instance_exists(self) && place_meeting(x, y, Floor)){
 						with(instances_meeting(x, y, [Bones, TopPot])){
 							if(place_meeting(x, y, other)){
-								instance_delete(id);
+								instance_delete(self);
 							}
 						}
-						instance_delete(id);
+						instance_delete(self);
 					}
 				}
 			}
@@ -4169,7 +3743,7 @@
 		image_yscale = other.image_yscale;
 		image_angle  = other.image_angle;
 		
-		return id;
+		return self;
 	}
 	
 #define wall_delete(_x1, _y1, _x2, _y2)
@@ -4179,12 +3753,12 @@
 	
 	with(instance_rectangle_bbox(_x1, _y1, _x2, _y2, [Wall, InvisiWall])){
 		with(instances_matching(instances_matching(TrapScorchMark, "x", x), "y", y)){
-			instance_delete(id);
+			instance_delete(self);
 		}
-		instance_delete(id);
+		instance_delete(self);
 	}
 	with(instance_rectangle_bbox(_x1, _y1, _x2, _y2, [TopSmall, TopPot, Bones])){
-		instance_delete(id);
+		instance_delete(self);
 	}
 	
 #define wall_tops()
@@ -4192,7 +3766,7 @@
 		Creates the outer TopSmall tiles around the calling Wall instance
 	*/
 	
-	var _minID = GameObject.id;
+	var _minID = instance_max;
 	
 	instance_create(x - 16, y - 16, Top);
 	instance_create(x - 16, y,      Top);
@@ -4226,52 +3800,63 @@
 			           Use -1 to automatically determine the distance using the bounding boxes of the current instance and objAvoid
 	*/
 	
-	var	_isArray  = is_array(_objAvoid),
-		_inLevel  = !place_meeting(xprevious, yprevious, Floor),
-		_disAdd   = 4,
-		_dirStart = 0;
+	var	_inLevel  = !place_meeting(xprevious, yprevious, Floor),
+		_objArray = is_array(_objAvoid),
+		_dirStart = direction + 180,
+		_disMultX = 1,
+		_disMultY = 1;
 		
+	 // Starting Direction:
+	if(x != xprevious || y != yprevious){
+		_dirStart = point_direction(x, y, xprevious, yprevious);
+	}
+	
 	 // Auto Max Distance:
 	if(_disMax < 0){
-		var	_w = 0,
-			_h = 0;
+		var	_objW = 0,
+			_objH = 0;
 			
-		with(_isArray ? _objAvoid : [_objAvoid]){
+		with(_objArray ? _objAvoid : [_objAvoid]){
 			if(object_exists(self)){
 				var _mask = object_get_mask(self);
 				if(_mask < 0){
 					_mask = object_get_sprite(self);
 				}
-				_w = max(_w, (sprite_get_bbox_right(_mask)  + 1) - sprite_get_bbox_left(_mask));
-				_h = max(_h, (sprite_get_bbox_bottom(_mask) + 1) - sprite_get_bbox_top(_mask));
+				_objW = max(_objW, (sprite_get_bbox_right(_mask)  + 1) - sprite_get_bbox_left(_mask));
+				_objH = max(_objH, (sprite_get_bbox_bottom(_mask) + 1) - sprite_get_bbox_top(_mask));
 			}
 			else{
-				_w = max(_w, bbox_width);
-				_h = max(_h, bbox_height);
+				_objW = max(_objW, bbox_width);
+				_objH = max(_objH, bbox_height);
 			}
 		}
 		
-		_disMax = sqrt(sqr(bbox_width + _w) + sqr(bbox_height + _h)) + _disAdd;
-	}
-	
-	 // Starting Direction:
-	if(x != xprevious || y != yprevious){
-		_dirStart = point_direction(x, y, xprevious, yprevious);
-	}
-	else{
-		_dirStart = point_direction(hspeed, vspeed, 0, 0);
+		var	_w = _objW + bbox_width,
+			_h = _objH + bbox_height;
+			
+		_disMultX = max(1, _w / _h);
+		_disMultY = max(1, _h / _w);
+		_disMax   = sqrt(sqr(min(_w, _h) - 1) * 2);
 	}
 	
 	 // Search for Open Space:
-	var _dis = 0;
-	while(_dis <= _disMax){
+	var	_dis     = 0,
+		_disAdd  = max(1, _disMax / 16);
+		
+	while(true){
+		var	_dir    = _dirStart,
+			_dirAdd = 360 / max(1, 4 * _dis);
+			
 		 // Look Around:
-		var _dirAdd = 360 / max(1, 4 * _dis);
-		for(var _dir = _dirStart; _dir < _dirStart + 360; _dir += _dirAdd){
-			var	_x = x + lengthdir_x(_dis, _dir),
-				_y = y + lengthdir_y(_dis, _dir);
+		repeat(ceil(360 / abs(_dirAdd))){
+			var	_x = x + lengthdir_x(_dis * _disMultX, _dir),
+				_y = y + lengthdir_y(_dis * _disMultY, _dir);
 				
-			if(_isArray ? (array_length(instances_meeting(_x, _y, _objAvoid)) <= 0) : !place_meeting(_x, _y, _objAvoid)){
+			if(
+				_objArray
+				? !array_length(instances_meeting(_x, _y, _objAvoid))
+				: !place_meeting(_x, _y, _objAvoid)
+			){
 				if(_inLevel || (place_free(_x, _y) && (position_meeting(_x, _y, Floor) || place_meeting(_x, _y, Floor)))){
 					x = _x;
 					y = _y;
@@ -4281,10 +3866,14 @@
 					return true;
 				}
 			}
+			
+			_dir += _dirAdd;
 		}
 		
 		 // Go Outward:
-		if(_dis >= _disMax) break;
+		if(_dis >= _disMax){
+			break;
+		}
 		_dis = min(_dis + clamp(_dis, 1, _disAdd), _disMax);
 	}
 	
@@ -4363,7 +3952,7 @@
 			image_index     = _imgInd;
 			image_speed_raw = image_number;
 			
-			array_push(_inst, id);
+			array_push(_inst, self);
 		}
 		
 		_lx = _wx;
@@ -4386,16 +3975,171 @@
 #define wep_raw(_wep)
 	/*
 		For use with LWO weapons
+		Call a weapon's "weapon_raw" script in case of wrapper weapons
 		
 		Ex:
 			wep_raw({ wep:{ wep:{ wep:123 }}}) == 123
 	*/
 	
-	if(is_object(_wep)){
-		return wep_raw(lq_defget(_wep, "wep", wep_none));
+	var _raw = _wep;
+	
+	 // Find Base Weapon:
+	while(is_object(_raw)){
+		_raw = (("wep" in _raw) ? _raw.wep : wep_none);
+	}
+	
+	 // Wrapper:
+	if(is_string(_raw) && mod_script_exists("weapon", _raw, "weapon_raw")){
+		_raw = mod_script_call("weapon", _raw, "weapon_raw", _wep);
+	}
+	
+	return _raw;
+	
+#define wep_wrap(_wep, _scrName, _scrRef)
+	/*
+		Returns the given weapon as an NT:TE wrapper weapon, with the given script modification
+		
+		Args:
+			wep     - The weapon to modify
+			scrName - The name of the script to modify
+			scrAdd  - A script reference to call after the given script, which can return a custom value for the weapon
+			          The script is called with its 'argument0' being the weapon's current value, and then the normal script's arguments
+			          Can also be a boolean value to toggle the script's base execution
+			
+		Ex:
+			wep  = wep_wrap(wep,  "weapon_sprt", script_ref_create(coolspr));
+			bwep = wep_wrap(bwep, "weapon_fire", false);
+			
+			#define coolspr(_spr, _wep)
+				return sprBanditGun;
+	*/
+	
+	 // Wrapper Setup:
+	if(!is_object(_wep) || "tewrapper" not in _wep){
+		var _wrap = {
+			"wep"     : wep_raw(_wep),
+			"lwo"     : is_object(_wep),
+			"scr_use" : {},
+			"scr_ref" : {}
+		};
+		
+		if(!_wrap.lwo){
+			_wep = {};
+		}
+		
+		_wep.wep       = "tewrapper";
+		_wep.tewrapper = _wrap;
+	}
+	
+	 // Toggle Base Script:
+	if(is_real(_scrRef)){
+		lq_set(_wep.tewrapper.scr_use, _scrName, _scrRef);
+	}
+	
+	 // Add Script:
+	else{
+		if(_scrName not in _wep.tewrapper.scr_ref){
+			lq_set(_wep.tewrapper.scr_ref, _scrName, [_scrRef]);
+		}
+		else{
+			array_push(lq_get(_wep.tewrapper.scr_ref, _scrName), _scrRef);
+		}
 	}
 	
 	return _wep;
+	
+#define wep_skin(_wep, _race, _skin)
+	/*
+		Returns the given weapon as a resprited variant for the given skin if one exists
+	*/
+	
+	if(is_string(_skin) && array_find_index(ntte_mods.skin, _skin) >= 0){
+		var _refSprt = script_ref_create_ext("skin", _skin, "skin_weapon_sprite");
+		if(mod_script_exists(_refSprt[0], _refSprt[1], _refSprt[2])){
+			var _spr = weapon_get_sprt(_wep);
+			if(_spr != script_ref_call(_refSprt, _spr, _wep)){
+				_wep = wep_wrap(wep_wrap(wep_wrap(
+					_wep,
+					"weapon_sprt", _refSprt),
+					"weapon_name", script_ref_create(wep_skin_name, _race, _skin)),
+					"weapon_fire", script_ref_create(wep_skin_fire, _race, _skin)
+				);
+				with([
+					["weapon_sprt_hud", "skin_weapon_sprite_hud"],
+					["weapon_swap",     "skin_weapon_swap"]
+				]){
+					var _ref = script_ref_create_ext("skin", _skin, self[1]);
+					if(mod_script_exists(_ref[0], _ref[1], _ref[2])){
+						_wep = wep_wrap(_wep, self[0], _ref);
+					}
+				}
+			}
+		}
+	}
+	
+	return _wep;
+	
+#define wep_skin_name(_race, _skin, _name, _wep)
+	/*
+		Returns the given weapon's name with "GOLDEN" replaced by the given skin's name, or prefixed by it if "GOLDEN" isn't mentioned
+	*/
+	
+	if(!is_string(_name)){
+		_name = weapon_get_name(wep_raw(_wep));
+	}
+	
+	var	_nameSplit = string_split(_name, " "),
+		_skinName  = skin_get_name(_race, _skin);
+		
+	for(var i = array_length(_nameSplit) - 1; i >= 0; i--){
+		if(string_upper(_nameSplit[i]) == "GOLDEN"){
+			_nameSplit[i] = _skinName;
+		}
+	}
+	
+	return (
+		(array_find_index(_nameSplit, _skinName) >= 0)
+		? array_join(_nameSplit, " ")
+		: (
+			(wep_raw(_wep) == wep_frog_pistol)
+			? _name
+			: (_skinName + " " + _name)
+		)
+	);
+	
+#define wep_skin_fire(_race, _skin, _fireID, _wep)
+	/*
+		Resprites projectiles shot by the given weapon to the given skin
+	*/
+	
+	if(instance_exists(projectile)){
+		var _inst = instances_matching_gt(projectile, "id", _fireID);
+		if(array_length(_inst)) with(_inst){
+			var _spr = mod_script_call("skin", _skin, "skin_weapon_sprite", sprite_index, _wep);
+			if(sprite_index != _spr){
+				 // Cause of Death:
+				if(hitid == 101){
+					hitid = [sprGoldDisc, "GOLDEN DISC"];
+				}
+				if(array_length(hitid) && sprite_index == hitid[0]){
+					hitid[0] = _spr;
+					if(array_length(hitid) > 1 && is_string(hitid[1])){
+						hitid[1] = wep_skin_name(_race, _skin, hitid[1], _wep);
+					}
+				}
+				
+				 // Hitbox:
+				if(mask_index < 0){
+					mask_index = sprite_index;
+				}
+				
+				 // Sprite:
+				sprite_index = _spr;
+			}
+		}
+	}
+	
+	return _fireID;
 	
 #define wep_merge(_stock, _front)
 	return mod_script_call_nc("weapon", "merge", "weapon_merge", _stock, _front);
@@ -4486,60 +4230,511 @@
 	
 	return _wepDecide;
 	
-#define weapon_get_loadout(_wep)
+#define weapon_get(_name, _wep)
 	/*
-		Returns the loadout sprite associated with a given weapon
+		Calls the given script from a weapon mod and fetches its return value
 	*/
 	
-	var _wepRaw = wep_raw(_wep);
+	var _raw = _wep;
 	
-	 // Custom:
-	if(is_string(_wepRaw)){
-		return mod_script_call("weapon", _wepRaw, "weapon_loadout", _wep);
+	 // Find Base Weapon:
+	while(is_object(_raw) && "wep" in _raw){
+		_raw = _raw.wep;
 	}
 	
-	 // Normal:
-	else switch(_wepRaw){
-		case wep_revolver                : return sprRevolverLoadout;
-		case wep_golden_revolver         : return sprGoldRevolverLoadout;
-		case wep_chicken_sword           : return sprChickenSwordLoadout;
-		case wep_rogue_rifle             : return sprRogueRifleLoadout;
-		case wep_rusty_revolver          : return sprRustyRevolverLoadout;
-		case wep_golden_wrench           : return sprGoldWrenchLoadout;
-		case wep_golden_machinegun       : return sprGoldMachinegunLoadout;
-		case wep_golden_shotgun          : return sprGoldShotgunLoadout;
-		case wep_golden_crossbow         : return sprGoldCrossbowLoadout;
-		case wep_golden_grenade_launcher : return sprGoldGrenadeLauncherLoadout;
-		case wep_golden_laser_pistol     : return sprGoldLaserPistolLoadout;
-		case wep_golden_screwdriver      : return sprGoldScrewdriverLoadout;
-		case wep_golden_assault_rifle    : return sprGoldAssaultRifleLoadout;
-		case wep_golden_slugger          : return sprGoldSluggerLoadout;
-		case wep_golden_splinter_gun     : return sprGoldSplintergunLoadout;
-		case wep_golden_bazooka          : return sprGoldBazookaLoadout;
-		case wep_golden_plasma_gun       : return sprGoldPlasmaGunLoadout;
-		case wep_golden_nuke_launcher    : return sprGoldNukeLauncherLoadout;
-		case wep_golden_disc_gun         : return sprGoldDiscgunLoadout;
-		case wep_golden_frog_pistol      : return sprGoldToxicGunLoadout;
+	 // Call Script:
+	if(is_string(_raw)){
+		var _scrt = "weapon_" + _name;
+		if(mod_script_exists("weapon", _raw, _scrt)){
+			return mod_script_call_self("weapon", _raw, _scrt, _wep);
+		}
 	}
 	
-	return 0;
-	
-#define weapon_get_red(_wep)
-	/*
-		Returns how much red ammo a weapon uses
-	*/
-	
-	var	_type = "weapon",
-		_name = wep_raw(_wep),
-		_scrt = "weapon_red";
+	 // Default:
+	switch(_name){
 		
-	 // Custom:
-	if(is_string(_name) && mod_script_exists(_type, _name, _scrt)){
-		return mod_script_call_nc(_type, _name, _scrt);
+		case "avail":
+		case "burst":
+			
+			return 1;
+			
+		case "loadout":
+			
+			switch(_raw){
+				case wep_revolver                : return sprRevolverLoadout;
+				case wep_golden_revolver         : return sprGoldRevolverLoadout;
+				case wep_chicken_sword           : return sprChickenSwordLoadout;
+				case wep_rogue_rifle             : return sprRogueRifleLoadout;
+				case wep_rusty_revolver          : return sprRustyRevolverLoadout;
+				case wep_golden_wrench           : return sprGoldWrenchLoadout;
+				case wep_golden_machinegun       : return sprGoldMachinegunLoadout;
+				case wep_golden_shotgun          : return sprGoldShotgunLoadout;
+				case wep_golden_crossbow         : return sprGoldCrossbowLoadout;
+				case wep_golden_grenade_launcher : return sprGoldGrenadeLauncherLoadout;
+				case wep_golden_laser_pistol     : return sprGoldLaserPistolLoadout;
+				case wep_golden_screwdriver      : return sprGoldScrewdriverLoadout;
+				case wep_golden_assault_rifle    : return sprGoldAssaultRifleLoadout;
+				case wep_golden_slugger          : return sprGoldSluggerLoadout;
+				case wep_golden_splinter_gun     : return sprGoldSplintergunLoadout;
+				case wep_golden_bazooka          : return sprGoldBazookaLoadout;
+				case wep_golden_plasma_gun       : return sprGoldPlasmaGunLoadout;
+				case wep_golden_nuke_launcher    : return sprGoldNukeLauncherLoadout;
+				case wep_golden_disc_gun         : return sprGoldDiscgunLoadout;
+				case wep_golden_frog_pistol      : return sprGoldToxicGunLoadout;
+			}
+			
+			break;
+			
+		case "raw":
+			
+			return (is_object(_wep) ? wep_none : _wep);
+			
 	}
 	
-	 // Normal:
 	return 0;
+	
+#define weapon_fire_init(_wep)
+	/*
+		Called from a 'weapon_fire' script to do some basic weapon firing setup
+		Returns a LWO with some useful variables
+		
+		Vars:
+			wep     - The weapon's value, may be modified from the given argument
+			creator - The actual instance firing, for 'player_fire_ext()' support
+			primary - The weapon is in the primary slot (true) or secondary slot (false)
+			wepheld - The weapon is physically stored in the creator's 'wep' variable
+			spec    - The weapon is being shot by an active (YV, Steroids, Skeleton)
+			burst   - The current burst shot (starts at 1)
+	*/
+	
+	var _fire = {
+		"wep"     : _wep,
+		"creator" : noone,
+		"primary" : true,
+		"wepheld" : false,
+		"spec"    : false,
+		"burst"   : 1
+	};
+	
+	 // Creator:
+	_fire.creator = self;
+	if(instance_is(self, FireCont) && "creator" in self){
+		_fire.creator = creator;
+	}
+	
+	 // Weapon Held by Creator:
+	_fire.wepheld = (variable_instance_get(_fire.creator, "wep") == _fire.wep);
+	
+	 // Active / Secondary Firing:
+	_fire.spec = variable_instance_get(self, "specfiring", false);
+	if(race == "steroids" && _fire.spec){
+		_fire.primary = false;
+	}
+	
+	 // LWO Setup:
+	var _lwo = mod_variable_get("weapon", wep_raw(_fire.wep), "lwoWep");
+	if(is_object(_lwo)){
+		if(!is_object(_fire.wep)){
+			_fire.wep = { "wep" : _fire.wep };
+			if(_fire.wepheld){
+				_fire.creator.wep = _fire.wep;
+			}
+		}
+		for(var i = lq_size(_lwo) - 1; i >= 0; i--){
+			var _key = lq_get_key(_lwo, i);
+			if(_key not in _fire.wep){
+				lq_set(_fire.wep, _key, lq_get_value(_lwo, i));
+			}
+		}
+	}
+	
+	 // NT:TE Systems:
+	var _other = other;
+	with(instance_exists(_fire.creator) ? _fire.creator : self){
+		 // Charge Weapon:
+		if(weapon_get("chrg", _fire.wep) && _fire.wep.chrg >= 0){
+			var	_load = variable_instance_get(self, "reloadspeed", 1) * current_time_scale,
+				_auto = ((other.race == "steroids") ? (weapon_get_auto(_fire.wep) >= 0) : weapon_get_auto(_fire.wep));
+				
+			 // Charging (chrg: -1==Released, 0==None, 1==Charging, 2==Charged):
+			_fire.wep.chrg = ((_fire.wep.chrg_num < _fire.wep.chrg_max) ? 1 : 2);
+			switch(_fire.wep.chrg){
+				
+				case 1: // Charging
+					
+					_fire.wep.chrg_num = min(_fire.wep.chrg_num + _load, _fire.wep.chrg_max);
+					
+					 // Pop Pop:
+					if(_fire.spec && _fire.primary){
+						_fire.wep.chrg_num = _fire.wep.chrg_max;
+					}
+					
+					break;
+					
+				case 2: // Fully Charged - Blink
+					
+					if((current_frame % 12) < current_time_scale){
+						with(_fire.creator) if(instance_is(self, Player)){
+							gunshine = 2;
+						}
+					}
+					
+					break;
+					
+			}
+			
+			 // Hold to Charge:
+			if(_auto || _fire.wep.chrg_num >= _fire.wep.chrg_max){
+				 // Manual Reload:
+				other.reload += _load - weapon_get_load(_fire.wep);
+				
+				 // Charge Controller:
+				with(other){
+					var _inst = instances_matching(instances_matching(CustomObject, "name", "WeaponCharger"), "wep", _fire.wep);
+					if(!array_length(_inst)){
+						_inst = instance_create(x, y, CustomObject);
+						with(_inst){
+							name    = "WeaponCharger";
+							on_step = weapon_chrg_step;
+							wep     = _fire.wep;
+						}
+					}
+					with(_inst){
+						x         = other.x;
+						y         = other.y;
+						direction = other.gunangle;
+						accuracy  = other.accuracy;
+						team      = other.team;
+						creator   = _fire.creator;
+						primary   = _fire.primary;
+						fire      = !_auto;
+					}
+				}
+			}
+		}
+		
+		 // Normal Weapon:
+		else{
+			 // Melee:
+			if(weapon_is_melee(_fire.wep)){
+				other.wepangle *= -1;
+			}
+			
+			 // Burst Fire:
+			if(instance_is(_other, CustomObject) && "name" in _other && _other.name == "WeaponBurst"){
+				_fire.burst = _other.burst;
+			}
+			else{
+				var _burst = ceil(weapon_get("burst", _fire.wep));
+				if(_burst > 1 || _burst < 0){
+					var _time = weapon_get("burst_time", _fire.wep);
+					if(_time == 0){
+						_time = weapon_get_load(_fire.wep) / max(1, _burst);
+					}
+					with(other){
+						with(instance_create(x, y, CustomObject)){
+							name      = "WeaponBurst";
+							on_step   = weapon_burst_step;
+							direction = other.gunangle;
+							accuracy  = other.accuracy;
+							team      = other.team;
+							creator   = _fire.creator;
+							primary   = _fire.primary;
+							wep       = _fire.wep;
+							burst     = 0;
+							ammo      = _burst - 1;
+							time      = _time;
+							time_max  = _time;
+							chrg      = lq_get(_fire.wep, "chrg");
+							chrg_num  = lq_get(_fire.wep, "chrg_num");
+							
+							 // Insta-Fire:
+							time -= random(current_time_scale);
+							if(time <= 0){
+								time += current_time_scale;
+								with(self){
+									event_perform(ev_step, ev_step_normal);
+								}
+							}
+							
+							 // Burst Level:
+							if(instance_exists(self)){
+								burst++;
+								_fire.burst = burst;
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+	
+	return _fire;
+	
+#define weapon_burst_step
+	if(time > 0 && ammo != 0){
+		time -= current_time_scale;
+		while(time <= 0 && time_max >= 0 && ammo-- != 0){
+			var _wep = wep;
+			burst++;
+			
+			 // Delay:
+			with(creator){
+				var _time = weapon_get("burst_time", _wep);
+				if(_time != 0){
+					other.time_max = _time;
+				}
+			}
+			time += time_max;
+			
+			 // Fire:
+			if(instance_exists(creator)){
+				x = creator.x;
+				y = creator.y;
+				if("gunangle" in creator){
+					direction = creator.gunangle;
+				}
+				
+				 // Charge Weapon Fix:
+				var	_lastChrg    = undefined,
+					_lastChrgNum = undefined;
+					
+				if(is_object(_wep)){
+					if("chrg"     in _wep && !is_undefined(chrg)    ){ _lastChrg    = _wep.chrg;     _wep.chrg     = chrg;     }
+					if("chrg_num" in _wep && !is_undefined(chrg_num)){ _lastChrgNum = _wep.chrg_num; _wep.chrg_num = chrg_num; }
+				}
+				
+				 // Player:
+				if(instance_is(creator, Player)){
+					with(creator){
+						 // Steroids:
+						if(!other.primary){
+							player_swap();
+							specfiring = true;
+						}
+						
+						 // Fire:
+						var	_lastTeam     = team,
+							_lastAccuracy = accuracy;
+							
+						team     = other.team;
+						accuracy = other.accuracy;
+						
+						weapon_get("fire", _wep);
+						
+						team     = _lastTeam;
+						accuracy = _lastAccuracy;
+						
+						 // Steroids:
+						if(!other.primary){
+							specfiring = false;
+							player_swap();
+						}
+					}
+				}
+				
+				 // Non-Player:
+				else with(player_fire_ext(direction, wep_none, x, y, team, creator, accuracy)){
+					wep = _wep;
+					weapon_get("fire", wep);
+				}
+				
+				 // Charge Weapon Fix Reset:
+				if(is_object(_wep)){
+					if("chrg"     in _wep && !is_undefined(chrg)     && _wep.chrg     == chrg    ) _wep.chrg     = _lastChrg;
+					if("chrg_num" in _wep && !is_undefined(chrg_num) && _wep.chrg_num == chrg_num) _wep.chrg_num = _lastChrgNum;
+				}
+			}
+		}
+	}
+	else instance_destroy();
+	
+#define weapon_chrg_step
+	if(fire){
+		if(is_object(wep) && "chrg" in wep){
+			if(wep.chrg){
+				wep.chrg = -1;
+				
+				var _wepName = (primary ? "wep" : "bwep");
+				
+				with(creator){
+					if(visible){
+						other.x = x;
+						other.y = y;
+						if(_wepName not in self || variable_instance_get(self, _wepName) == other.wep){
+							 // Player:
+							if(instance_is(self, Player)){
+								 // Steroids:
+								if(!other.primary){
+									player_swap();
+									specfiring = true;
+								}
+								
+								 // Fire:
+								var	_type = weapon_get_type(other.wep),
+									_cost = weapon_get_cost(other.wep),
+									_rads = weapon_get_rads(other.wep),
+									_ammo = ammo[_type];
+									
+								if(infammo != 0 || (_ammo >= _cost && GameCont.rad >= _rads)){
+									var	_lastTeam     = team,
+										_lastAccuracy = accuracy;
+										
+									team     = other.team;
+									accuracy = other.accuracy;
+									
+									player_fire(other.direction);
+									
+									team     = _lastTeam;
+									accuracy = _lastAccuracy;
+								}
+								
+								 // Low Ammo:
+								else{
+									wkick     = -2;
+									clicked   = false;
+									drawempty = 30;
+									sound_play((_ammo < _cost) ? sndEmpty : sndUltraEmpty);
+									with(instance_create(x, y, PopupText)){
+										target = other.index;
+										text   = ((_ammo < _cost) ? ((_ammo > 0) ? "NOT ENOUGH " + other.typ_name[_type] : "EMPTY") : "NOT ENOUGH RADS");
+									}
+								}
+								
+								 // Steroids:
+								if(!other.primary){
+									specfiring = false;
+									player_swap();
+								}
+							}
+							
+							 // Non-Player:
+							else player_fire_ext(other.direction, other.wep, other.x, other.y, other.team, other.creator, other.accuracy);
+						}
+					}
+				}
+				wep.chrg = 0;
+			}
+			wep.chrg_num = 0;
+		}
+		instance_destroy();
+	}
+	else fire = true;
+	
+#define weapon_ammo_fire(_wep)
+	/*
+		Called from a 'weapon_fire' script to process LWO weapons with internal ammo
+		Returns 'true' if the weapon had enough internal ammo to fire, 'false' otherwise
+	*/
+	
+	 // Gun Warrant:
+	if(infammo != 0){
+		return true;
+	}
+	
+	 // Ammo Cost:
+	var _cost = lq_defget(_wep, "cost", 1);
+	with(_wep) if(ammo >= _cost){
+		ammo -= _cost;
+		
+		 // Can Fire:
+		return true;
+	}
+	
+	 // Not Enough Ammo:
+	reload = variable_instance_get(self, "reloadspeed", 1) * current_time_scale;
+	if("anam" in _wep){
+		if(button_pressed(index, (specfiring ? "spec" : "fire"))){
+			wkick = -2;
+			sound_play(sndEmpty);
+			with(instance_create(x, y, PopupText)){
+				target = other.index;
+				text   = ((_wep.ammo > 0) ? "NOT ENOUGH " + _wep.anam : "EMPTY");
+			}
+		}
+	}
+	
+	return false;
+	
+#define weapon_ammo_hud(_wep)
+	/*
+		Called from a 'weapon_sprt_hud' script to draw HUD for LWO weapons with internal ammo
+		Returns the weapon's normal sprite for easy returning
+		
+		Ex:
+			#define weapon_sprt_hud(w)
+				return weapon_ammo_hud(w);
+	*/
+	
+	 // Draw Ammo:
+	if(
+		instance_is(self, Player)
+		&& (instance_is(other, TopCont) || instance_is(other, UberCont))
+		&& is_object(_wep)
+	){
+		var	_ammo    = lq_defget(_wep, "ammo", 0),
+			_ammoMax = lq_defget(_wep, "amax", _ammo),
+			_ammoMin = lq_defget(_wep, "amin", round(_ammoMax * 0.2));
+			
+		draw_ammo(index, (bwep != _wep), (race == "steroids"), _ammo, _ammoMin);
+	}
+	
+	 // Default Sprite:
+	return weapon_get_sprt(_wep);
+	
+#define draw_ammo(_index, _primary, _steroids, _ammo, _ammoMin)
+	/*
+		Draws ammo HUD text
+		
+		Args:
+			index    - The player to draw HUD for
+			primary  - Is a primary weapon, true/false
+			steroids - Player can dual wield, true/false
+			ammo     - Ammo, can be a string or number
+			ammoMin  - Low ammo threshold
+	*/
+	
+	var _local = player_find_local_nonsync();
+	
+	if(player_is_active(_local) && player_get_show_hud(_index, _local)){
+		if(!instance_exists(menubutton) || _index == _local){
+			var	_x = view_xview_nonsync + (_primary ? 42 : 86),
+				_y = view_yview_nonsync + 21;
+				
+			 // Co-op Offset:
+			var _active = 0;
+			for(var i = 0; i < maxp; i++){
+				_active += player_is_active(i);
+			}
+			if(_active > 1){
+				_x -= 19;
+			}
+			
+			 // Color:
+			var _text = "";
+			if(is_real(_ammo)){
+				_text += "@";
+				if(_ammo > 0){
+					if(_primary || _steroids){
+						if(_ammo > _ammoMin){
+							_text += "w";
+						}
+						else _text += "r";
+					}
+					else _text += "s";
+				}
+				else _text += "d";
+			}
+			_text += string(_ammo);
+			
+			 // !!!
+			draw_set_halign(fa_left);
+			draw_set_valign(fa_top);
+			draw_set_projection(2, _index);
+			draw_text_nt(_x, _y, _text);
+			draw_reset_projection();
+		}
+	}
 	
 #define path_create(_xstart, _ystart, _xtarget, _ytarget, _wall)
 	 // Auto-Determine Grid Size:
@@ -4547,7 +4742,7 @@
 		_areaWidth  = pceil(abs(_xtarget - _xstart), _tileSize) + 320,
 		_areaHeight = pceil(abs(_ytarget - _ystart), _tileSize) + 320;
 		
-	_areaWidth = max(_areaWidth, _areaHeight);
+	_areaWidth  = max(_areaWidth, _areaHeight);
 	_areaHeight = max(_areaWidth, _areaHeight);
 	
 	var _triesMax = 4 * ceil((_areaWidth + _areaHeight) / _tileSize);
@@ -4570,7 +4765,7 @@
 	
 	 // Mark Walls:
 	with(instance_rectangle(_gridx, _gridy, _gridx + _areaWidth, _gridy + _areaHeight, _wall)){
-		if(position_meeting(x, y, id)){
+		if(position_meeting(x, y, self)){
 			_grid[# (x - _gridx) / _tileSize, (y - _gridy) / _tileSize] = -2;
 		}
 	}
@@ -4764,15 +4959,15 @@
 	
 	return null;
 	
-#define path_draw(_path)
-	var	_x = x,
-		_y = y;
-		
-	with(_path){
-		draw_line(self[0], self[1], _x, _y);
-		_x = self[0];
-		_y = self[1];
-	}
+//#define path_draw(_path)
+//	var	_x = x,
+//		_y = y;
+//		
+//	with(_path){
+//		draw_line(self[0], self[1], _x, _y);
+//		_x = self[0];
+//		_y = self[1];
+//	}
 	
 #define race_get_sprite(_race, _sprite)
 	/*
@@ -4796,7 +4991,9 @@
 		var	_id   = race_get_id(_race),
 			_name = race_get_name(_race);
 			
-		if(_id >= 17) _id = 1;
+		if(_id >= 17){
+			_id = 1;
+		}
 		
 		switch(_sprite){
 			case sprMutant1Idle:
@@ -4839,13 +5036,15 @@
 			 // Shadow:
 			case shd24:
 				
-				if(_id == 13) _sprite = shd96;
+				if(_id == char_bigdog){
+					_sprite = shd96;
+				}
 				
 				break;
 		}
 	}
 	
-	return skin_get_sprite(variable_instance_get(self, "bskin"), _sprite);
+	return skin_get_sprite(variable_instance_get(self, "bskin", 0), _sprite);
 	
 #define race_get_title(_race)
 	/*
@@ -4925,126 +5124,126 @@
 		Returns a given skin's variant of a given sprite
 		
 		Ex:
-			skin_get_sprite(1, sprShield) == sprShieldB
+			skin_get_sprite(1,      sprShield) == sprShieldB
 			skin_get_sprite("tree", sprShield) == (Shield sprite for 'tree.skin.gml')
 	*/
 	
 	switch(_sprite){
-		 // FISH:
-		case sprMutant1Idle:            return sprite_skin(_skin, _sprite, sprMutant1BIdle);
-		case sprMutant1Walk:            return sprite_skin(_skin, _sprite, sprMutant1BWalk);
-		case sprMutant1Hurt:            return sprite_skin(_skin, _sprite, sprMutant1BHurt);
-		case sprMutant1Dead:            return sprite_skin(_skin, _sprite, sprMutant1BDead);
-		case sprMutant1GoSit:           return sprite_skin(_skin, _sprite, sprMutant1BGoSit);
-		case sprMutant1Sit:             return sprite_skin(_skin, _sprite, sprMutant1BSit);
+		 /// FISH:
+		case sprMutant1Idle            : return sprite_skin(_skin, _sprite, sprMutant1BIdle);
+		case sprMutant1Walk            : return sprite_skin(_skin, _sprite, sprMutant1BWalk);
+		case sprMutant1Hurt            : return sprite_skin(_skin, _sprite, sprMutant1BHurt);
+		case sprMutant1Dead            : return sprite_skin(_skin, _sprite, sprMutant1BDead);
+		case sprMutant1GoSit           : return sprite_skin(_skin, _sprite, sprMutant1BGoSit);
+		case sprMutant1Sit             : return sprite_skin(_skin, _sprite, sprMutant1BSit);
 		
-		 // CRYSTAL:
-		case sprMutant2Idle:            return sprite_skin(_skin, _sprite, sprMutant2BIdle);
-		case sprMutant2Walk:            return sprite_skin(_skin, _sprite, sprMutant2BWalk);
-		case sprMutant2Hurt:            return sprite_skin(_skin, _sprite, sprMutant2BHurt);
-		case sprMutant2Dead:            return sprite_skin(_skin, _sprite, sprMutant2BDead);
-		case sprMutant2GoSit:           return sprite_skin(_skin, _sprite, sprMutant2BGoSit);
-		case sprMutant2Sit:             return sprite_skin(_skin, _sprite, sprMutant2BSit);
-		case sprShield:                 return sprite_skin(_skin, _sprite, sprShieldB);
-		case sprCrystTrail:             return sprite_skin(_skin, _sprite, sprCrystTrailB);
-		case sprCrystalShieldIdleFront: return sprite_skin(_skin, _sprite, sprCrystalShieldBIdleFront);
-		case sprCrystalShieldWalkFront: return sprite_skin(_skin, _sprite, sprCrystalShieldBWalkFront);
-		case sprCrystalShieldIdleBack:  return sprite_skin(_skin, _sprite, sprCrystalShieldBIdleBack);
-		case sprCrystalShieldWalkBack:  return sprite_skin(_skin, _sprite, sprCrystalShieldBWalkBack);
+		 /// CRYSTAL:
+		case sprMutant2Idle            : return sprite_skin(_skin, _sprite, sprMutant2BIdle);
+		case sprMutant2Walk            : return sprite_skin(_skin, _sprite, sprMutant2BWalk);
+		case sprMutant2Hurt            : return sprite_skin(_skin, _sprite, sprMutant2BHurt);
+		case sprMutant2Dead            : return sprite_skin(_skin, _sprite, sprMutant2BDead);
+		case sprMutant2GoSit           : return sprite_skin(_skin, _sprite, sprMutant2BGoSit);
+		case sprMutant2Sit             : return sprite_skin(_skin, _sprite, sprMutant2BSit);
+		case sprShield                 : return sprite_skin(_skin, _sprite, sprShieldB);
+		case sprCrystTrail             : return sprite_skin(_skin, _sprite, sprCrystTrailB);
+		case sprCrystalShieldIdleFront : return sprite_skin(_skin, _sprite, sprCrystalShieldBIdleFront);
+		case sprCrystalShieldWalkFront : return sprite_skin(_skin, _sprite, sprCrystalShieldBWalkFront);
+		case sprCrystalShieldIdleBack  : return sprite_skin(_skin, _sprite, sprCrystalShieldBIdleBack);
+		case sprCrystalShieldWalkBack  : return sprite_skin(_skin, _sprite, sprCrystalShieldBWalkBack);
 		
-		 // EYES:
-		case sprMutant3Idle:            return sprite_skin(_skin, _sprite, sprMutant3BIdle);
-		case sprMutant3Walk:            return sprite_skin(_skin, _sprite, sprMutant3BWalk);
-		case sprMutant3Hurt:            return sprite_skin(_skin, _sprite, sprMutant3BHurt);
-		case sprMutant3Dead:            return sprite_skin(_skin, _sprite, sprMutant3BDead);
-		case sprMutant3GoSit:           return sprite_skin(_skin, _sprite, sprMutant3BGoSit);
-		case sprMutant3Sit:             return sprite_skin(_skin, _sprite, sprMutant3BSit);
+		 /// EYES:
+		case sprMutant3Idle            : return sprite_skin(_skin, _sprite, sprMutant3BIdle);
+		case sprMutant3Walk            : return sprite_skin(_skin, _sprite, sprMutant3BWalk);
+		case sprMutant3Hurt            : return sprite_skin(_skin, _sprite, sprMutant3BHurt);
+		case sprMutant3Dead            : return sprite_skin(_skin, _sprite, sprMutant3BDead);
+		case sprMutant3GoSit           : return sprite_skin(_skin, _sprite, sprMutant3BGoSit);
+		case sprMutant3Sit             : return sprite_skin(_skin, _sprite, sprMutant3BSit);
 		
-		 // MELTING:
-		case sprMutant4Idle:            return sprite_skin(_skin, _sprite, sprMutant4BIdle);
-		case sprMutant4Walk:            return sprite_skin(_skin, _sprite, sprMutant4BWalk);
-		case sprMutant4Hurt:            return sprite_skin(_skin, _sprite, sprMutant4BHurt);
-		case sprMutant4Dead:            return sprite_skin(_skin, _sprite, sprMutant4BDead);
-		case sprMutant4GoSit:           return sprite_skin(_skin, _sprite, sprMutant4BGoSit);
-		case sprMutant4Sit:             return sprite_skin(_skin, _sprite, sprMutant4BSit);
+		 /// MELTING:
+		case sprMutant4Idle            : return sprite_skin(_skin, _sprite, sprMutant4BIdle);
+		case sprMutant4Walk            : return sprite_skin(_skin, _sprite, sprMutant4BWalk);
+		case sprMutant4Hurt            : return sprite_skin(_skin, _sprite, sprMutant4BHurt);
+		case sprMutant4Dead            : return sprite_skin(_skin, _sprite, sprMutant4BDead);
+		case sprMutant4GoSit           : return sprite_skin(_skin, _sprite, sprMutant4BGoSit);
+		case sprMutant4Sit             : return sprite_skin(_skin, _sprite, sprMutant4BSit);
 		
-		 // PLANT:
-		case sprMutant5Idle:            return sprite_skin(_skin, _sprite, sprMutant5BIdle);
-		case sprMutant5Walk:            return sprite_skin(_skin, _sprite, sprMutant5BWalk);
-		case sprMutant5Hurt:            return sprite_skin(_skin, _sprite, sprMutant5BHurt);
-		case sprMutant5Dead:            return sprite_skin(_skin, _sprite, sprMutant5BDead);
-		case sprMutant5GoSit:           return sprite_skin(_skin, _sprite, sprMutant5BGoSit);
-		case sprMutant5Sit:             return sprite_skin(_skin, _sprite, sprMutant5BSit);
-		case sprTangle:                 return sprite_skin(_skin, _sprite, sprTangleB);
-		case sprTangleSeed:             return sprite_skin(_skin, _sprite, sprTangleSeedB);
+		 /// PLANT:
+		case sprMutant5Idle            : return sprite_skin(_skin, _sprite, sprMutant5BIdle);
+		case sprMutant5Walk            : return sprite_skin(_skin, _sprite, sprMutant5BWalk);
+		case sprMutant5Hurt            : return sprite_skin(_skin, _sprite, sprMutant5BHurt);
+		case sprMutant5Dead            : return sprite_skin(_skin, _sprite, sprMutant5BDead);
+		case sprMutant5GoSit           : return sprite_skin(_skin, _sprite, sprMutant5BGoSit);
+		case sprMutant5Sit             : return sprite_skin(_skin, _sprite, sprMutant5BSit);
+		case sprTangle                 : return sprite_skin(_skin, _sprite, sprTangleB);
+		case sprTangleSeed             : return sprite_skin(_skin, _sprite, sprTangleSeedB);
 		
-		 // YV:
-		case sprMutant6Idle:            return sprite_skin(_skin, _sprite, sprMutant6BIdle,  sprMutant16Idle);
-		case sprMutant6Walk:            return sprite_skin(_skin, _sprite, sprMutant6BWalk,  sprMutant16Walk);
-		case sprMutant6Hurt:            return sprite_skin(_skin, _sprite, sprMutant6BHurt,  sprMutant16Hurt);
-		case sprMutant6Dead:            return sprite_skin(_skin, _sprite, sprMutant6BDead,  sprMutant16Dead);
-		case sprMutant6GoSit:           return sprite_skin(_skin, _sprite, sprMutant6BGoSit, sprMutant16GoSit);
-		case sprMutant6Sit:             return sprite_skin(_skin, _sprite, sprMutant6BSit,   sprMutant16Sit);
+		 /// YV:
+		case sprMutant6Idle            : return sprite_skin(_skin, _sprite, sprMutant6BIdle,  sprMutant16Idle);
+		case sprMutant6Walk            : return sprite_skin(_skin, _sprite, sprMutant6BWalk,  sprMutant16Walk);
+		case sprMutant6Hurt            : return sprite_skin(_skin, _sprite, sprMutant6BHurt,  sprMutant16Hurt);
+		case sprMutant6Dead            : return sprite_skin(_skin, _sprite, sprMutant6BDead,  sprMutant16Dead);
+		case sprMutant6GoSit           : return sprite_skin(_skin, _sprite, sprMutant6BGoSit, sprMutant16GoSit);
+		case sprMutant6Sit             : return sprite_skin(_skin, _sprite, sprMutant6BSit,   sprMutant16Sit);
 		
-		 // STEROIDS:
-		case sprMutant7Idle:            return sprite_skin(_skin, _sprite, sprMutant7BIdle);
-		case sprMutant7Walk:            return sprite_skin(_skin, _sprite, sprMutant7BWalk);
-		case sprMutant7Hurt:            return sprite_skin(_skin, _sprite, sprMutant7BHurt);
-		case sprMutant7Dead:            return sprite_skin(_skin, _sprite, sprMutant7BDead);
-		case sprMutant7GoSit:           return sprite_skin(_skin, _sprite, sprMutant7BGoSit);
-		case sprMutant7Sit:             return sprite_skin(_skin, _sprite, sprMutant7BSit);
+		 /// STEROIDS:
+		case sprMutant7Idle            : return sprite_skin(_skin, _sprite, sprMutant7BIdle);
+		case sprMutant7Walk            : return sprite_skin(_skin, _sprite, sprMutant7BWalk);
+		case sprMutant7Hurt            : return sprite_skin(_skin, _sprite, sprMutant7BHurt);
+		case sprMutant7Dead            : return sprite_skin(_skin, _sprite, sprMutant7BDead);
+		case sprMutant7GoSit           : return sprite_skin(_skin, _sprite, sprMutant7BGoSit);
+		case sprMutant7Sit             : return sprite_skin(_skin, _sprite, sprMutant7BSit);
 		
-		 // ROBOT:
-		case sprMutant8Idle:            return sprite_skin(_skin, _sprite, sprMutant8BIdle,  sprMutant8CIdle);
-		case sprMutant8Walk:            return sprite_skin(_skin, _sprite, sprMutant8BWalk,  sprMutant8CWalk);
-		case sprMutant8Hurt:            return sprite_skin(_skin, _sprite, sprMutant8BHurt,  sprMutant8CHurt);
-		case sprMutant8Dead:            return sprite_skin(_skin, _sprite, sprMutant8BDead,  sprMutant8CDead);
-		case sprMutant8GoSit:           return sprite_skin(_skin, _sprite, sprMutant8BGoSit, sprMutant8CGoSit);
-		case sprMutant8Sit:             return sprite_skin(_skin, _sprite, sprMutant8BSit,   sprMutant8CSit);
+		 /// ROBOT:
+		case sprMutant8Idle            : return sprite_skin(_skin, _sprite, sprMutant8BIdle,  sprMutant8CIdle);
+		case sprMutant8Walk            : return sprite_skin(_skin, _sprite, sprMutant8BWalk,  sprMutant8CWalk);
+		case sprMutant8Hurt            : return sprite_skin(_skin, _sprite, sprMutant8BHurt,  sprMutant8CHurt);
+		case sprMutant8Dead            : return sprite_skin(_skin, _sprite, sprMutant8BDead,  sprMutant8CDead);
+		case sprMutant8GoSit           : return sprite_skin(_skin, _sprite, sprMutant8BGoSit, sprMutant8CGoSit);
+		case sprMutant8Sit             : return sprite_skin(_skin, _sprite, sprMutant8BSit,   sprMutant8CSit);
 		
-		 // CHICKEN:
-		case sprMutant9Idle:            return sprite_skin(_skin, _sprite, sprMutant9BIdle);
-		case sprMutant9Walk:            return sprite_skin(_skin, _sprite, sprMutant9BWalk);
-		case sprMutant9Hurt:            return sprite_skin(_skin, _sprite, sprMutant9BHurt);
-		case sprMutant9GoSit:           return sprite_skin(_skin, _sprite, sprMutant9BGoSit);
-		case sprMutant9Sit:             return sprite_skin(_skin, _sprite, sprMutant9BSit);
-		case sprMutant9HeadIdle:        return sprite_skin(_skin, _sprite, sprMutant9BHeadIdle);
-		case sprMutant9HeadHurt:        return sprite_skin(_skin, _sprite, sprMutant9BHeadHurt);
+		 /// CHICKEN:
+		case sprMutant9Idle            : return sprite_skin(_skin, _sprite, sprMutant9BIdle);
+		case sprMutant9Walk            : return sprite_skin(_skin, _sprite, sprMutant9BWalk);
+		case sprMutant9Hurt            : return sprite_skin(_skin, _sprite, sprMutant9BHurt);
+		case sprMutant9GoSit           : return sprite_skin(_skin, _sprite, sprMutant9BGoSit);
+		case sprMutant9Sit             : return sprite_skin(_skin, _sprite, sprMutant9BSit);
+		case sprMutant9HeadIdle        : return sprite_skin(_skin, _sprite, sprMutant9BHeadIdle);
+		case sprMutant9HeadHurt        : return sprite_skin(_skin, _sprite, sprMutant9BHeadHurt);
 		
-		 // REBEL:
-		case sprMutant10Idle:           return sprite_skin(_skin, _sprite, sprMutant10BIdle, sprMutant10CIdle);
-		case sprMutant10Walk:           return sprite_skin(_skin, _sprite, sprMutant10BWalk, sprMutant10CWalk);
-		case sprMutant10Hurt:           return sprite_skin(_skin, _sprite, sprMutant10BHurt, sprMutant10CHurt);
-		case sprMutant10Dead:           return sprite_skin(_skin, _sprite, sprMutant10BDead, sprMutant10CDead);
-		case sprMutant10GoSit:          return sprite_skin(_skin, _sprite, sprMutant10BGoSit);
-		case sprMutant10Sit:            return sprite_skin(_skin, _sprite, sprMutant10BSit);
+		 /// REBEL:
+		case sprMutant10Idle           : return sprite_skin(_skin, _sprite, sprMutant10BIdle, sprMutant10CIdle);
+		case sprMutant10Walk           : return sprite_skin(_skin, _sprite, sprMutant10BWalk, sprMutant10CWalk);
+		case sprMutant10Hurt           : return sprite_skin(_skin, _sprite, sprMutant10BHurt, sprMutant10CHurt);
+		case sprMutant10Dead           : return sprite_skin(_skin, _sprite, sprMutant10BDead, sprMutant10CDead);
+		case sprMutant10GoSit          : return sprite_skin(_skin, _sprite, sprMutant10BGoSit);
+		case sprMutant10Sit            : return sprite_skin(_skin, _sprite, sprMutant10BSit);
 		
-		 // HORROR:
-		case sprMutant11Idle:           return sprite_skin(_skin, _sprite, sprMutant11BIdle);
-		case sprMutant11Walk:           return sprite_skin(_skin, _sprite, sprMutant11BWalk);
-		case sprMutant11Hurt:           return sprite_skin(_skin, _sprite, sprMutant11BHurt);
-		case sprMutant11Dead:           return sprite_skin(_skin, _sprite, sprMutant11BDead);
-		case sprMutant11GoSit:          return sprite_skin(_skin, _sprite, sprMutant11BGoSit);
-		case sprMutant11Sit:            return sprite_skin(_skin, _sprite, sprMutant11BSit);
-		case sprHorrorBullet:           return sprite_skin(_skin, _sprite, sprHorrorBBullet);
-		case sprHorrorBulletHit:        return sprite_skin(_skin, _sprite, sprHorrorBulletHitB);
-		case sprHorrorHit:              return sprite_skin(_skin, _sprite, sprHorrorHitB);
+		 /// HORROR:
+		case sprMutant11Idle           : return sprite_skin(_skin, _sprite, sprMutant11BIdle);
+		case sprMutant11Walk           : return sprite_skin(_skin, _sprite, sprMutant11BWalk);
+		case sprMutant11Hurt           : return sprite_skin(_skin, _sprite, sprMutant11BHurt);
+		case sprMutant11Dead           : return sprite_skin(_skin, _sprite, sprMutant11BDead);
+		case sprMutant11GoSit          : return sprite_skin(_skin, _sprite, sprMutant11BGoSit);
+		case sprMutant11Sit            : return sprite_skin(_skin, _sprite, sprMutant11BSit);
+		case sprHorrorBullet           : return sprite_skin(_skin, _sprite, sprHorrorBBullet);
+		case sprHorrorBulletHit        : return sprite_skin(_skin, _sprite, sprHorrorBulletHitB);
+		case sprHorrorHit              : return sprite_skin(_skin, _sprite, sprHorrorHitB);
 		
-		 // ROGUE:
-		case sprMutant12Idle:           return sprite_skin(_skin, _sprite, sprMutant12BIdle);
-		case sprMutant12Walk:           return sprite_skin(_skin, _sprite, sprMutant12BWalk);
-		case sprMutant12Hurt:           return sprite_skin(_skin, _sprite, sprMutant12BHurt);
-		case sprMutant12Dead:           return sprite_skin(_skin, _sprite, sprMutant12BDead);
-		case sprMutant12GoSit:          return sprite_skin(_skin, _sprite, sprMutant12BGoSit);
-		case sprMutant12Sit:            return sprite_skin(_skin, _sprite, sprMutant12BSit);
+		 /// ROGUE:
+		case sprMutant12Idle           : return sprite_skin(_skin, _sprite, sprMutant12BIdle);
+		case sprMutant12Walk           : return sprite_skin(_skin, _sprite, sprMutant12BWalk);
+		case sprMutant12Hurt           : return sprite_skin(_skin, _sprite, sprMutant12BHurt);
+		case sprMutant12Dead           : return sprite_skin(_skin, _sprite, sprMutant12BDead);
+		case sprMutant12GoSit          : return sprite_skin(_skin, _sprite, sprMutant12BGoSit);
+		case sprMutant12Sit            : return sprite_skin(_skin, _sprite, sprMutant12BSit);
 		
-		 // SKELETON:
-		case sprMutant14Idle:           return sprite_skin(_skin, _sprite, sprMutant14BIdle);
-		case sprMutant14Walk:           return sprite_skin(_skin, _sprite, sprMutant14BWalk);
-		case sprMutant14Hurt:           return sprite_skin(_skin, _sprite, sprMutant14BHurt);
-		case sprMutant14Dead:           return sprite_skin(_skin, _sprite, sprMutant14BDead);
-		case sprMutant14GoSit:          return sprite_skin(_skin, _sprite, sprMutant14BGoSit);
-		case sprMutant14Sit:            return sprite_skin(_skin, _sprite, sprMutant14BSit);
+		 /// SKELETON:
+		case sprMutant14Idle           : return sprite_skin(_skin, _sprite, sprMutant14BIdle);
+		case sprMutant14Walk           : return sprite_skin(_skin, _sprite, sprMutant14BWalk);
+		case sprMutant14Hurt           : return sprite_skin(_skin, _sprite, sprMutant14BHurt);
+		case sprMutant14Dead           : return sprite_skin(_skin, _sprite, sprMutant14BDead);
+		case sprMutant14GoSit          : return sprite_skin(_skin, _sprite, sprMutant14BGoSit);
+		case sprMutant14Sit            : return sprite_skin(_skin, _sprite, sprMutant14BSit);
 	}
 	
 	return sprite_skin(_skin, _sprite);
@@ -5076,7 +5275,10 @@
 	
 #define pet_create(_x, _y, _name, _modType, _modName)
 	/*
-		Creates a given pet for a given mod, and sets up its stats, sprites, and other variables
+		Creates the given NT:TE pet, and sets up its stats, sprites, and other variables
+		
+		Ex:
+			pet_create(x, y, "Parrot", "mod", "petlib")
 	*/
 	
 	with(obj_create(_x, _y, "Pet")){
@@ -5087,34 +5289,30 @@
 		 // Stats:
 		var _stat = `pet:${pet}.${mod_name}.${mod_type}`;
 		if(!is_object(stat_get(_stat))){
-			stat_set(_stat, { found:0, owned:0 });
+			stat_set(_stat, {
+				"found" : 0,
+				"owned" : 0
+			});
 		}
 		stat = stat_get(_stat);
 		
-		 // Sprites:
-		if(mod_type == "mod" && mod_name == "petlib"){
-			spr_idle = lq_defget(spr, "Pet" + pet + "Idle", spr_idle);
-			spr_walk = lq_defget(spr, "Pet" + pet + "Walk", spr_idle);
-			spr_hurt = lq_defget(spr, "Pet" + pet + "Hurt", spr_idle);
-			spr_dead = lq_defget(spr, "Pet" + pet + "Dead", mskNone);
-		}
-		spr_icon = lq_defget(pet_get_icon(mod_type, mod_name, pet), "spr", spr_icon);
-		
 		 // Custom Create Event:
-		var _scrt = pet + "_create";
-		if(mod_script_exists(mod_type, mod_name, _scrt)){
-			mod_script_call(mod_type, mod_name, _scrt);
-		}
+		mod_script_call(mod_type, mod_name, pet + "_create");
 		
-		 // Auto-set Stuff:
+		 // Auto-Set:
 		if(instance_exists(self)){
-			with(prompt) if(text == ""){
-				icon = other.spr_icon;
-				text = `@2(${icon})` + other.pet;
+			 // Fill Health:
+			if(my_health == 0){
+				my_health = maxhealth;
 			}
-			if(sprite_index == spr.PetParrotIdle) sprite_index = spr_idle;
-			if(maxhealth > 0 && my_health == 0) my_health = maxhealth;
-			if(hitid == -1) hitid = [spr_idle, pet];
+			
+			 // Cause of Death Name:
+			if(is_array(hitid) && array_length(hitid) && hitid[1] == ""){
+				hitid[1] = pet_get_name(pet, mod_type, mod_name, 0);
+			}
+			
+			 // Sprites:
+			pet_set_skin(bskin);
 		}
 		
 		return self;
@@ -5125,9 +5323,217 @@
 #define pet_spawn(_x, _y, _name)
 	return pet_create(_x, _y, _name, "mod", "petlib");
 	
+#define pet_get_name(_name, _modType, _modName, _skin)
+	/*
+		Returns the display name of the given NT:TE pet
+		Defaults to the A-skin, or ultimately the pet's raw name if no name was found
+		
+		Ex:
+			pet_get_name("CoolGuy", "mod", "petlib", 1) == "CoolGuy?"
+	*/
+	
+	var _title = undefined;
+	
+	 // Custom:
+	if(is_array(_skin)){
+		var _ref = array_clone(_skin);
+		if(array_length(_ref) >= 3){
+			_ref[2] += "_name";
+		}
+		_title = script_ref_call(_ref);
+	}
+	
+	 // Normal:
+	else _title = mod_script_call(_modType, _modName, _name + "_name", _skin);
+	
+	 // Return:
+	if(is_string(_title)){
+		return _title;
+	}
+	return (
+		(_skin == 0)
+		? _name
+		: pet_get_name(_name, _modType, _modName, 0)
+	);
+	
+#define pet_get_ttip(_name, _modType, _modName, _skin)
+	/*
+		Returns a random loading screen tip for the given NT:TE pet
+		Defaults to the A-skin, or ultimately a blank string if no tip was found
+	*/
+	
+	var _tip = undefined;
+	
+	 // Custom:
+	if(is_array(_skin)){
+		var _ref = array_clone(_skin);
+		if(array_length(_ref) >= 3){
+			_ref[2] += "_ttip";
+		}
+		_tip = script_ref_call(_ref);
+	}
+	
+	 // Normal:
+	else _tip = mod_script_call(_modType, _modName, _name + "_ttip", _skin);
+	
+	 // Auto-Choose:
+	if(is_array(_tip) && array_length(_tip)){
+		_tip = _tip[irandom(array_length(_tip) - 1)];
+	}
+	
+	 // Return:
+	if(is_string(_tip)){
+		return _tip;
+	}
+	return (
+		(_skin == 0)
+		? ""
+		: pet_get_ttip(_name, _modType, _modName, 0)
+	);
+	
+#define pet_get_sprite(_name, _modType, _modName, _skin, _sprName)
+	/*
+		Returns the sprite index associated with the given name and NT:TE pet
+		Defaults to the A-skin, or ultimately '0' if no sprite was found
+		
+		Ex:
+			pet_get_sprite("Parrot", "mod", "petlib", 1, "idle") == spr.PetParrotBIdle
+	*/
+	
+	var _spr = undefined;
+	
+	 // Custom:
+	if(is_array(_skin)){
+		var _ref = array_clone(_skin);
+		if(array_length(_ref) >= 3){
+			_ref[2] += "_sprite";
+		}
+		_spr = script_ref_call(_ref, _sprName);
+	}
+	
+	 // Normal:
+	else{
+		var _modScrt = _name + "_sprite";
+		if(mod_script_exists(_modType, _modName, _modScrt)){
+			_spr = mod_script_call(_modType, _modName, _modScrt, _skin, _sprName);
+		}
+		
+		 // Legacy Support:
+		else if(_sprName == "icon"){
+			_spr = mod_script_call(_modType, _modName, _name + "_icon");
+			if(is_object(_spr) && "spr" in _spr){
+				_spr = _spr.spr;
+			}
+		}
+	}
+	
+	 // Return:
+	if(_spr != 0 && is_real(_spr)){
+		return _spr;
+	}
+	return (
+		(_skin == 0)
+		? 0
+		: pet_get_sprite(_name, _modType, _modName, 0, _sprName)
+	);
+	
+#define pet_get_sound(_name, _modType, _modName, _skin, _sndName)
+	/*
+		Returns the sound index associated with the given name and NT:TE pet, or 0 by default
+		Defaults to the A-skin, or ultimately '0' if no sound was found
+		
+		Ex:
+			pet_get_sound("Scorpion", "mod", "petlib", 0, "hurt") == sndScorpionMelee
+	*/
+	
+	var _snd = undefined;
+	
+	 // Custom:
+	if(is_array(_skin)){
+		var _ref = array_clone(_skin);
+		if(array_length(_ref) >= 3){
+			_ref[2] += "_sound";
+		}
+		_snd = script_ref_call(_ref, _sndName);
+	}
+	
+	 // Normal:
+	else _snd = mod_script_call(_modType, _modName, _name + "_sound", _skin, _sndName);
+	
+	 // Return:
+	if(_snd != 0 && is_real(_snd)){
+		return _snd;
+	}
+	return (
+		(_skin == 0)
+		? 0
+		: pet_get_sound(_name, _modType, _modName, 0, _sndName)
+	);
+	
+#define pet_set_skin(_skin)
+	/*
+		Called from an NT:TE pet to update their sprites and sounds to the given skin
+		The skin can be a script reference for setting a custom skin
+	*/
+	
+	bskin = _skin;
+	
+	 // Update Variables:
+	var _sprCurrent = sprite_index;
+	with(variable_instance_get_names(self)){
+		 // Sprites:
+		if(string_pos("spr_", self) == 1){
+			var _name = string_delete(self, 1, 4);
+			with(other){
+				var _spr = pet_get_sprite(pet, mod_type, mod_name, bskin, _name);
+				if(_spr != 0){
+					if(sprite_exists(_sprCurrent) && _sprCurrent == variable_instance_get(self, other)){
+						_sprCurrent = -1;
+						sprite_index = _spr;
+					}
+					variable_instance_set(self, other, _spr);
+				}
+			}
+		}
+		
+		 // Sounds:
+		else if(string_pos("snd_", self) == 1){
+			var _name = string_delete(self, 1, 4);
+			with(other){
+				var _snd = pet_get_sound(pet, mod_type, mod_name, bskin, _name)
+				if(_snd != 0){
+					variable_instance_set(self, other, _snd);
+				}
+			}
+		}
+	}
+	
+	 // Cause of Death Sprite:
+	if(is_array(hitid) && array_length(hitid)){
+		var _spr = pet_get_sprite(pet, mod_type, mod_name, bskin, "stat");
+		if(_spr == 0){
+			_spr = spr_idle;
+		}
+		hitid[0] = _spr;
+	}
+	
+	 // Prompt:
+	var	_icon = spr_icon,
+		_text = pet_get_name(pet, mod_type, mod_name, bskin);
+		
+	with(prompt){
+		text = `@2(${_icon})${_text}`;
+	}
+	
 #define pet_get_icon(_modType, _modName, _name)
-	var _icon = {
-		"spr" : spr.PetParrotIcon,
+	/*
+		Returns a LWO containing 'draw_sprite_ext()' arguments for the given NT:TE pet's icon
+		
+		!!! Legacy script, use 'pet_get_sprite()' instead
+	*/
+	
+	return {
+		"spr" : pet_get_sprite(_name, _modType, _modName, 0, "icon"),
 		"img" : 0.4 * current_frame,
 		"x"   : 0,
 		"y"   : 0,
@@ -5137,41 +5543,6 @@
 		"col" : c_white,
 		"alp" : 1
 	};
-	
-	 // Custom:
-	var _modScrt = _name + "_icon";
-	if(mod_script_exists(_modType, _modName, _modScrt)){
-		var _iconCustom = mod_script_call(_modType, _modName, _modScrt);
-		
-		if(is_real(_iconCustom)){
-			_icon.spr = _iconCustom;
-		}
-		
-		else{
-			for(var i = 0; i < min(array_length(_iconCustom), lq_size(_icon)); i++){
-				lq_set(_icon, lq_get_key(_icon, i), real(_iconCustom[i]));
-			}
-		}
-	}
-	
-	 // Stored Icon:
-	else if(
-		"name" in self
-		&& name == "Pet"
-		&& sprite_exists(spr_icon)
-	){
-		_icon.spr = spr_icon;
-	}
-	
-	 // Default:
-	else if(
-		_modType == "mod" &&
-		_modName == "petlib"
-	){
-		_icon.spr = lq_defget(spr, "Pet" + _name + "Icon", -1);
-	}
-	
-	return _icon;
 	
 #define top_create(_x, _y, _obj, _spawnDir, _spawnDis)
 	/*
@@ -5202,12 +5573,12 @@
 	}
 	
 	 // Top-ify:
-	if(array_length(instances_matching(instances_matching(CustomObject, "name", "TopObject"), "target", _inst)) <= 0){
+	if(!array_length(instances_matching(instances_matching(CustomObject, "name", "TopObject"), "target", _inst))){
 		with(obj_create(_x, _y, "TopObject")){
 			target = _inst;
 			
 			if(instance_exists(target)){
-				target.top_object = id;
+				target.top_object = self;
 				spawn_dis = random_range(16, 48);
 				
 				 // Object-General Setup:
@@ -5223,7 +5594,12 @@
 						if(target.direction == 0 && "walk" not in target && "right" in target){
 							with(target){
 								direction = random(360);
-								scrRight(direction);
+								if(direction < 90 || direction > 270){
+									right = 1;
+								}
+								else if(direction > 90 && direction < 270){
+									right = -1;
+								}
 							}
 						}
 					}
@@ -5283,52 +5659,52 @@
 				
 				 // Object-Specific Setup:
 				switch((string_pos("Custom", object_get_name(target.object_index)) == 1 && "name" in target) ? target.name : target.object_index){
-					 /// ENEMIES ///
-					case BoneFish:
-					case "Puffer":
-					case "HammerShark":
-						idle_walk = [0, 5];
-						idle_walk_chance = 1/2;
-						break;
-						
-					case Exploder:
-						jump_time = 1;
-						break;
-						
-					case ExploFreak:
-						jump *= 1.2;
-						idle_walk = [0, 5];
-						idle_walk_chance = 1;
-						
-						 // Important:
-						target_save.my_health = 0;
-						break;
-						
-					case Freak:
-						idle_walk = [0, 5];
-						idle_walk_chance = 1;
-						break;
+					// /// ENEMIES ///
+					//case BoneFish:
+					//case "Puffer":
+					//case "HammerShark":
+					//	idle_walk        = [0, 5];
+					//	idle_walk_chance = 1/2;
+					//	break;
+					//	
+					//case Exploder:
+					//	jump_time = 1;
+					//	break;
+					//	
+					//case ExploFreak:
+					//	jump *= 1.2;
+					//	idle_walk        = [0, 5];
+					//	idle_walk_chance = 1;
+					//	
+					//	 // Important:
+					//	target_save.my_health = 0;
+					//	break;
+					//	
+					//case Freak:
+					//	idle_walk        = [0, 5];
+					//	idle_walk_chance = 1;
+					//	break;
 						
 					case JungleFly:
 						jump = 0;
 						grav = random_range(0.1, 0.3);
-						idle_walk = [8, 12];
+						idle_walk        = [8, 12];
 						idle_walk_chance = 1/2;
 						break;
 						
 					case MeleeBandit:
-						idle_walk = [10, 30];
+						idle_walk        = [10, 30];
 						idle_walk_chance = 1/2;
 						break;
 						
-					case Necromancer:
-						jump *= 2/3;
-						idle_walk_chance = 1/16;
-						break;
-						
-					case "Seal":
-						idle_walk_chance = 1/12;
-						break;
+					//case Necromancer:
+					//	jump *= 2/3;
+					//	idle_walk_chance = 1/16;
+					//	break;
+					//	
+					//case "Seal":
+					//	idle_walk_chance = 1/12;
+					//	break;
 						
 					case "Spiderling":
 						jump *= 4/5;
@@ -5337,9 +5713,9 @@
 						
 					case "TopRaven":
 					case "BoneRaven":
-						type = RavenFly;
-						jump = 2;
-						grav = 0;
+						type    = RavenFly;
+						jump    = 2;
+						grav    = 0;
 						canmove = true;
 						spr_shadow_y--;
 						break;
@@ -5348,26 +5724,26 @@
 					case Anchor:
 					case OasisBarrel:
 					case WaterMine:
-						mask_index = target.spr_shadow;
+						mask_index   = target.spr_shadow;
 						image_xscale = 0.5;
 						image_yscale = 0.5;
-						spr_shadow = mskNone;
+						spr_shadow   = mskNone;
 						break;
 						
 					case Barrel:
 					case GoldBarrel:
 					case ToxicBarrel:
-						jump *= 1.5;
-						spr_shadow = shd16;
+						jump        *= 1.5;
+						spr_shadow   = shd16;
 						spr_shadow_y = 4;
-						wobble = 8;
+						wobble       = 8;
 						break;
 						
 					case BigFlower:
 					case IceFlower:
 						//override_depth = false;
 						//depth = -6.01;
-						spr_shadow = target.spr_idle;
+						spr_shadow   = target.spr_idle;
 						spr_shadow_y = 1;
 						break;
 						
@@ -5378,26 +5754,25 @@
 						
 					case Cactus:
 						with(target){
-							var t = choose("", "3");
-							if(true || chance(2, 3)) t = "B" + t; // Rotten epic
-							spr_idle = asset_get_index("sprCactus" + t);
-							spr_hurt = asset_get_index("sprCactus" + t + "Hurt");
-							spr_dead = asset_get_index("sprCactus" + t + "Dead");
+							var _t = choose("", "3");
+							spr_idle = asset_get_index("sprCactusB" + _t);
+							spr_hurt = asset_get_index("sprCactusB" + _t + "Hurt");
+							spr_dead = asset_get_index("sprCactusB" + _t + "Dead");
 						}
 						//case NightCactus:
-						spr_shadow = sprMine;
+						spr_shadow   = sprMine;
 						spr_shadow_y = 9;
 						break;
 						
 					case Cocoon:
 					case "NewCocoon":
-						spr_shadow = shd16;
+						spr_shadow   = shd16;
 						spr_shadow_y = 3;
 						break;
 						
 					case FireBaller:
 					case SuperFireBaller:
-						z += random(8);
+						z   += random(8);
 						jump = random(1);
 						grav = random_range(0.1, 0.2);
 						break;
@@ -5413,24 +5788,26 @@
 						
 					case Hydrant:
 						 // Icicle:
-						if(chance(1, 2) || target.spr_idle == sprIcicle) with(target){
-							spr_idle = sprIcicle;
-							spr_hurt = sprIcicleHurt;
-							spr_dead = sprIcicleDead;
-							snd_hurt = sndHitRock;
-							snd_dead = sndIcicleBreak;
-							spr_shadow = shd16;
-							spr_shadow_y = 3;
+						if(chance(1, 2) || target.spr_idle == sprIcicle){
+							with(target){
+								spr_idle     = sprIcicle;
+								spr_hurt     = sprIcicleHurt;
+								spr_dead     = sprIcicleDead;
+								snd_hurt     = sndHitRock;
+								snd_dead     = sndIcicleBreak;
+								spr_shadow   = shd16;
+								spr_shadow_y = 3;
+							}
 						}
 						break;
 						
 					case MeleeFake:
-						spr_shadow = sprMine;
+						spr_shadow   = sprMine;
 						spr_shadow_y = 7;
 						break;
 						
 					case MoneyPile:
-						spawn_dis = 8;
+						spawn_dis    = 8;
 						spr_shadow_y = -1;
 						break;
 						
@@ -5439,23 +5816,23 @@
 						break;
 						
 					case Pipe:
-						spr_shadow = sprMine;
+						spr_shadow   = sprMine;
 						spr_shadow_y = 7;
 						break;
 						
 					case Server:
-						spr_shadow = sprHydrant;
+						spr_shadow   = sprHydrant;
 						spr_shadow_y = 5;
 						break;
 						
 					case SmallGenerator:
-						target.image_xscale = 1;
-						spr_shadow = target.spr_idle;
+						spr_shadow   = target.spr_idle;
 						spr_shadow_y = 1;
+						target.image_xscale = 1;
 						break;
 						
 					case SnowMan:
-						spr_shadow = sprNewsStand;
+						spr_shadow   = sprNewsStand;
 						spr_shadow_y = 5;
 						break;
 						
@@ -5468,8 +5845,8 @@
 						break;
 						
 					case "WepPickupGrounded":
-						jump = 3;
-						wobble = 8;
+						jump    = 3;
+						wobble  = 8;
 						unstick = true;
 						break;
 				}
@@ -5482,7 +5859,7 @@
 				}
 				
 				 // Hitbox:
-				if(mask_index == -1){
+				if(mask_index < 0){
 					image_xscale = 0.5;
 					image_yscale = 0.5;
 					
@@ -5546,19 +5923,19 @@
 					
 					 // Object-Specific Post-Setup:
 					switch(target.object_index){
-						case BoneFish:
-						case Freak:
-						case "Puffer":
-						case "HammerShark": // Swimming bro
-							if(area_get_underwater(GameCont.area)){
-								z += random_range(8, distance_to_object(Floor) / 2) * ((target.object_index == "Puffer") ? 0.5 : 1);
-							}
-							break;
-							
-						case FrogEgg: // Hatch
-							target.alarm0 = irandom(150) + (distance_to_object(Player) * (1 + GameCont.loops));
-							target_save.alarm0 = random_range(10, 30);
-							break;
+						//case BoneFish:
+						//case Freak:
+						//case "Puffer":
+						//case "HammerShark": // Swimming bro
+						//	if(area_get_underwater(GameCont.area)){
+						//		z += random_range(8, distance_to_object(Floor) / 2) * ((target.object_index == "Puffer") ? 0.5 : 1);
+						//	}
+						//	break;
+						//	
+						//case FrogEgg: // Hatch
+						//	target.alarm0 = irandom(150) + (distance_to_object(Player) * (1 + GameCont.loops));
+						//	target_save.alarm0 = random_range(10, 30);
+						//	break;
 							
 						case JungleFly: // Bro hes actually flying real
 							z += random_range(4, 16 + (distance_to_object(Floor) / 2));
@@ -5595,14 +5972,14 @@
 				}
 				
 				 // Insta-Land:
-				var n = instance_nearest(x - 16, y - 16, Floor); //instance_nearest_bbox(x, y, Floor);
+				var _n = instance_nearest(x - 16, y - 16, Floor); //instance_nearest_bbox(x, y, Floor);
 				if(
-					instance_exists(n)                                                                                                            &&
-					!instance_exists(NothingSpiral)                                                                                               &&
-					!collision_line(x, y + 8, (n.bbox_left + n.bbox_right + 1) / 2, (n.bbox_top + n.bbox_bottom + 1) / 2, Wall,     false, false) &&
-					!collision_line(x, y + 8, (n.bbox_left + n.bbox_right + 1) / 2, (n.bbox_top + n.bbox_bottom + 1) / 2, TopSmall, false, false)
+					instance_exists(_n)
+					&& !instance_exists(NothingSpiral)
+					&& !collision_line(x, y + 8, (_n.bbox_left + _n.bbox_right + 1) / 2, (_n.bbox_top + _n.bbox_bottom + 1) / 2, Wall,     false, false)
+					&& !collision_line(x, y + 8, (_n.bbox_left + _n.bbox_right + 1) / 2, (_n.bbox_top + _n.bbox_bottom + 1) / 2, TopSmall, false, false)
 				){
-					zspeed = jump;
+					zspeed    = jump;
 					zfriction = grav;
 				}
 				
@@ -5648,13 +6025,13 @@
 					depth = object_get_depth(SubTopCont) + min(-1, depth);
 					
 					 // Search Zone:
-					var m = mask_index;
+					var _m = mask_index;
 					mask_index = -1;
 					other.search_x1 = min(x - 8, bbox_left);
 					other.search_x2 = max(x + 8, bbox_right);
 					other.search_y1 = min(y - 8, bbox_top);
 					other.search_y2 = max(y + 8, bbox_bottom);
-					mask_index = m;
+					mask_index = _m;
 				}
 			}
 			
@@ -5769,47 +6146,18 @@
 			with(partner){
 				partner = other;
 			}
-			_partner = id;
+			_partner = self;
 			
 			 // Ensure LoS Wall Creation:
 			with(self){
 				event_perform(ev_step, ev_step_normal);
 			}
 			
-			array_push(_inst, id);
+			array_push(_inst, self);
 		}
 	}
 	
 	return _inst;
-	
-#define player_create(_x, _y, _index)
-	/*
-		Creates a Player of the given index at the given coordinates
-	*/
-	
-	with(instance_create(_x, _y, CustomHitme)){
-		with(instance_create(x, y, Revive)){
-			p = _index;
-			canrevive = true;
-			event_perform(ev_collision, Player);
-			with(self){
-				event_perform(ev_alarm, 0);
-			}
-		}
-		instance_destroy();
-	}
-	
-	with(player_find(_index)){
-		my_health = maxhealth;
-		sound_stop(snd_hurt);
-		return id;
-	}
-	
-	return noone;
-
-#define trace_error(_error)
-	trace(_error);
-	trace_color(" ^ Screenshot that error and post it on NT:TE's itch.io page, thanks!", c_yellow);
 	
 #define sleep_max(_milliseconds)
 	/*
@@ -5844,7 +6192,7 @@
 				trace_error(_error);
 			}
 			
-			instance_delete(id);
+			instance_delete(self);
 		}
 		
 		UberCont.opt_shake = _shake;
@@ -5902,18 +6250,14 @@
 	var _inst = [];
 	
 	while(_raddrop > 0){
-		var r = (_raddrop > 15);
-		repeat(r ? 1 : _raddrop){
-			if(r) _raddrop -= 10;
-			with(instance_create(_x, _y, (r ? BigRad : Rad))){
-				speed = _spd;
-				direction = _dir;
-				motion_add(random(360), random(_raddrop / 2) + 3);
-				speed *= power(0.9, speed);
-				array_push(_inst, id);
-			}
+		var _big = (_raddrop > 15);
+		_raddrop -= (_big ? 10 : 1);
+		with(instance_create(_x, _y, (_big ? BigRad : Rad))){
+			motion_add(_dir, _spd);
+			motion_add(random(360), 3 + random(_raddrop / 2));
+			speed *= power(0.9, speed);
+			array_push(_inst, self);
 		}
-		if(!r) break;
 	}
 	
 	return _inst;
@@ -5961,7 +6305,7 @@
 					_ty   = _targ.y,
 					_path = _vars.path;
 					
-				if(array_length(_path) > 0){
+				if(array_length(_path)){
 					 // Direction to Follow:
 					var _dir = null;
 					if(collision_line(x, y, _tx, _ty, Wall, false, false)){
@@ -6044,7 +6388,7 @@
 						var j = 0;
 						with(_instList){
 							var v = _varsList[j++];
-							if(v.targ == _targ && array_length(v.path) <= 0 && self != other){
+							if(v.targ == _targ && !array_length(v.path) && self != other){
 								if(instance_exists(self) && !collision_line(x, y, other.x, other.y, Wall, false, false)){
 									v.path = _path;
 									v.can_path = false;
@@ -6063,9 +6407,11 @@
 				
 				 // Heal FX:
 				if(_vars.heal){
-					var n = 0;
-					with(_varsList) if(targ == _targ) n++;
-					if(n <= 0) with(_targ){
+					var _num = 0;
+					with(_varsList) if(targ == _targ){
+						_num++;
+					}
+					if(_num <= 0) with(_targ){
 						with(instance_create(x, y, FrogHeal)){
 							sprite_index  = spr.BossHealFX;
 							depth         = other.depth - 1;
@@ -6085,7 +6431,7 @@
 		vars = _varsList;
 		
 		 // Goodbye:
-		if(array_length(_instList) <= 0){
+		if(!array_length(_instList)){
 			visible = false;
 		}
 		
@@ -6180,7 +6526,7 @@
 								variable_instance_set_list(self, _varList);
 								
 								 // Object-Specifics:
-								if(array_exists(["CustomBullet", "CustomFlak", "CustomShell", "CustomPlasma"], _newObj)){
+								if(array_find_index(["CustomBullet", "CustomFlak", "CustomShell", "CustomPlasma"], _newObj) >= 0){
 									var _sprAlly = team_get_sprite(2, sprite_index);
 									
 									 // Destruction Sprite:
@@ -6278,7 +6624,7 @@
 									}
 								}
 							}
-							instance_delete(id);
+							instance_delete(self);
 						}
 					}
 				}
@@ -6286,8 +6632,10 @@
 		}
 	}
 	
-	_newInst = instances_matching(_newInst, "", null);
+	_newInst = instances_matching_ne(_newInst, "id", null);
 	
-	if(array_length(_newInst) <= 0) return noone;
-	return ((array_length(_newInst) == 1) ? _newInst[0] : _newInst);
+	if(array_length(_newInst)){
+		return ((array_length(_newInst) == 1) ? _newInst[0] : _newInst);
+	}
 	
+	return noone;

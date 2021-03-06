@@ -1,6 +1,11 @@
 #define init
+	mod_script_call("mod", "teassets", "ntte_init", script_ref_create(init));
+	
 	 // Sprites:
 	global.sprSkillHUD = sprite_add("../sprites/skills/Annihilation/sprSkillAnnihilationHUD.png", 1, 9, 9);
+	
+#define cleanup
+	mod_script_call("mod", "teassets", "ntte_cleanup", script_ref_create(cleanup));
 	
 #macro annihilation_list variable_instance_get(GameCont, "annihilation_list", [])
 

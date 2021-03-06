@@ -1,6 +1,8 @@
 #define init
-	spr = mod_variable_get("mod", "teassets", "spr");
-	snd = mod_variable_get("mod", "teassets", "snd");
+	mod_script_call("mod", "teassets", "ntte_init", script_ref_create(init));
+	
+#define cleanup
+	mod_script_call("mod", "teassets", "ntte_cleanup", script_ref_create(cleanup));
 	
 #macro spr global.spr
 #macro msk spr.msk
@@ -13,12 +15,12 @@
 #define skin_unlock    return "FOR REROLLING HEAVY HEART";
 #define skin_ttip      return choose("YOU LOOK SO GOOD", "MILLION DOLLAR SMILE", "SHINY LIKE A LIMOUSINE", "ALL THAT TWINKLES IS GOLD", "PUMP YOUR VEINS WITH GUSHING GOLD");
 #define skin_avail     return unlock_get("skin:" + mod_current);
-#define skin_portrait  return spr.PlantOrchidPortrait;
-#define skin_mapicon   return spr.PlantOrchidMapIcon;
+#define skin_portrait  return skin_sprite(sprBigPortrait);
+#define skin_mapicon   return skin_sprite(sprMapIcon);
 
 #define skin_button
-	sprite_index = spr.PlantOrchidLoadout;
-	image_index  = skin_avail();
+	sprite_index = skin_sprite(sprLoadoutSkin);
+	image_index  = !skin_avail();
 	
 #define skin_sprite(_spr)
 	switch(_spr){
@@ -34,7 +36,44 @@
 		case sprTangle       : return spr.PlantOrchidTangle;
 		case sprTangleSeed   : return spr.PlantOrchidTangleSeed;
 	}
-	return -1;
+	
+#define skin_weapon_sprite(_spr, _wep)
+	switch(_spr){
+		case sprGoldARifle       : return spr.OrchidAssaultRifle;
+		case sprGoldBazooka      : return spr.OrchidBazooka;
+		case sprGoldCrossbow     : return spr.OrchidCrossbow;
+		case sprGoldDiscgun      : return spr.OrchidDiscGun;
+		case sprGoldFrogBlaster  : return spr.OrchidFrogPistol;
+		case sprFrogBlaster      : return spr.OrchidFrogPistolRusty;
+		case sprGoldNader        : return spr.OrchidGrenadeLauncher;
+		case sprGoldLaserGun     : return spr.OrchidLaserPistol;
+		case sprGoldMachinegun   : return spr.OrchidMachinegun;
+		case sprGoldNukeLauncher : return spr.OrchidNukeLauncher;
+		case sprGoldPlasmaGun    : return spr.OrchidPlasmaGun;
+		case sprGoldRevolver     : return spr.OrchidRevolver;
+		case sprGoldScrewdriver  : return spr.OrchidScrewdriver;
+		case sprGoldShotgun      : return spr.OrchidShotgun;
+		case sprGoldSlugger      : return spr.OrchidSlugger;
+		case sprGoldSplinterGun  : return spr.OrchidSplinterGun;
+		case sprGoldWrench       : return spr.OrchidWrench;
+		
+		 // Projectiles:
+		case sprBoltGold         : return spr.OrchidBolt;
+		case sprGoldDisc         : return spr.OrchidDisc;
+		case sprGoldGrenade      : return spr.OrchidGrenade;
+		case sprGoldNuke         : return spr.OrchidNuke;
+		case sprGoldRocket       : return spr.OrchidRocket;
+		
+		 // Modded:
+		default:
+			if(_spr == spr.GoldTrident  ) return spr.OrchidTrident;
+			if(_spr == spr.GoldTunneller) return spr.OrchidTunneller;
+	}
+	return _spr;
+	
+#define skin_weapon_sprite_hud(_spr, _wep)
+	if(_spr == spr.TunnellerHUD) return spr.OrchidTunnellerHUD;
+	return _spr;
 	
 	
 /// SCRIPTS

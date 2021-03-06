@@ -1,7 +1,12 @@
 #define init
+	mod_script_call("mod", "teassets", "ntte_init", script_ref_create(init));
+	
 	 // Sprites:
 	global.sprSkillIcon = sprite_add("../sprites/skills/Silver Tongue/sprSkillSilverTongueIcon.png", 1, 12, 16);
 	global.sprSkillHUD  = sprite_add("../sprites/skills/Silver Tongue/sprSkillSilverTongueHUD.png",  1,  8,  8);
+	
+#define cleanup
+	mod_script_call("mod", "teassets", "ntte_cleanup", script_ref_create(cleanup));
 	
 #define skill_name    return "SILVER TONGUE";
 #define skill_text    return `FIND @wSMUGGLED GOODS#@(color:${make_color_rgb(175, 143, 106)})THE FAMILY CONCEDES`;

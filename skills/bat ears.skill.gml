@@ -1,6 +1,11 @@
 #define init
+	mod_script_call("mod", "teassets", "ntte_init", script_ref_create(init));
+	
 	 // Sprites:
 	global.sprSkillHUD  = sprite_add("../sprites/skills/Bat Ears/sprBatEarsHUD.png",  1,  8,  8);
+	
+#define cleanup
+	mod_script_call("mod", "teassets", "ntte_cleanup", script_ref_create(cleanup));
 	
 #define skill_name   return "BAT EARS";
 #define skill_text   return "@wSEE BETTER @sIN THE @wDARK";
@@ -8,7 +13,7 @@
 #define skill_icon   return global.sprSkillHUD;
 #define skill_avail  return false;
 	
-#define ntte_dark(_type)
+#define ntte_draw_dark(_type)
 	if(skill_get(mod_current) > 0){
 		switch(_type){
 			

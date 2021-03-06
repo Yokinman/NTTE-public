@@ -1,15 +1,20 @@
 #define init
+	mod_script_call("mod", "teassets", "ntte_init", script_ref_create(init));
+	
 	 // Sprites:
 	global.sprCrownIcon	   = sprite_add("../sprites/crowns/Crime/sprCrownCrimeIcon.png",     1, 12, 16);
 	global.sprCrownIdle	   = sprite_add("../sprites/crowns/Crime/sprCrownCrimeIdle.png",    20,  8,  8);
 	global.sprCrownWalk	   = sprite_add("../sprites/crowns/Crime/sprCrownCrimeWalk.png",     6,	 8,  8);
 	global.sprCrownLoadout = sprite_add("../sprites/crowns/Crime/sprCrownCrimeLoadout.png",  2, 16, 16);
 	
+#define cleanup
+	mod_script_call("mod", "teassets", "ntte_cleanup", script_ref_create(cleanup));
+	
 #define crown_name        return "CROWN OF CRIME";
 #define crown_text        return "FIND @wSMUGGLED GOODS#@sA @rPRICE @sON YOUR HEAD";
 #define crown_tip         return choose("THE @wFAMILY@s DOESN'T FORGIVE", "THE @rBAT'S@s EXPERIMENTS", "THE @rCAT'S@s RESOURCES", "THE WASTELAND WEAPON TRADE");
 #define crown_unlock      return "STOLEN FROM THIEVES";
-#define crown_avail       return unlock_get(`crown:${mod_current}`);
+#define crown_avail       return (unlock_get(`crown:${mod_current}`) && GameCont.loops <= 0);
 #define crown_menu_avail  return unlock_get(`loadout:crown:${mod_current}`);
 #define crown_loadout     return global.sprCrownLoadout;
 #define crown_ntte_pack   return "crown";

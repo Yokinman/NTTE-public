@@ -1,7 +1,12 @@
 #define init
+	mod_script_call("mod", "teassets", "ntte_init", script_ref_create(init));
+	
 	 // Sprites:
-	global.sprWep = sprite_add_weapon("../sprites/weps/sprHarpoonLauncher.png", 3, 4);
-	global.sprWepLocked = mskNone;
+	global.sprWep       = sprite_add_weapon("../sprites/weps/sprHarpoonLauncher.png", 3, 4);
+	global.sprWepLocked = sprTemp;
+	
+#define cleanup
+	mod_script_call("mod", "teassets", "ntte_cleanup", script_ref_create(cleanup));
 	
 #define weapon_name       return (weapon_avail() ? "HARPOON LAUNCHER" : "LOCKED");
 #define weapon_text       return "REEL IT IN";
@@ -24,13 +29,13 @@
 			var _rope = variable_instance_get(creator, "harpoon_rope", noone);
 			
 			if(!instance_exists(lq_defget(_rope, "link1", noone)) || lq_defget(_rope, "broken", true)){
-				_rope = Harpoon_rope(id, creator);
+				_rope = Harpoon_rope(self, creator);
 			}
 			else{
 				array_push(rope, _rope);
 				_rope.break_timer = 60;
-				_rope.link2 = id;
-				_rope = noone;
+				_rope.link2       = self;
+				_rope             = noone;
 			}
 			
 			variable_instance_set(creator, "harpoon_rope", _rope);
@@ -62,7 +67,7 @@
 #define weapon_fire_init(_wep)                                                          return  mod_script_call     ('mod', 'telib', 'weapon_fire_init', _wep);
 #define weapon_ammo_fire(_wep)                                                          return  mod_script_call     ('mod', 'telib', 'weapon_ammo_fire', _wep);
 #define weapon_ammo_hud(_wep)                                                           return  mod_script_call     ('mod', 'telib', 'weapon_ammo_hud', _wep);
-#define weapon_get_red(_wep)                                                            return  mod_script_call_self('mod', 'telib', 'weapon_get_red', _wep);
+#define weapon_get(_name, _wep)                                                         return  mod_script_call     ('mod', 'telib', 'weapon_get', _name, _wep);
 #define wep_raw(_wep)                                                                   return  mod_script_call_nc  ('mod', 'telib', 'wep_raw', _wep);
 #define wep_get(_primary, _name, _default)                                              return  variable_instance_get(self, (_primary ? '' : 'b') + _name, _default);
 #define wep_set(_primary, _name, _value)                                                        variable_instance_set(self, (_primary ? '' : 'b') + _name, _value);

@@ -1,5 +1,5 @@
 #define init
-	ntte_version = 2.031;
+	ntte_version = 2.04;
 	
 	 // Debug Lag:
 	lag = false;
@@ -74,8 +74,16 @@
 		p = "weps/";
 			
 			 // Bone:
-			Bone      = sprite(p + "sprBone",      1, 6, 6);
+			Bone      = sprite(p + "sprBone",      1, 6, 6, shnWep);
 			BoneShard = sprite(p + "sprBoneShard", 1, 3, 2, shnWep);
+			
+			 // Tunneller:
+			Tunneller            = sprite(p + "sprTunneller",            1, 14,  6, shnWep);
+			GoldTunneller        = sprite(p + "sprGoldTunneller",        1, 14,  6, shnWep);
+			TunnellerLoadout     = sprite(p + "sprTunnellerLoadout",     1, 24, 24);
+			GoldTunnellerLoadout = sprite(p + "sprGoldTunnellerLoadout", 1, 24, 24);
+			TunnellerHUD         = sprite(p + "sprTunnellerHUD",         1,  0,  3, shnWep);
+			TunnellerHUDRed      = sprite(p + "sprTunnellerHUD",         1,  0,  3);
 			
 			 // Trident:
 			Trident            = sprite(p + "sprTrident",            1, 11,  6, shnWep);
@@ -130,10 +138,14 @@
 			msk.ClamShieldSlash = sprite(p + "mskClamShieldSlash",  4, 12, 12);
 			
 			 // Crystal Heart:
-			CrystalHeartBullet      = sprite(p + "sprCrystalHeartBullet",      2, 10, 10);
-			CrystalHeartBulletHit   = sprite(p + "sprCrystalHeartBulletHit",   8, 16, 16);
-			CrystalHeartBulletRing  = sprite(p + "sprCrystalHeartBulletRing",  2, 10, 10);
-			CrystalHeartBulletTrail = sprite(p + "sprCrystalHeartBulletTrail", 4, 10, 10);
+			CrystalHeartBullet         = sprite(p + "sprCrystalHeartBullet",         2, 10, 10);
+			CrystalHeartBulletHit      = sprite(p + "sprCrystalHeartBulletHit",      8, 16, 16);
+			CrystalHeartBulletRing     = sprite(p + "sprCrystalHeartBulletRing",     2, 10, 10);
+			CrystalHeartBulletTrail    = sprite(p + "sprCrystalHeartBulletTrail",    4, 10, 10);
+			CrystalHeartBulletBig      = sprite(p + "sprCrystalHeartBulletBig",      2, 24, 24);
+			CrystalHeartBulletBigRed   = sprite(p + "sprCrystalHeartBulletBigRed",   2, 24, 24);
+			CrystalHeartBulletBigRing  = sprite(p + "sprCrystalHeartBulletBigRing",  2, 24, 24);
+			CrystalHeartBulletBigTrail = sprite(p + "sprCrystalHeartBulletBigTrail", 4, 24, 24);
 			
 			 // Electroplasma:
 			ElectroPlasma       = sprite(p + "sprElectroPlasma",       7, 12, 12);
@@ -141,9 +153,6 @@
 			ElectroPlasmaTrail  = sprite(p + "sprElectroPlasmaTrail",  3,  4,  4);
 			ElectroPlasmaImpact = sprite(p + "sprElectroPlasmaImpact", 7, 12, 12);
 			ElectroPlasmaTether = sprite(p + "sprElectroPlasmaTether", 4,  0,  1);
-			
-			 // Entangler:
-			EntanglerSlash = sprite(p + "sprEntanglerSlash", 3, 0, 24);
 			
 			 // Harpoon:
 			Harpoon      = sprite(p + "sprHarpoon",      1, 4, 3, shnWep);
@@ -183,7 +192,11 @@
 			RedBulletDisappear = sprite(p + "sprRedBulletDisappear", 5,  9,  9);
 			RedExplosion       = sprite(p + "sprRedExplosion",       7, 16, 16);
 			RedSlash           = sprite(p + "sprRedSlash",           3,  0, 24);
+			RedHeavySlash      = sprite(p + "sprRedHeavySlash",      3,  0, 24);
+			RedMegaSlash       = sprite(p + "sprRedMegaSlash",       3,  0, 36);
 			RedShank           = sprite(p + "sprRedShank",           2, -5,  8);
+			RedShankGold       = sprite(p + "sprRedShankGold",       2, -5,  8);
+			//EntanglerSlash     = sprite(p + "sprEntanglerSlash", 3, 0, 24);
 			
 			 // Small Green Explo:
 			SmallGreenExplosion = sprite(p + "sprSmallGreenExplosion", 7, 12, 12);
@@ -478,7 +491,7 @@
 			DiverIdle  = sprite(p + "sprDiverIdle",       4, 12, 12);
 			DiverWalk  = sprite(p + "sprDiverWalk",       6, 12, 12);
 			DiverHurt  = sprite(p + "sprDiverHurt",       3, 12, 12);
-			DiverDead  = sprite(p + "sprDiverDead",       9, 16, 16);
+			DiverDead  = sprite(p + "sprDiverDead",       9, 24, 24);
 			HarpoonGun = sprite(p + "sprDiverHarpoonGun", 1,  8,  8);
 			
 			 // Eel:
@@ -596,7 +609,7 @@
 			PelicanWalk   = sprite(p + "sprPelicanWalk",   6, 24, 24);
 			PelicanHurt   = sprite(p + "sprPelicanHurt",   3, 24, 24);
 			PelicanDead   = sprite(p + "sprPelicanDead",   6, 24, 24);
-			PelicanHammer = sprite(p + "sprPelicanHammer", 1,  6,  8);
+			PelicanHammer = sprite(p + "sprPelicanHammer", 1,  6,  8, shnWep);
 			
 			 // Pit Squid:
 			p = m + "Pitsquid/";
@@ -608,7 +621,7 @@
 				
 				 // Tentacles:
 				TentacleIdle = sprite(p + "sprTentacleIdle", 8, 20, 28);
-				TentacleHurt = sprite(p + "sprTentacleIdle", 8, 20, 28, shnHurt);
+				TentacleHurt = sprite(p + "sprTentacleHurt", 3, 20, 28);
 				TentacleDead = sprite(p + "sprTentacleDead", 4, 20, 28);
 				TentacleSpwn = sprite(p + "sprTentacleSpwn", 6, 20, 28);
 				TentacleTele = sprite(p + "sprTentacleTele", 6, 20, 28);
@@ -736,6 +749,26 @@
 			InvSpiderlingHurt  = sprite(p + "sprInvSpiderlingHurt",  3, 8, 8);
 			InvSpiderlingDead  = sprite(p + "sprInvSpiderlingDead",  7, 8, 8);
 			InvSpiderlingHatch = sprite(p + "sprInvSpiderlingHatch", 5, 8, 8);
+			
+			 // Tesseract:
+			p = m + "Tesseract/";
+			TesseractIdle           = sprite(p + "sprTesseractEyeIdle",           8,  8,  8);
+			TesseractHurt           = sprite(p + "sprTesseractEyeHurt",           3,  8,  8);
+			TesseractFire           = sprite(p + "sprTesseractEyeFire",           4,  8,  8);
+			TesseractTell           = sprite(p + "sprTesseractEyeTell",           6,  8,  8);
+			TesseractLayer          =[sprite(p + "sprTesseractLayerBottom",       2, 48, 48),
+			                          sprite(p + "sprTesseractLayerMiddle",       2, 48, 48),
+			                          sprite(p + "sprTesseractLayerTop",          2, 48, 48)];
+			TesseractDeathLayer     =[sprite(p + "sprTesseractDeathLayerBottom",  3, 48, 48),
+			                          sprite(p + "sprTesseractDeathLayerMiddle",  6, 48, 48),
+			                          sprite(p + "sprTesseractDeathLayerTop",    11, 48, 48)];
+			TesseractDeathCause     = sprite(p + "sprTesseractDeathCause",        8, 48, 48);
+			TesseractDeathCauseText = sprite(p + "sprTesseractDeathCauseText",   12, 36,  4);
+			TesseractWeapon         = sprite(p + "sprTesseractWeapon",            1, 24, 24);
+			TesseractStrike         = sprite(p + "sprTesseractStrike",            4, 26, 12);
+			with(TesseractDeathLayer){
+				mask = [true, 0];
+			}
 			
 			 // Traffic Crab:
 			p = m + "Crab/";
@@ -1068,8 +1101,9 @@
 			DetailCoast = sprite(p + "sprDetailCoast", 6, 4, 4);
 			
 			 // Sea:
-			CoastTrans  = sprite(p + "sprCoastTrans",  1, 0, 0);
-			WaterStreak = sprite(p + "sprWaterStreak", 7, 8, 8);
+			CoastTrans    = sprite(p + "sprCoastTrans",    1,   0, 0);
+			WaterGradient = sprite(p + "sprWaterGradient", 1, 128, 0);
+			WaterStreak   = sprite(p + "sprWaterStreak",   7,   8, 8);
 			
 			//#region PROPS
 			p = m + "Props/";
@@ -1136,7 +1170,7 @@
 			14, 80, 80);
 			CreatureHurt = sprite_add_base64("iVBORw0KGgoAAAANSUhEUgAAAeAAAACgCAMAAADjJU9/AAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAMAUExURQAAAAU9IAxsQXVgQ7iVetS/r////wAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAHiDNaAAAAEAdFJOU////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////wBT9wclAAAACXBIWXMAAA7DAAAOwwHHb6hkAAAAGXRFWHRTb2Z0d2FyZQBwYWludC5uZXQgNC4wLjE3M26fYwAABYhJREFUeF7tmomS2joURCF2+P8/nmhpBttos9GWpk/VC4MsXXf1GZNJXm4/ghoJJkeCyZFgciSYHAkmR4LJkWByJJgcCSZHgsmRYHIkmBwJJkeCyZFgciSYHAkmR4LJkWByJJgcCSZHgsmRYHIkmBwJJkeCyZFgciSYHAkmR4LJkWByJJgcCSZHgsmRYHIkmBwJJkeCyZFgciSYHAkmR4LJkWByJJgcCSZHgsmRYHIkmBwJJkeCyZFgciSYnI8EP7ZgbSZuW7A2E0jmwVptrs2F0xDYMRZ0dt+CNewYC7IgmQdr2FGN0wPhMQV2jsG1hM5CNOjwFL3znZsGg3mwvzfx7v68GOh4QL4To+CuEBzqSLQ9X5v7FZgOcagjY/KVDoK2M+BkH5LPxu4B8fRWPCxf2RgoOwkOdyDanq8uUKCtEIc7MDBfyRT4ugAGNCZRX6i5X3o9xEPz5WfA1TUwoyWp+gzhx8PT5SEenC83AqIugzHNyNS3AaXtaW54eL7MBGj6AAxqRLQ+FLRhiOHx+dIDIOkjMKoJkf5QzoEBhifIlzwPRR+CYQ041V+MhoZnyJc6DkGfg3m1CfeHXopp9yfiKfIlDsNODTCxLnX6sz/FtjE8R774WbipA2bW5NLnX+CyXWpheJJ80aMwUwtMrcel/kINupX6hmfJFzsJL/XA3FpE+jtfII7UNjxNvshBWKkJJtch1t/lAiv/pdY8+cLn4KQumF2DaH/Jv/mzvF1+FljV8ET5JBgLkwu+nC94DEYqg+EViPeXbs/wvgMrNQXPlK+j4HqGEwXaNlIthgr0hyoanilf6BR8VAfjPybVny3jvaQXbsMO++/cHg+zXk3wVPn4BKf/D6u9vsMsmP4ej1svwZ3zzSS4bFe2QAPK2YFL/qJ9Xde/jnV1980XeHPgTYKp8gVOuXEtwPww2FMgON/fFvv5Zr7/DVjwoDyPazBToBng9uYFz5VvEsHYYcFKnDMF+voMuwZ37TlWex3zQ6C9v2tlwe3z9RRswT324JoHa3HKCzSlYKgpEGuh+kwx67LYDsMlPuurLbhHvt6CHbgRwCLAYoKyAl0dmwKxfEcTW9Zfgi2+6jM7834ny/ceGHdsDG72fjssxynrz/Eq8HkIRWx5/izzxPS47fB221wvETxZvlGCLcG7uQwpThSIkfYPkQ7fwa6wdcEXB0yHrpptfWZzXcGI1zTfSMFBkCJOeYFuHr6+321Tpr1Dfbu3B2yJu+tLXcFd8n2J4MVWZ34P2/VnfktL9ffWr93fSHC7fN8hGPUd+jDv0gUe+l2aCW6YbzrBWcPlBdoG7YvvzoImPPZdssDDRTPENJo1PFk+asGeZXl+BKIJj3uXLPCA6c+MqSnY0zbffIJzhs8WaOoL9Xe6QPuAlDzCk+XjF2yw39kfF+j6CzwiRybLN6HgjOErBQb685wr0P+YmzE8Wb5vEBx8QDzlBbofYWyD9QU3zTej4LThCwW6/sIFFjdoCvRjcoYny/flgssfET/D0lPw5/kCYdHySJAkDGopp16B9tX8lzaMu5bTNF8wK2oeB3LEQDGl/H52BSgvcPOaFjxXvkhWFF0KTu14rrsNCWeZy2FQTRnLglM7bKXPV3wZJHM5DO5cRtN8qW9GX30C7BsF+omDfaNAijjY15Tcp434z5FgciSYHAkmR4LJkWByJJgcCSZHgsmRYHIkmBwJJkeCyZFgciSYHAkmR4LJkWByJJgcCSZHgsmRYHIkmBwJJkeCyZFgciSYHAkmR4LJkWByJJgcCSZHgsmRYHIkmBwJJkeCyZFgciSYHAkmR4LJkWByJJgcCSZHgsmRYHIkmBwJJkeCyZFgciSYHAkmR4LJkWByJJgcCSZHgsmRYHIkmBwJpubn5x8Du/CP6ZKb1gAAAABJRU5ErkJggg==",
 			3, 80, 80);
-			CreatureBott = sprite_add_base64("iVBORw0KGgoAAAANSUhEUgAAAKAAAACgCAYAAACLz2ctAAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH4wYVETYBV3z5JQAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAB+UlEQVR42u3bzU3DMBgGYAf10i1A6hQdgGmQmIUDq3BggGyBGCNHc2wrxX9tgxN4ngtIbZLP9usvrZSGAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAUGXYVLX7Y0y+No2D5RTA9uCsxT0CvIVx/tZcdA3gX1kIFg/nIHj0DOMgfPQM4oPZo2fzEUC6EkC6dkEBRAfk/3ZBAUQH5P92QQFEB0QAYeMB9DgUOiDdNTYiAaRb+EJY4nlAT8UIX4PdAqV8LTTEeMOGaT02hq39XGH5uU7PyTQerr3QboGdcAj748dMh80N6vzv+XFx5v/URJwfGxMdPibOHWZqCJU1hcz75841ZMYfMudN1Zi77pC4Rm6DpdYpJNbqJsvt8v3xbWW7+m6TtoKae47l8trT+LrOAJ6C+FLoPjGzU0Omm5V2bix0nZquGTO7vvacNV2oNObSfIUrulvuTlKq9TS+aXxfdwAvw/ic2cG5W1bs3AFramvpVqlbeGmNYqG+mjG2zmv6/dP4ud5bcHs4H6/odDHz+aj0Wa9l59/jC1CpEw8NXb1UW7pjT+N3xVo8Jc9fc/wmA3hbeEtfjNZf45prBwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACg5AeYQa0I8Pr3rQAAAABJRU5ErkJggg==",
+			CreatureBott = sprite_add_base64("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",
 			1, 80, 80);
 			CreatureFoam = sprite_add_base64("iVBORw0KGgoAAAANSUhEUgAAAKAAAACgCAYAAACLz2ctAAAABGdBTUEAALGPC/xhBQAAAAlwSFlzAAAOwAAADsABataJCQAAABl0RVh0U29mdHdhcmUAcGFpbnQubmV0IDQuMC4xNzNun2MAAAIVSURBVHhe7dLBTsIAFERR/v+nMe6voBUGtGeSs7npok3f5Xq9wstkhJWMsJIRVjLCSkZYyQgrGWElI6xkhJWMsJIRVjLCSkZYyQgrGWElI6xkhJWMsJIRVjLCSkZYyQgrGWElI6xkhJWMsJIRVjLCSkZYyQgrGWElI6xkhJWMsJIRVjLCSkZYyQgrGWElI6xkhJWMsJIRVjLCSkZYyQgrGWElI6xkhJWMsJIRVjLCSkZYyQgrGWElI6xkhJWMsJIRVjLCSkZYyQgrGWElI6xkhJWMsJIRVjLCSkZYyQgrGWElI6xkhJWMsJIRVjLCSkZYyQgrGWElI6xkhJWMsJIRVjLCSkZYyQgrGd/YrdXzvLmMT/AXVu/9U/9l9W1PkfEB7P+u/vdhGX/BzrW6gR/JeJCdd3UP35LxIDv36ibuyniQnXt1E3dlPMis7uKmjAeZ1V3clPEgs8/VbXwp4y/ZeVf3cFPGB/nLq+/hCTI+0Tus3osXyQgrGWElI6xkhJWMsJIRVjLCSkZYyQgrGWElI6xkhJWMsJIRVjLCSkZYyQgrGWElI6xkhJWMsJIRVjLCSkZYyQgrGWElI6xkhJWMsJIRVjLCSkZYyQgrGWElI6xkhJWMsJIRVjLCSkZYyQgrGWElI6xkhJWMsJIRVjLCSkZYyQgrGWElI6xkhJWMsJIRVjLCSkZYyQgrGWElI6xkhI3r5QPGwQeqRTAO1AAAAABJRU5ErkJggg==",
 			1, 80, 80);
@@ -1389,6 +1423,16 @@
 				
 			//#endregion
 			
+			//#region LIGHTS
+			p = m + "Lights/";
+				
+				 // Ceiling Lights:
+				CatLight     = sprite(p + "sprCatLight",     1,  96, 16);
+				CatLightBig  = sprite(p + "sprCatLightBig",  1, 128, 16);
+				CatLightThin = sprite(p + "sprCatLightThin", 1,  72, 16);
+				
+			//#endregion
+			
 		//#endregion
 		
 		//#region RED
@@ -1580,13 +1624,15 @@
 			ButtonPickupDebris = sprite(p + "sprButtonPickupDebris", 2, 6, 6);
 			
 			 // Red Ammo:
-			RedAmmoChest     = sprite(p + "sprRedAmmoChest",     1, 8, 8, shn16);
-			RedAmmoChestOpen = sprite(p + "sprRedAmmoChestOpen", 1, 8, 8);
-			RedAmmoPickup    = sprite(p + "sprRedAmmoPickup",    1, 5, 5, shn10);
-			RedAmmoHUD       = sprite(p + "sprRedAmmoHUD",       2, 1, 1);
-			RedAmmoHUDAmmo   = sprite(p + "sprRedAmmoHUDAmmo",   2, 1, 2);
-			RedAmmoHUDFill   = sprite(p + "sprRedAmmoHUDFill",   2, 0, 0);
-			RedAmmoHUDCost   = sprite(p + "sprRedAmmoHUDCost",   2, 2, 2);
+			RedAmmoChest       = sprite(p + "sprRedAmmoChest",       1, 8, 8, shn16);
+			RedAmmoChestOpen   = sprite(p + "sprRedAmmoChestOpen",   1, 8, 8);
+			RedAmmoPickup      = sprite(p + "sprRedAmmoPickup",      1, 5, 5, shn10);
+			RedAmmoHUD         = sprite(p + "sprRedAmmoHUD",         2, 1, 1);
+			RedAmmoHUDAmmo     = sprite(p + "sprRedAmmoHUDAmmo",     2, 1, 2);
+			RedAmmoHUDFill     = sprite(p + "sprRedAmmoHUDFill",     2, 0, 0);
+			RedAmmoHUDCost     = sprite(p + "sprRedAmmoHUDCost",     2, 2, 2);
+			RedAmmoHUDGold     = sprite(p + "sprRedAmmoHUDGold",     2, 1, 1);
+			RedAmmoHUDCostGold = sprite(p + "sprRedAmmoHUDCostGold", 2, 2, 2);
 			
 			 // Red Crystal Chest:
 			RedChest     = sprite(p + "sprRedChest",     1, 8, 8, shn16);
@@ -1640,7 +1686,7 @@
 						["Sit",           1, 12,  12, true],
 						["MenuSelected", 10, 16,  16, false],
 						["Feather",       1,  3,   4, true],
-						["FeatherHUD",    1,  5,   5, false]
+						["FeatherHUD",    8,  5,   5, true]
 					]
 				}/*,
 					
@@ -1714,12 +1760,84 @@
 				FishAnglerSit   = sprite(p + "sprFishAnglerSit",   1, 12, 12);
 				
 				 // Menu:
-				FishAnglerPortrait = sprite(p + "sprFishAnglerPortrait", 1, 20, 229);
+				FishAnglerPortrait = sprite(p + "sprFishAnglerPortrait", 1, 40, 243);
 				FishAnglerLoadout  = sprite(p + "sprFishAnglerLoadout",  2, 16,  16);
 				FishAnglerMapIcon  = sprite(p + "sprFishAnglerMapIcon",  1, 10,  10);
 				
 				 // Eye Trail:
-				FishAnglerTrail = sprite(p + "sprFishAnglerTrail", 4, 12, 12);
+				FishAnglerTrail = sprite(p + "sprFishAnglerTrail", 6, 12, 12);
+				
+			//#endregion
+			
+			//#region BAT EYES
+			var p = m + "EyesBat/";
+				
+				 // Player:
+				EyesBatIdle  = sprite(p + "sprEyesBatIdle",  4, 12, 12);
+				EyesBatWalk  = sprite(p + "sprEyesBatWalk",  6, 12, 16);
+				EyesBatHurt  = sprite(p + "sprEyesBatHurt",  3, 12, 12);
+				EyesBatDead  = sprite(p + "sprEyesBatDead",  6, 12, 12);
+				EyesBatGoSit = sprite(p + "sprEyesBatGoSit", 3, 12, 12);
+				EyesBatSit   = sprite(p + "sprEyesBatSit",   1, 12, 12);
+				
+				 // Menu:
+				EyesBatPortrait = sprite(p + "sprEyesBatPortrait", 1, 40, 243);
+				EyesBatLoadout  = sprite(p + "sprEyesBatLoadout",  2, 16,  16);
+				EyesBatMapIcon  = sprite(p + "sprEyesBatMapIcon",  1, 10,  10);
+				
+			//#endregion
+			
+			//#region BONUS ROBOT
+			var p = m + "RobotBonus/";
+				
+				 // Player:
+				RobotBonusIdle  = sprite(p + "sprRobotBonusIdle",  15, 12, 12);
+				RobotBonusWalk  = sprite(p + "sprRobotBonusWalk",   6, 12, 12);
+				RobotBonusHurt  = sprite(p + "sprRobotBonusHurt",   3, 12, 12);
+				RobotBonusDead  = sprite(p + "sprRobotBonusDead",   6, 12, 12);
+				RobotBonusGoSit = sprite(p + "sprRobotBonusGoSit",  3, 12, 12);
+				RobotBonusSit   = sprite(p + "sprRobotBonusSit",    1, 12, 12);
+				
+				 // Menu:
+				RobotBonusPortrait = sprite(p + "sprRobotBonusPortrait", 1, 40, 243);
+				RobotBonusLoadout  = sprite(p + "sprRobotBonusLoadout",  2, 16,  16);
+				RobotBonusMapIcon  = sprite(p + "sprRobotBonusMapIcon",  1, 10,  10);
+				
+			//#endregion
+			
+			//#region COAT Y.V.
+			var p = m + "YVCoat/";
+				
+				 // Player:
+				YVCoatIdle  = sprite(p + "sprYVCoatIdle",  14, 12, 12);
+				YVCoatWalk  = sprite(p + "sprYVCoatWalk",   6, 12, 12);
+				YVCoatHurt  = sprite(p + "sprYVCoatHurt",   3, 12, 12);
+				YVCoatDead  = sprite(p + "sprYVCoatDead",  19, 24, 24);
+				YVCoatGoSit = sprite(p + "sprYVCoatGoSit",  3, 12, 12);
+				YVCoatSit   = sprite(p + "sprYVCoatSit",    1, 12, 12);
+				
+				 // Menu:
+				YVCoatPortrait = sprite(p + "sprYVCoatPortrait", 1, 40, 243);
+				YVCoatLoadout  = sprite(p + "sprYVCoatLoadout",  2, 16,  16);
+				YVCoatMapIcon  = sprite(p + "sprYVCoatMapIcon",  1, 10,  10);
+				
+			//#endregion
+			
+			//#region COOL FROG
+			var p = m + "FrogCool/";
+				
+				 // Player:
+				FrogCoolIdle  = sprite(p + "sprFrogCoolIdle",  6, 12, 12);
+				FrogCoolWalk  = sprite(p + "sprFrogCoolWalk",  6, 12, 12);
+				FrogCoolHurt  = sprite(p + "sprFrogCoolHurt",  3, 12, 12);
+				FrogCoolDead  = sprite(p + "sprFrogCoolDead",  6, 24, 24);
+				FrogCoolGoSit = sprite(p + "sprFrogCoolGoSit", 3, 12, 12);
+				FrogCoolSit   = sprite(p + "sprFrogCoolSit",   6, 12, 12);
+				
+				 // Menu:
+				FrogCoolPortrait = sprite(p + "sprFrogCoolPortrait", 1, 40, 243);
+				FrogCoolLoadout  = sprite(p + "sprFrogCoolLoadout",  2, 16,  16);
+				FrogCoolMapIcon  = sprite(p + "sprFrogCoolMapIcon",  1, 10,  10);
 				
 			//#endregion
 			
@@ -1735,7 +1853,7 @@
 				PlantOrchidSit   = sprite(p + "sprPlantOrchidSit",   1, 16, 16);
 				
 				 // Menu:
-				PlantOrchidPortrait = sprite(p + "sprPlantOrchidPortrait", 1, 20, 229);
+				PlantOrchidPortrait = sprite(p + "sprPlantOrchidPortrait", 1, 40, 243);
 				PlantOrchidLoadout  = sprite(p + "sprPlantOrchidLoadout",  2, 16,  16);
 				PlantOrchidMapIcon  = sprite(p + "sprPlantOrchidMapIcon",  1, 10,  10);
 				
@@ -1757,7 +1875,7 @@
 				CrystalRedSit   = sprite(p + "sprCrystalRedSit",   1, 12, 12);
 				
 				 // Menu:
-				CrystalRedPortrait = sprite(p + "sprCrystalRedPortrait", 1, 20, 229);
+				CrystalRedPortrait = sprite(p + "sprCrystalRedPortrait", 1, 40, 243);
 				CrystalRedLoadout  = sprite(p + "sprCrystalRedLoadout",  2, 16,  16);
 				CrystalRedMapIcon  = sprite(p + "sprCrystalRedMapIcon",  1, 10,  10);
 				
@@ -1769,6 +1887,92 @@
 				CrystalRedShieldIdleBack  = sprite(p + "sprCrystalRedShieldIdleBack",  1, 32, 42);
 				CrystalRedShieldWalkBack  = sprite(p + "sprCrystalRedShieldWalkBack",  8, 32, 42);
 				CrystalRedTrail           = sprite(p + "sprCrystalRedTrail",           5,  8,  8);
+				
+			//#endregion
+			
+			//#region WEAPONS
+			m += "Weapons/";
+				
+				 // Angler:
+				p = m + "Angler/";
+				AnglerAssaultRifle    = sprite(p + "sprAnglerAssaultRifle",    1,  4,  3, shnWep);
+				AnglerBazooka         = sprite(p + "sprAnglerBazooka",         1, 10,  7, shnWep);
+				AnglerCrossbow        = sprite(p + "sprAnglerCrossbow",        1,  2,  3, shnWep);
+				AnglerDiscGun         = sprite(p + "sprAnglerDiscGun",         1, -2,  3, shnWep);
+				AnglerGrenadeLauncher = sprite(p + "sprAnglerGrenadeLauncher", 1,  2,  3, shnWep);
+				AnglerGuitar          = sprite(p + "sprAnglerGuitar",          1,  2,  7, shnWep);
+				AnglerLaserPistol     = sprite(p + "sprAnglerLaserPistol",     1, -3,  3, shnWep);
+				AnglerMachinegun      = sprite(p + "sprAnglerMachinegun",      1,  0,  2, shnWep);
+				AnglerNukeLauncher    = sprite(p + "sprAnglerNukeLauncher",    1,  9, 10, shnWep);
+				AnglerPlasmaGun       = sprite(p + "sprAnglerPlasmaGun",       1,  1,  4, shnWep);
+				AnglerRevolver        = sprite(p + "sprAnglerRevolver",        1, -3,  2, shnWep);
+				AnglerScrewdriver     = sprite(p + "sprAnglerScrewdriver",     1, -2,  3, shnWep);
+				AnglerShotgun         = sprite(p + "sprAnglerShotgun",         1,  3,  3, shnWep);
+				AnglerSlugger         = sprite(p + "sprAnglerSlugger",         1,  1,  3, shnWep);
+				AnglerSplinterGun     = sprite(p + "sprAnglerSplinterGun",     1,  2,  3, shnWep);
+				AnglerTrident         = sprite(p + "sprAnglerTrident",         1, 12,  7, shnWep);
+				AnglerTunneller       = sprite(p + "sprAnglerTunneller",       1,  8,  6, shnWep);
+				AnglerTunnellerHUD    = sprite(p + "sprAnglerTunneller",       1, 16,  6, shnWep);
+				AnglerWrench          = sprite(p + "sprAnglerWrench",          1,  1,  4, shnWep);
+				AnglerBolt            = sprite(p + "sprAnglerBolt",            2,  4,  8);
+				AnglerDisc            = sprite(p + "sprAnglerDisc",            2,  7,  7);
+				AnglerGrenade         = sprite(p + "sprAnglerGrenade",         1,  3,  3);
+				AnglerNuke            = sprite(p + "sprAnglerNuke",            1,  8,  8);
+				AnglerRocket          = sprite(p + "sprAnglerRocket",          1,  4,  4);
+				
+				 // Orchid:
+				p = m + "Orchid/";
+				OrchidAssaultRifle    = sprite(p + "sprOrchidAssaultRifle",    1,  5, 4, shnWep);
+				OrchidBazooka         = sprite(p + "sprOrchidBazooka",         1, 12, 5, shnWep);
+				OrchidCrossbow        = sprite(p + "sprOrchidCrossbow",        1,  4, 4, shnWep);
+				OrchidDiscGun         = sprite(p + "sprOrchidDiscGun",         1, -3, 4, shnWep);
+				OrchidFrogPistol      = sprite(p + "sprOrchidFrogPistol",      1, -4, 4, shnWep);
+				OrchidFrogPistolRusty = sprite(p + "sprOrchidFrogPistolRusty", 1, -4, 4, shnWep);
+				OrchidGrenadeLauncher = sprite(p + "sprOrchidGrenadeLauncher", 1,  5, 5, shnWep);
+				OrchidLaserPistol     = sprite(p + "sprOrchidLaserPistol",     1, -2, 2, shnWep);
+				OrchidMachinegun      = sprite(p + "sprOrchidMachinegun",      1,  3, 3, shnWep);
+				OrchidNukeLauncher    = sprite(p + "sprOrchidNukeLauncher",    1,  8, 8, shnWep);
+				OrchidPlasmaGun       = sprite(p + "sprOrchidPlasmaGun",       1,  3, 4, shnWep);
+				OrchidRevolver        = sprite(p + "sprOrchidRevolver",        1, -3, 2, shnWep);
+				OrchidScrewdriver     = sprite(p + "sprOrchidScrewdriver",     1, -1, 3, shnWep);
+				OrchidShotgun         = sprite(p + "sprOrchidShotgun",         1,  5, 3, shnWep);
+				OrchidSlugger         = sprite(p + "sprOrchidSlugger",         1,  4, 4, shnWep);
+				OrchidSplinterGun     = sprite(p + "sprOrchidSplinterGun",     1,  3, 4, shnWep);
+				OrchidTrident         = sprite(p + "sprOrchidTrident",         1, 12, 7, shnWep);
+				OrchidTunneller       = sprite(p + "sprOrchidTunneller",       1, 10, 9, shnWep);
+				OrchidTunnellerHUD    = sprite(p + "sprOrchidTunneller",       1, 20, 9, shnWep);
+				OrchidWrench          = sprite(p + "sprOrchidWrench",          1,  1, 4, shnWep);
+				OrchidBolt            = sprite(p + "sprOrchidBolt",            2,  4, 8);
+				OrchidDisc            = sprite(p + "sprOrchidDisc",            2,  6, 6);
+				OrchidGrenade         = sprite(p + "sprOrchidGrenade",         1,  3, 3);
+				OrchidNuke            = sprite(p + "sprOrchidNuke",            1,  8, 8);
+				OrchidRocket          = sprite(p + "sprOrchidRocket",          1,  4, 4);
+				
+				 // Red:
+				p = m + "Red/";
+				RedAssaultRifle    = sprite(p + "sprRedAssaultRifle",    1,  4, 3, shnWep);
+				RedBazooka         = sprite(p + "sprRedBazooka",         1, 11, 2, shnWep);
+				RedCrossbow        = sprite(p + "sprRedCrossbow",        1,  2, 5, shnWep);
+				RedDiscGun         = sprite(p + "sprRedDiscGun",         1, -3, 4, shnWep);
+				RedGrenadeLauncher = sprite(p + "sprRedGrenadeLauncher", 1,  1, 2, shnWep);
+				RedLaserPistol     = sprite(p + "sprRedLaserPistol",     1, -2, 2, shnWep);
+				RedMachinegun      = sprite(p + "sprRedMachinegun",      1,  1, 0, shnWep);
+				RedNukeLauncher    = sprite(p + "sprRedNukeLauncher",    1,  7, 6, shnWep);
+				RedPlasmaGun       = sprite(p + "sprRedPlasmaGun",       1,  3, 3, shnWep);
+				RedRevolver        = sprite(p + "sprRedRevolver",        1, -2, 2, shnWep);
+				RedScrewdriver     = sprite(p + "sprRedScrewdriver",     1, -2, 3, shnWep);
+				RedShotgun         = sprite(p + "sprRedShotgun",         1,  4, 2, shnWep);
+				RedSlugger         = sprite(p + "sprRedSlugger",         1,  2, 2, shnWep);
+				RedSplinterGun     = sprite(p + "sprRedSplinterGun",     1,  2, 4, shnWep);
+				RedTrident         = sprite(p + "sprRedTrident",         1, 12, 7, shnWep);
+				RedTunneller       = sprite(p + "sprRedTunneller",       1, 10, 7, shnWep);
+				RedTunnellerHUD    = sprite(p + "sprRedTunneller",       1, 18, 8, shnWep);
+				RedWrench          = sprite(p + "sprRedWrench",          1,  1, 3, shnWep);
+				RedBolt            = sprite(p + "sprRedBolt",            2,  4, 8);
+				RedDisc            = sprite(p + "sprRedDisc",            2,  6, 6);
+				RedGrenade         = sprite(p + "sprRedGrenade",         1,  3, 3);
+				RedNuke            = sprite(p + "sprRedNuke",            1,  8, 8);
+				RedRocket          = sprite(p + "sprRedRocket",          1,  4, 4);
 				
 			//#endregion
 			
@@ -1809,7 +2013,6 @@
 			PetCoolGuyIdle = sprite(p + "sprPetCoolGuyIdle",  4, 12, 12);
 			PetCoolGuyWalk = sprite(p + "sprPetCoolGuyWalk",  6, 12, 12);
 			PetCoolGuyHurt = sprite(p + "sprPetCoolGuyDodge", 3, 12, 12);
-			
 			PetPeasIcon    = sprite(p + "sprPetPeasIcon",     1,  6,  6);
 			PetPeasIdle    = sprite(p + "sprPetPeasIdle",     4, 12, 12);
 			PetPeasWalk    = sprite(p + "sprPetPeasWalk",     6, 12, 12);
@@ -1893,26 +2096,30 @@
 			PetWeaponHurt       = sprite(p + "sprPetWeaponHurt",        3, 12, 12);
 			PetWeaponDead       = sprite(p + "sprPetWeaponDead",        6, 12, 12);
 			PetWeaponStat       = sprite(p + "sprPetWeaponStat",        1, 20,  5);
-			PetWeaponIconCursed = sprite(p + "sprPetWeaponIconCursed",  1,  6,  6);
-			PetWeaponChstCursed = sprite(p + "sprPetWeaponChstCursed",  1,  8,  8);
-			PetWeaponHideCursed = sprite(p + "sprPetWeaponHideCursed",  8, 12, 12);
-			PetWeaponSpwnCursed = sprite(p + "sprPetWeaponSpwnCursed", 16, 12, 12);
-			PetWeaponIdleCursed = sprite(p + "sprPetWeaponIdleCursed",  8, 12, 12);
-			PetWeaponWalkCursed = sprite(p + "sprPetWeaponWalkCursed",  8, 12, 12);
-			PetWeaponHurtCursed = sprite(p + "sprPetWeaponHurtCursed",  3, 12, 12);
-			PetWeaponDeadCursed = sprite(p + "sprPetWeaponDeadCursed",  6, 12, 12);
+			PetWeaponCursedIcon = sprite(p + "sprPetWeaponIconCursed",  1,  6,  6);
+			PetWeaponCursedChst = sprite(p + "sprPetWeaponChstCursed",  1,  8,  8);
+			PetWeaponCursedHide = sprite(p + "sprPetWeaponHideCursed",  8, 12, 12);
+			PetWeaponCursedSpwn = sprite(p + "sprPetWeaponSpwnCursed", 16, 12, 12);
+			PetWeaponCursedIdle = sprite(p + "sprPetWeaponIdleCursed",  8, 12, 12);
+			PetWeaponCursedWalk = sprite(p + "sprPetWeaponWalkCursed",  8, 12, 12);
+			PetWeaponCursedHurt = sprite(p + "sprPetWeaponHurtCursed",  3, 12, 12);
+			PetWeaponCursedDead = sprite(p + "sprPetWeaponDeadCursed",  6, 12, 12);
 			
 			 // Twins:
 			p = m + "Red/";
 			PetTwinsIcon        = sprite(p + "sprPetTwinsIcon",        1,  6,  6);
 			PetTwinsStat        = sprite(p + "sprPetTwinsStat",        6, 12, 12);
-			PetTwinsRed         = sprite(p + "sprPetTwinsRed",         6, 12, 12);
 			PetTwinsRedIcon     = sprite(p + "sprPetTwinsRedIcon",     1,  6,  6);
+			PetTwinsRed         = sprite(p + "sprPetTwinsRed",         6, 12, 12);
 			PetTwinsRedEffect   = sprite(p + "sprPetTwinsRedEffect",   6,  8,  8);
-			PetTwinsWhite       = sprite(p + "sprPetTwinsWhite",       6, 12, 12);
 			PetTwinsWhiteIcon   = sprite(p + "sprPetTwinsWhiteIcon",   1,  6,  6);
+			PetTwinsWhite       = sprite(p + "sprPetTwinsWhite",       6, 12, 12);
 			PetTwinsWhiteEffect = sprite(p + "sprPetTwinsWhiteEffect", 6,  8,  8);
 			CrystalWhiteTrail   = sprite(p + "sprCrystalWhiteTrail",   5,  8,  8);
+			
+			 // Cuz:
+			p = m + "Crib/";
+			PetCuzIcon = sprite(p + "sprPetCuzIcon", 1, 6, 6);
 			
 		//#endregion
 	}
@@ -1955,6 +2162,7 @@
 			BigShots      = sound_add(p + "musBigShots.ogg");
 			PitSquid      = sound_add(p + "musPitSquid.ogg");
 			PitSquidIntro = sound_add(p + "musPitSquidIntro.ogg");
+			Tesseract     = sound_add(p + "musTesseract.ogg");
 		}
 	}
 	
@@ -1990,6 +2198,12 @@
 				for(var i = 0; i < lq_size(_save); i++){
 					lq_set(save_data, lq_get_key(_save, i), lq_get_value(_save, i));
 				}
+				
+				 // Shader Override:
+				if(!save_get("shaders_option_reset", false)){
+					save_set("shaders_option_reset", true);
+					option_set("shaders", true);
+				}
 			}
 			
 			 // Save File Corrupt:
@@ -2009,55 +2223,40 @@
 		file_unload(_path);
 		
 		 // Re-Save:
-		save_ntte();
+		ntte_save();
 		save_auto = true;
 		
 		exit;
 	}
 	
-	 // Surface, Shader, Script Binding Storage:
-	global.surf = ds_map_create();
-	global.shad = ds_map_create();
-	global.bind = ds_map_create();
+	 // Script Binding, Surface, Shader Storage:
+	global.bind        = ds_map_create();
+	global.surf        = ds_map_create();
+	global.shad        = ds_map_create();
+	global.shad_active = "";
 	
-	 // Compile Mod Lists:
+	 // Cloned Starting Weapons:
+	global.loadout_wep_clone = ds_list_create();
+	
+	 // Mod Lists:
 	ntte_mods = {
-		"mod"   : [],
-		"wep"   : [],
-		"area"  : [],
-		"race"  : [],
-		"skin"  : [],
-		"skill" : [],
-		"crown" : []
+		"mod"    : [],
+		"area"   : [],
+		"race"   : [],
+		"skin"   : [],
+		"skill"  : [],
+		"crown"  : [],
+		"weapon" : []
 	};
-	if(fork()){
-		var _find = [];
-		
-		file_find_all(".", _find, 1);
-		while(array_length(_find) <= 0){
-			wait 0;
-		}
-		
-		with(_find){
-			if(!is_dir && ext == ".gml"){
-				var _split = string_split(name, ".");
-				if(array_length(_split) >= 2){
-					var	_type = _split[array_length(_split) - 2],
-						_name = string_copy(name, 1, string_length(name) - string_length("." + _type + ext));
-						
-					if(_type == "weapon"){
-						_type = "wep";
-					}
-					
-					if(lq_exists(ntte_mods, _type)){
-						array_push(lq_get(ntte_mods, _type), _name);
-					}
-				}
-			}
-		}
-		
-		exit;
-	}
+	ntte_mods_call = {
+		"begin_step"   : [],
+		"step"         : [],
+		"end_step"     : [],
+		"draw_shadows" : [],
+		"draw_bloom"   : [],
+		"draw_dark"    : [],
+		"update"       : []
+	};
 	
 	 // Reminders:
 	global.remind = [];
@@ -2103,18 +2302,101 @@
 			}
 		}
 		
-		 // Warnings:
-		try{
-			if(!null){
-				trace_color("NT:TE | WARNING - NTT beta versions (9942+) may cause issues!", c_red);
-			}
-		}
-		catch(_error){}
+		 // FPS Warning:
 		if(room_speed > 30){
 			trace_color("NT:TE | WARNING - Playing on higher than 30 FPS will likely cause lag!", c_red);
 		}
 		
 		exit;
+	}
+	
+	 // Color/Alpha-Unblending Shader for Copying Drawn Stuff:
+	try{
+		if(!null){} // GMS1 only for now
+	}
+	catch(_error){
+		shader_add("Unblend",
+			
+			/* Vertex Shader */"
+			struct VertexShaderInput
+			{
+				float2 vTexcoord : TEXCOORD0;
+				float4 vPosition : POSITION;
+			};
+			
+			struct VertexShaderOutput
+			{
+				float2 vTexcoord : TEXCOORD0;
+				float4 vPosition : SV_POSITION;
+			};
+			
+			uniform float4x4 matrix_world_view_projection;
+			
+			VertexShaderOutput main(VertexShaderInput INPUT)
+			{
+				VertexShaderOutput OUT;
+				
+				OUT.vTexcoord = INPUT.vTexcoord; // (x,y)
+				OUT.vPosition = mul(matrix_world_view_projection, INPUT.vPosition); // (x,y,z,w)
+				
+				return OUT;
+			}
+			",
+			
+			/* Fragment/Pixel Shader */"
+			struct PixelShaderInput
+			{
+				float2 vTexcoord : TEXCOORD0;
+			};
+			
+			sampler2D s0;
+			
+			uniform float blendPower;
+			
+			float4 main(PixelShaderInput INPUT) : SV_TARGET
+			{
+				float4 RGBA = tex2D(s0, INPUT.vTexcoord);
+				if(RGBA.a > 0.0){
+					float RGBFactor = pow(abs(RGBA.a), 1.0 - blendPower);
+					return float4(
+						RGBA.r / RGBFactor,
+						RGBA.g / RGBFactor,
+						RGBA.b / RGBFactor,
+						pow(abs(RGBA.a), blendPower)
+					);
+				}
+				return RGBA;
+			}
+			"
+		);
+	}
+	
+#define cleanup
+	 // Reset Starting Weapons:
+	loadout_wep_reset();
+	ds_list_destroy(global.loadout_wep_clone);
+	
+	 // Save Game:
+	if(save_auto){
+		ntte_save();
+	}
+	
+	 // Clear Surfaces, Shaders, Script Bindings:
+	with(ds_map_values(global.surf)) if(surf != -1) surface_destroy(surf);
+	with(ds_map_values(global.shad)) if(shad != -1) shader_destroy(shad);
+	with(ds_map_values(global.bind)) with(self) with(id) instance_destroy();
+	ds_map_destroy(global.surf);
+	ds_map_destroy(global.shad);
+	ds_map_destroy(global.bind);
+	
+	 // No Crash:
+	with(ntte_mods.race){
+		with(instances_matching([CampChar, CharSelect], "race", self)){
+			repeat(8) with(instance_create(random_range(bbox_left, bbox_right), random_range(bbox_top, bbox_bottom), Dust)){
+				motion_add(random(360), random(random(8)));
+			}
+			instance_delete(self);
+		}
 	}
 	
 #macro spr global.spr
@@ -2123,8 +2405,9 @@
 #macro mus snd.mus
 #macro lag global.debug_lag
 
-#macro ntte_mods    global.mods
-#macro ntte_version global.version
+#macro ntte_mods      global.mods
+#macro ntte_mods_call global.mods_call
+#macro ntte_version   global.version
 
 #macro spr_load     global.spr_load
 #macro spr_load_num 20 // How many sprites to load per frame
@@ -2164,7 +2447,204 @@
 #macro  area_hq           106
 #macro  area_crib         107
 
-#define save_ntte()
+#define ntte_init(_ref)
+	/*
+		Called by NT:TE mods from their 'init' script to execute general setup code
+	*/
+	
+	var	_type = _ref[0],
+		_name = _ref[1];
+		
+	 // Set Global Variables:
+	mod_variable_set(_type, _name, "spr",       spr);
+	mod_variable_set(_type, _name, "snd",       snd);
+	mod_variable_set(_type, _name, "debug_lag", false);
+	
+	 // Add to Mod List:
+	if(_type in ntte_mods){
+		var _list = lq_get(ntte_mods, _type);
+		if(array_find_index(_list, _name) < 0){
+			array_push(_list, _name);
+		}
+		
+		 // Compile NT:TE Script References:
+		if(_name + "." + _type != "ntte.mod"){
+			var _modList = [];
+			for(var i = 0; i < lq_size(ntte_mods); i++){
+				var _modType = lq_get_key(ntte_mods, i);
+				with(lq_get_value(ntte_mods, i)){
+					array_push(_modList, _modType + ":" + self);
+				}
+			}
+			for(var i = lq_size(ntte_mods_call) - 1; i >= 0; i--){
+				if(mod_script_exists(_type, _name, "ntte_" + lq_get_key(ntte_mods_call, i))){
+					var	_refAdd  = [_type, _name],
+						_refList = lq_get_value(ntte_mods_call, i);
+						
+					 // Ensure Consistency Between Mod Reloads:
+					for(var j = 0; j < array_length(_refList); j++){
+						var _refCur = _refList[j];
+						if(array_find_index(_modList, array_join(_refAdd, ":")) < array_find_index(_modList, array_join(_refCur, ":"))){
+							_refList[j] = _refAdd;
+							_refAdd     = _refCur;
+						}
+					}
+					
+					 // Add:
+					array_push(_refList, _refAdd);
+				}
+			}
+		}
+	}
+	
+	 // Mod-Specific:
+	switch(_type){
+		
+		case "race":
+			
+			 // Loadout Fix:
+			with(Loadout){
+				instance_destroy();
+				with(loadbutton){
+					instance_destroy();
+				}
+			}
+			
+			break;
+			
+		case "weapon":
+			
+			 // Weapon Sprite Setup:
+			if(fork()){
+				wait 0;
+				
+				var _spr = mod_variable_get(_type, _name, "sprWep");
+				
+				if(is_real(_spr) && sprite_exists(_spr)){
+					 // Wait for Sprite to Load:
+					var	_waitMax = 90,
+						_waitBox = [sprite_get_bbox_left(_spr), sprite_get_bbox_top(_spr), sprite_get_bbox_right(_spr), sprite_get_bbox_bottom(_spr)];
+						
+					while(_waitMax-- > 0 && array_equals(_waitBox, [sprite_get_bbox_left(_spr), sprite_get_bbox_top(_spr), sprite_get_bbox_right(_spr), sprite_get_bbox_bottom(_spr)])){
+						wait 0;
+					}
+					
+					 // Locked Weapons:
+					if(mod_variable_get(_type, _name, "sprWepLocked") == sprTemp){
+						var	_sprX = sprite_get_xoffset(_spr) + 1,
+							_sprY = sprite_get_yoffset(_spr) + 1;
+							
+						with(surface_setup("sprWepLocked", sprite_get_width(_spr) + 2, sprite_get_height(_spr) + 2, 1)){
+							surface_set_target(surf);
+							draw_clear_alpha(0, 0);
+							
+							with(UberCont){
+								 // Outline:
+								draw_set_fog(true, c_white, 0, 0);
+								for(var _d = 0; _d < 360; _d += 90){
+									draw_sprite(_spr, 1, _sprX + dcos(_d), _sprY + dsin(_d));
+								}
+								
+								 // Main:
+								draw_set_fog(true, c_black, 0, 0);
+								draw_sprite(_spr, 1, _sprX, _sprY);
+								draw_set_fog(false, 0, 0, 0);
+							}
+							
+							 // Done:
+							surface_reset_target();
+							surface_save(surf, name + ".png");
+							mod_variable_set(_type, _name, "sprWepLocked", sprite_add_weapon(name + ".png", _sprX, _sprY));
+							free = true;
+						}
+					}
+					
+					 // Manually Split Bat Disc Sprites:
+					var _list = mod_variable_get(_type, _name, "sprWepImage");
+					if(is_array(_list) && !array_length(_list)){
+						var	_sprX = sprite_get_xoffset(_spr),
+							_sprY = sprite_get_yoffset(_spr);
+							
+						with(surface_setup("sprWepImage", sprite_get_width(_spr), sprite_get_height(_spr), 1)){
+							surface_set_target(surf);
+							
+							 // Load Each Frame as a Weapon Sprite:
+							for(var i = 0; i < sprite_get_number(_spr); i++){
+								draw_clear_alpha(0, 0);
+								with(UberCont){
+									draw_sprite(_spr, i, _sprX, _sprY);
+								}
+								surface_save(surf, name + ".png");
+								array_push(_list, sprite_add_weapon(name + ".png", _sprX, _sprY));
+							}
+							
+							 // Done:
+							surface_reset_target();
+							sprite_delete(_spr);
+							free = true;
+						}
+						
+						mod_variable_set(_type, _name, "sprWep", _list[array_length(_list) - 1]);
+					}
+				}
+				
+				exit;
+			}
+			
+			break;
+			
+	}
+	
+#define ntte_cleanup(_ref)
+	/*
+		Called by NT:TE mods from their 'cleanup' script to execute general unload code
+	*/
+	
+	var	_type = _ref[0],
+		_name = _ref[1];
+		
+	 // Remove NT:TE Script References:
+	for(var i = lq_size(ntte_mods_call) - 1; i >= 0; i--){
+		var	_list    = lq_get_value(ntte_mods_call, i),
+			_listNew = [];
+			
+		with(_list){
+			if(self[0] != _type || self[1] != _name){
+				array_push(_listNew, self);
+			}
+		}
+		
+		if(!array_equals(_list, _listNew)){
+			lq_set(ntte_mods_call, lq_get_key(ntte_mods_call, i), _listNew);
+		}
+	}
+	
+	 // Unbind Scripts:
+	var _bindKey = _name + ":" + _type;
+	if(ds_map_exists(global.bind, _bindKey)){
+		with(global.bind[? _bindKey]){
+			with(id){
+				instance_destroy();
+			}
+		}
+		ds_map_delete(global.bind, _bindKey);
+	}
+	
+	 // Race Mod Loadout Fix:
+	if(_type == "race"){
+		with(Loadout){
+			instance_destroy();
+			with(loadbutton){
+				instance_destroy();
+			}
+		}
+	}
+	
+#define ntte_save()
+	/*
+		Sends NT:TE's save data to the save file
+	*/
+	
 	string_save(json_encode(save_data), save_path);
 	
 #define save_get(_name, _default)
@@ -2181,7 +2661,7 @@
 		_save = save_data;
 		
 	with(_path){
-		if(!lq_exists(_save, self)){
+		if(self not in _save){
 			return _default;
 		}
 		_save = lq_get(_save, self);
@@ -2506,8 +2986,8 @@
 		global.surf[? _name] = _surf;
 		
 		 // Auto-Management:
-		with(_surf){
-			if(fork()){
+		if(fork()){
+			with(_surf){
 				while(true){
 					 // Deactivate Unused Surfaces:
 					if((time > 0 || free) && --time <= 0){
@@ -2531,8 +3011,8 @@
 					
 					wait 0;
 				}
-				exit;
 			}
+			exit;
 		}
 	}
 	
@@ -2580,6 +3060,9 @@
 	*/
 	
 	if(mod_variable_exists("mod", mod_current, "shad") && ds_map_exists(global.shad, _name)){
+		if(global.shad_active == ""){
+			global.shad_active = _name;
+		}
 		with(global.shad[? _name]){
 			if(shad != -1){
 				 // Enable Shader & Stage Texture:
@@ -2605,6 +3088,12 @@
 							
 						shader_set_fragment_constant_f(0, [1 / _w, 1 / _h]);
 						shader_set_fragment_constant_f(1, [color_get_red(_color) / 255, color_get_green(_color) / 255, color_get_blue(_color) / 255]);
+						break;
+						
+					case "Unblend":
+						var _blendNum = _args[0];
+						
+						shader_set_fragment_constant_f(0, [1 / power(2, _blendNum)]);
 						break;
 				}
 				
@@ -2644,6 +3133,17 @@
 	
 	 // Initialize Shader:
 	if(is_undefined(_shad)){
+		var _beta = false;
+		
+		 // Partial Beta Fix:
+		try{
+			if(!null){
+				_beta = true;
+			}
+		}
+		catch(_error){}
+		
+		 // Add:
 		_shad = {
 			"name" : _name,
 			"shad" : -1,
@@ -2653,11 +3153,11 @@
 		global.shad[? _name] = _shad;
 		
 		 // Auto-Management:
-		with(_shad){
-			if(fork()){
+		if(fork()){
+			with(_shad){
 				while(true){
 					 // Create Shaders:
-					if(option_get("shaders")){
+					if(option_get("shaders") && (!_beta || (global.shad_active == name && !instance_exists(Menu)))){
 						if(shad == -1 && !instance_exists(Menu)){
 							try{
 								// GMS2
@@ -2676,15 +3176,20 @@
 					}
 					
 					 // Shaders Disabled:
-					else if(shad != -1){
-						shader_destroy(shad);
-						shad = -1;
+					else{
+						if(shad != -1){
+							shader_destroy(shad);
+							shad = -1;
+						}
+						if(global.shad_active == name){
+							global.shad_active = "";
+						}
 					}
 					
 					wait 0;
 				}
-				exit;
 			}
+			exit;
 		}
 	}
 	
@@ -2700,55 +3205,45 @@
 	
 	return _shad;
 	
-#define script_bind(_name, _scriptObj, _scriptRef, _depth, _visible)
+#define script_bind(_modRef, _scriptObj, _scriptRef, _depth, _visible)
 	/*
 		Binds the given script to the given event
-		Ensures that the script's controller object always exists, and deletes it when the parent mod is unloaded
+		Automatically ensures that the script object always exists, and deletes it when the parent mod is unloaded
 		
 		Args:
-			name      - The name used to store the script binding
 			scriptObj - The event type: CustomStep, CustomBeginStep, CustomEndStep, CustomDraw
 			scriptRef - The script's reference to call
 			depth     - The script's default depth
 			visible   - The script's default visibility, basically "will this event run all the time"
 			
 		Ex:
-			script_bind("draw_thing", CustomDraw, script_ref_create(draw_thing), true, -8)
+			script_bind(script_ref_create(0), CustomDraw, script_ref_create(draw_thing, true), -8, true)
 	*/
 	
-	var _bind = {
-		"name"    : _name,
-		"object"  : _scriptObj,
-		"script"  : _scriptRef,
-		"depth"   : _depth,
-		"visible" : _visible,
-		"id"      : noone
-	};
-	
-	 // Fetch Old Controller:
-	if(ds_map_exists(global.bind, _name)){
-		with(global.bind[? _name]){
-			_bind.id = id;
-			with(id){
-				script = _bind.script;
-				depth  = _bind.depth;
-			}
-		}
-	}
-	
-	 // Make New Controller:
-	if(!instance_exists(_bind.id)){
-		_bind.id = instance_create(0, 0, _bind.object);
-		with(_bind.id){
-			script     = _bind.script;
-			depth      = _bind.depth;
-			visible    = _bind.visible;
-			persistent = true;
-		}
+	var	_modType = _modRef[0],
+		_modName = _modRef[1],
+		_bindKey = _modName + ":" + _modType,
+		_bind    = {
+			"object"  : _scriptObj,
+			"script"  : _scriptRef,
+			"depth"   : _depth,
+			"visible" : _visible,
+			"id"      : noone
+		};
+		
+	_bind.id = instance_create(0, 0, _bind.object);
+	with(_bind.id){
+		script     = _bind.script;
+		depth      = _bind.depth;
+		visible    = _bind.visible;
+		persistent = true;
 	}
 	
 	 // Store:
-	global.bind[? _name] = _bind;
+	if(!ds_map_exists(global.bind, _bindKey)){
+		global.bind[? _bindKey] = [];
+	}
+	array_push(global.bind[? _bindKey], _bind);
 	
 	return _bind;
 	
@@ -2768,13 +3263,22 @@ var _shine = argument_count > 4 ? argument[4] : shnNone;
 		shine : _shine
 	};
 	
+#define game_start
+	 // Autosave:
+	if(save_auto){
+		ntte_save();
+	}
+	
+	 // Reset Active Shader (Beta Fix):
+	global.shad_active = "";
+	
 #define step
 	if(lag) trace_time();
 	
 	 // Sprite Loading:
-	if(array_length(spr_load) > 0){
+	if(array_length(spr_load)){
 		repeat(spr_load_num){
-			while(array_length(spr_load) > 0){
+			while(array_length(spr_load)){
 				var	_num   = array_length(spr_load) - 1,
 					_load  = null,
 					_list  = spr_load[_num, 0],
@@ -2884,35 +3388,24 @@ var _shine = argument_count > 4 ? argument[4] : shnNone;
 	
 	 // Ensure Script Bindings Exist:
 	with(ds_map_values(global.bind)){
-		if(!instance_exists(id)){
-			id = instance_create(0, 0, object);
-			with(id){
-				script     = other.script;
-				depth      = other.depth;
-				visible    = other.visible;
-				persistent = true;
-			}
-		}
-	}
-	
-	 // Locked Weapon Spriterize:
-	with(ntte_mods.wep){
-		var _name = self;
-		if(mod_variable_get("weapon", _name, "sprWepLocked") == mskNone){
-			var _spr = mod_variable_get("weapon", _name, "sprWep");
-			if(sprite_get_number(_spr) != 1 || sprite_get_width(_spr) != 16 || sprite_get_height(_spr) != 16){
-				with(other){
-					mod_variable_set("weapon", _name, "sprWepLocked", wep_locked_sprite(_spr));
+		with(self){
+			if(!instance_exists(id)){
+				id = instance_create(0, 0, object);
+				with(id){
+					script     = other.script;
+					depth      = other.depth;
+					visible    = other.visible;
+					persistent = true;
 				}
 			}
 		}
 	}
 	
-	 // Autosave:
-	if(save_auto){
-		with(instances_matching(GameCont, "ntte_autosave", null)){
-			save_ntte();
+	 // Autosave (Return to Character Select):
+	if(instance_exists(Menu) && save_auto){
+		with(instances_matching(Menu, "ntte_autosave", null)){
 			ntte_autosave = true;
+			ntte_save();
 		}
 	}
 	
@@ -3296,43 +3789,6 @@ var _shine = argument_count > 4 ? argument[4] : shnNone;
 	}
 	
 	return -1;
-
-#define wep_locked_sprite(_sprite)
-	/*
-		Used to automatically create locked weapon sprites
-		Returns a new sprite made of the given sprite drawn in flat black with a white outline
-	*/
-	
-	var	_sprX  = sprite_get_xoffset(_sprite) + 1,
-		_sprY  = sprite_get_yoffset(_sprite) + 1,
-		_surfW = sprite_get_width(_sprite)  + 2,
-		_surfH = sprite_get_height(_sprite) + 2;
-		
-	with(surface_setup("sprLockedWep", _surfW, _surfH, 1)){
-		surface_set_target(surf);
-		draw_clear_alpha(0, 0);
-		
-		with(UberCont){
-			 // Outline:
-			draw_set_fog(true, c_white, 0, 0);
-			for(var _d = 0; _d < 360; _d += 90){
-				draw_sprite(_sprite, 0, _sprX + dcos(_d), _sprY + dsin(_d));
-			}
-			
-			 // Main:
-			draw_set_fog(true, c_black, 0, 0);
-			draw_sprite(_sprite, 0, _sprX, _sprY);
-			draw_set_fog(false, 0, 0, 0);
-		}
-		
-		 // Done:
-		surface_reset_target();
-		free = true;
-		
-		 // Add Sprite:
-		surface_save(surf, name + ".png");
-		return sprite_add_weapon(name + ".png", _sprX, _sprY);
-	}
 	
 #define sprite_add_toptiny(_spr)
 	/*
@@ -3384,26 +3840,32 @@ var _shine = argument_count > 4 ? argument[4] : shnNone;
 	
 	return _sprList;
 	
-#define cleanup
-	 // Save Game:
-	if(save_auto){
-		save_ntte();
+#define loadout_wep_save(_race, _name)
+	/*
+		Saves a LWO starting weapon's variables to restore them later on mod unload/game_start
+	*/
+	
+	var _wep = unlock_get(`loadout:wep:${_race}:${_name}`);
+	
+	if(is_object(_wep)){
+		ds_list_add(global.loadout_wep_clone, [_race, _name, _wep, lq_clone(_wep)]);
 	}
 	
-	 // Clear Surfaces, Shaders, Script Bindings:
-	with(ds_map_values(global.surf)) if(surf != -1) surface_destroy(surf);
-	with(ds_map_values(global.shad)) if(shad != -1) shader_destroy(shad);
-	with(ds_map_values(global.bind)) with(id) instance_destroy();
-	ds_map_destroy(global.surf);
-	ds_map_destroy(global.shad);
-	ds_map_destroy(global.bind);
+#define loadout_wep_reset()
+	/*
+		Restores all of a LWO starting weapon's original variables
+	*/
 	
-	 // No Crash:
-	with(ntte_mods.race){
-		with(instances_matching([CampChar, CharSelect], "race", self)){
-			repeat(8) with(instance_create(random_range(bbox_left, bbox_right), random_range(bbox_top, bbox_bottom), Dust)){
-				motion_add(random(360), random(random(8)));
-			}
-			instance_delete(id);
+	with(ds_list_to_array(global.loadout_wep_clone)){
+		var	_race    = self[0],
+			_name    = self[1],
+			_wep     = self[2],
+			_wepSave = unlock_get(`loadout:wep:${_race}:${_name}`);
+			
+		if(_wep == _wepSave){
+			var _wepCopy = self[3];
+			save_set(`unlock:loadout:wep:${_race}:${_name}`, _wepCopy);
 		}
 	}
+	
+	ds_list_clear(global.loadout_wep_clone);

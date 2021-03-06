@@ -1,17 +1,21 @@
 #define init
-	spr = mod_variable_get("mod", "teassets", "spr");
-	snd = mod_variable_get("mod", "teassets", "snd");
-	lag = false;
+	mod_script_call("mod", "teassets", "ntte_init", script_ref_create(init));
+	
+	 // Bind Events:
+	script_bind(CustomDraw, draw_diver_laser, -5, true);
 	
 	 // Palanking Camera Pan (During Pause Screen):
 	global.palanking_pan = [0, 0];
 	
 	 // Harpoon Ropes:
 	global.harpoon_rope_bind = [
-		script_bind("HarpoonRopeDraw",    CustomDraw, script_ref_create(draw_harpoon_rope),  0, false),
-		script_bind("HarpoonRopeDrawTop", CustomDraw, script_ref_create(draw_harpoon_rope), -9, false)
+		script_bind(CustomDraw, draw_harpoon_rope,  1, false),
+		script_bind(CustomDraw, draw_harpoon_rope, -9, false)
 	];
 	global.harpoon_rope = [];
+	
+#define cleanup
+	mod_script_call("mod", "teassets", "ntte_cleanup", script_ref_create(cleanup));
 	
 #macro spr global.spr
 #macro msk spr.msk
@@ -27,7 +31,7 @@
 		spr_hurt = spr.BloomingAssassinHurt;
 		spr_dead = spr.BloomingAssassinDead;
 		
-		return id;
+		return self;
 	}
 	
 	
@@ -56,7 +60,7 @@
 		alarm0 = 90 + random(90);
 		alarm1 = random_range(1500, 3000);
 		
-		return id;
+		return self;
 	}
 	
 #define BloomingAssassinHide_step
@@ -88,15 +92,16 @@
 #define BloomingAssassinHide_alrm0
 	alarm0 = 30 + random(60);
 	
-	enemy_target(x, y);
-	
 	 // Become Man:
-	if(instance_near(x, y, target, 32) || (chance(1, 2) && instance_near(x, y, target, 128))){
-		alarm1 = min(alarm1, 1);
-		
-		 // Intimidating:
-		motion_add(point_direction(x, y, target.x, target.y), 4);
-		scrRight(direction);
+	if(enemy_target(x, y)){
+		var _targetDis = target_distance;
+		if(_targetDis < 32 || (_targetDis < 128 && chance(1, 2))){
+			alarm1 = min(alarm1, 1);
+			
+			 // Intimidating:
+			motion_add(target_direction, 4);
+			enemy_look(direction);
+		}
 	}
 	
 #define BloomingAssassinHide_alrm1
@@ -113,11 +118,11 @@
 		}
 	}
 	
-	instance_delete(id);
+	instance_delete(self);
 	
-#define BloomingAssassinHide_hurt(_hitdmg, _hitvel, _hitdir)
+#define BloomingAssassinHide_hurt(_damage, _force, _direction)
 	alarm1 = min(alarm1, 1);
-	enemy_hurt(_hitdmg, _hitvel / 2, _hitdir);
+	enemy_hurt(_damage, _force / 2, _direction);
 	
 #define BloomingAssassinHide_death
 	 // Bonus Rads:
@@ -131,7 +136,7 @@
 		spr_hurt = spr.BloomingBushHurt;
 		spr_dead = spr.BloomingBushDead;
 		
-		return id;
+		return self;
 	}
 	
 	
@@ -143,7 +148,7 @@
 		spr_hurt = spr.BloomingCactusHurt[s];
 		spr_dead = spr.BloomingCactusDead[s];
 		
-		return id;
+		return self;
 	}
 	
 	
@@ -163,7 +168,7 @@
 		maxhealth = 20;
 		my_floor = instance_nearest_bbox(x, y, Floor);
 		
-		return id;
+		return self;
 	}
 	
 #define BuriedCar_step
@@ -181,12 +186,14 @@
 	
 	 // Break Floor:
 	with(my_floor){
-		repeat(4){
-			instance_create(bbox_center_x + orandom(8), bbox_center_y + orandom(8), Debris);
-		}
 		with(instances_meeting(x, y, Detail)){
 			if(place_meeting(x, y, other)){
 				instance_destroy();
+			}
+		}
+		for(var _x = bbox_left; _x < bbox_right + 1; _x += 16){
+			for(var _y = bbox_top; _y < bbox_bottom + 1; _y += 16){
+				instance_create(_x, _y, FloorExplo);
 			}
 		}
 		instance_destroy();
@@ -213,7 +220,7 @@
 		on_anim = [];
 		on_wall = [];
 		
-		return id;
+		return self;
 	}
 	
 #define ClamShield_step
@@ -228,14 +235,14 @@
 		 // Aim:
 		if("gunangle" in creator){
 			var	_shieldNum = array_length(_shieldList),
-				_goalDir = creator.gunangle + (180 * ((array_find_index(_shieldList, id) - ((_shieldNum - 1) / 2)) / _shieldNum)),
+				_goalDir = creator.gunangle + (180 * ((array_find_index(_shieldList, self) - ((_shieldNum - 1) / 2)) / _shieldNum)),
 				_lastDir = image_angle;
 				
 			if(wep == _bwep && wep_raw(_wep) == wep_raw(_bwep)){
 				_goalDir += 180;
 			}
 			
-			image_angle = angle_lerp(image_angle, _goalDir, (instance_is(creator, Player) ? 1/2 : 1/16) * current_time_scale);
+			image_angle = angle_lerp_ct(image_angle, _goalDir, (instance_is(creator, Player) ? 1/2 : 1/16));
 			direction = image_angle;
 			
 			 // Manually Rotate BoltSticks:
@@ -245,11 +252,11 @@
 		}
 		
 		 // Follow Creator:
-		var	l = 16 - min(4, variable_instance_get(creator, _b + "wkick", 0)),
-			d = image_angle;
+		var	_l = 16 - min(4, variable_instance_get(creator, _b + "wkick", 0)),
+			_d = image_angle;
 			
-		x = creator.x + lengthdir_x(l, d);
-		y = creator.y + lengthdir_y(l, d);
+		x = creator.x + lengthdir_x(_l, _d);
+		y = creator.y + lengthdir_y(_l, _d);
 		xprevious = x;
 		yprevious = y;
 		depth = creator.depth - (y > creator.y);
@@ -279,7 +286,7 @@
 		)),
 		_surfH = _surfW;
 		
-	with(surface_setup(name + string(id), _surfW, _surfH, _surfScale)){
+	with(surface_setup(name + string(self), _surfW, _surfH, _surfScale)){
 		var _dis = -6;
 		x = other.x + lengthdir_x(_dis, _ang) - (w / 2);
 		y = other.y + lengthdir_y(_dis, _ang) - (h / 2) + 5;
@@ -374,12 +381,12 @@
 						
 						 // Deflect:
 						if(_typ == 1){
-							speed += friction * 3;
-							direction = _deflectDir - clamp(angle_difference(direction + 180, _deflectDir), -40, 40);
+							speed      += friction * 3;
+							direction   = _deflectDir - clamp(angle_difference(direction + 180, _deflectDir), -40, 40);
 							image_angle = direction;
 							if(instance_is(other.creator, Player)){
 								deflected = true;
-								team = other.team;
+								team      = other.team;
 							}
 						}
 						
@@ -399,7 +406,7 @@
 						 // Destroyables:
 						if(_typ == 2){
 							 // Bolts Stick:
-							if(array_exists([sprBolt, sprBoltGold, sprHeavyBolt, sprUltraBolt, sprSplinter, sprSeeker], sprite_index)){
+							if(array_find_index([sprBolt, sprBoltGold, sprHeavyBolt, sprUltraBolt, sprSplinter, sprSeeker], sprite_index) >= 0){
 								var _target = other;
 								with(instance_create(x, y, BoltStick)){
 									sprite_index = other.sprite_index;
@@ -436,7 +443,7 @@
 		damage     = 10;
 		force      = 16;
 		
-		return id;
+		return self;
 	}
 	
 	
@@ -460,19 +467,19 @@
 		size = 4;
 		shell = true;
 		
-		return id;
+		return self;
 	}
 	
 	
 #define CoastDecal_create(_x, _y)
 	with(instance_create(_x, _y, CustomProp)){
 		 // Visual:
-		var t = irandom(array_length(spr.RockIdle) - 1);
-		spr_idle = spr.RockIdle[t];
-		spr_hurt = spr.RockHurt[t];
-		spr_dead = spr.RockDead[t];
-		spr_bott = spr.RockBott[t];
-		spr_foam = spr.RockFoam[t];
+		var _t = irandom(array_length(spr.RockIdle) - 1);
+		spr_idle   = spr.RockIdle[_t];
+		spr_hurt   = spr.RockHurt[_t];
+		spr_dead   = spr.RockDead[_t];
+		spr_bott   = spr.RockBott[_t];
+		spr_foam   = spr.RockFoam[_t];
 		spr_shadow = mskNone;
 		
 		 // Sound:
@@ -481,9 +488,9 @@
 		
 		 // Vars:
 		mask_index = mskBandit;
-		maxhealth = 50;
-		size = 3;
-		shell = false;
+		maxhealth  = 50;
+		size       = 3;
+		shell      = false;
 		
 		 // Offset:
 		x += orandom(10);
@@ -494,24 +501,28 @@
 		 // Doesn't Use Coast Wading System:
 		canwade = false;
 		
-		return id;
+		return self;
 	}
 	
 #define CoastDecal_step
 	 // Space Out Decals:
 	if(place_meeting(x, y, CustomProp)){
 		with(instances_meeting(x, y, instances_matching_le(instances_matching(CustomProp, "name", "CoastDecal", "CoastBigDecal"), "size", size))){
-			var	_dir = point_direction(other.x, other.y, x, y),
-				_dis = 8;
+			if(place_meeting(x, y, other)){
+				var	_dir = point_direction(other.x, other.y, x, y),
+					_dis = 8;
+					
+				do{
+					x += lengthdir_x(_dis, _dir);
+					y += lengthdir_y(_dis, _dir);
+				}
+				until(!place_meeting(x, y, other) && !position_meeting(x, y, Floor));
 				
-			do{
-				x += lengthdir_x(_dis, _dir);
-				y += lengthdir_y(_dis, _dir);
+				xstart    = x;
+				ystart    = y;
+				xprevious = x;
+				yprevious = y;
 			}
-			until (!place_meeting(x, y, other) && !position_meeting(x, y, Floor));
-			
-			xstart = x;
-			ystart = y;
 		}
 	}
 	
@@ -569,7 +580,7 @@
 		}
 		until instance_exists(my_floor);
 		
-		return id;
+		return self;
 	}
 	
 #define CoastDecalCorpse_step
@@ -600,6 +611,7 @@
 		maxhealth  = 999999999;
 		size       = 8;
 		team       = 1;
+		target     = noone;
 		right      = choose(-1, 1);
 		walk       = 0;
 		walkspeed  = 1.2;
@@ -610,84 +622,114 @@
 		 // Alarms:
 		alarm1 = 30;
 		
-		return id;
+		return self;
 	}
-
+	
 #define Creature_step
 	 // Alarms:
 	if(alarm1_run) exit;
 	
 	 // Run away when hurt:
-	if nexthurt > current_frame && !scared{
+	if(sprite_index == spr_hurt && !scared){
 		scared = true;
-		instance_create(x+right*65,y-24,AssassinNotice);
+		instance_create(x + (65 * right), y - 24, AssassinNotice);
 	}
 
 	 // Pushed away from floors:
-	if(instance_near(x, y, Floor, 128)){
+	if(distance_to_object(Floor) < 64){
 		with(instance_nearest_bbox(x, y, Floor)){
 			var _dir = point_direction(bbox_center_x, bbox_center_y, other.x, other.y);
-			with(other) motion_add_ct(_dir, 3);
+			with(other){
+				motion_add_ct(_dir, 3);
+			}
 		}
 	}
 
 	 // Push Player:
 	if(place_meeting(x, y, Player)){
-		with(Player) if(place_meeting(x, y, other)){
-			motion_add_ct(point_direction(other.x, other.y, x, y), 3);
+		with(instances_meeting(x, y, Player)){
+			if(place_meeting(x, y, other)){
+				motion_add_ct(point_direction(other.x, other.y, x, y), 3);
+			}
 		}
 	}
 	
 	 // Movement:
-	enemy_walk(walkspeed, maxspeed);
+	if(walk > 0){
+		walk -= current_time_scale;
+		speed += walkspeed * current_time_scale;
+	}
+	if(speed > maxspeed){
+		speed = maxspeed;
+	}
 	
 	 // Animate:
 	sprite_index = enemy_sprite;
-
+	
 #define Creature_draw
 	draw_self_enemy();
-
+	
 #define Creature_alrm1
 	alarm1 = 30;
-	if instance_exists(Player){
-		 // finds the nearest wading player
-		var	_p = noone,
-			_bigdist = 10000;
-		with(Player) if(!collision_line(x, y, other.x, other.y, Floor, false, false)){
-			var _distance = point_distance(x,y,other.x,other.y);
-			if _distance < _bigdist{
-				_p = self;
-				_bigdist = _distance;
-			}
-		}
-		if !scared{
-			if instance_exists(_p){
-				 // investigate wading player
-				if(!instance_near(x, y, _p, 128)){
-					scrWalk(point_direction(x, y, _p.x, _p.y), [20, 30]);
+	
+	 // Target Nearest Wading Player:
+	if(instance_exists(Player)){
+		var _disMax = infinity;
+		with(Player){
+			if(!collision_line(x, y, other.x, other.y, Floor, false, false)){
+				var _dis = point_distance(x, y, other.x, other.y);
+				if(_dis < _disMax){
+					_disMax = _dis;
+					other.target = self;
 				}
-				else if(chance(1, 4)){
-					instance_create(x + (65 * right), y - 24, HealFX);
-				}
-				scrRight(point_direction(x, y, _p.x, _p.y));
-			}
-			else{
-				 // wander
-				scrWalk(direction + random(20), [20, 30]);
-			}
-		}
-		else{
-			if instance_exists(_p)
-				scrWalk(point_direction(_p.x, _p.y, x, y), 999999999);
-			else{
-				_p = instance_nearest(x,y,Player);
-				scrWalk(point_direction(_p.x, _p.y, x, y), [20, 30]);
 			}
 		}
 	}
 	
+	 // Coolin:
+	if(!scared){
+		 // Investigate Bro:
+		if(instance_exists(target)){
+			var _targetDir = target_direction;
+			if(target_distance > 128){
+				enemy_walk(_targetDir, random_range(20, 30));
+			}
+			else if(chance(1, 4)){
+				instance_create(x + (65 * right), y - 24, HealFX);
+			}
+			enemy_look(_targetDir);
+		}
+		
+		 // Wander:
+		else{
+			enemy_walk(direction + random(20), random_range(20, 30));
+			enemy_look(direction);
+		}
+	}
+	
+	 // RUUUN:
+	else{
+		if(instance_exists(target)){
+			enemy_walk(target_direction + 180, alarm1);
+		}
+		else if(enemy_target(x, y)){
+			enemy_walk(target_direction + 180, random_range(20, 30));
+		}
+		enemy_look(direction);
+	}
+	
 	
 #define Diver_create(_x, _y)
+	/*
+		The bandit of the aquatic route, fires a harpoon (bolt) at the player after a short delay
+		
+		Vars
+			gonnafire - About to fire a harpoon, true/false
+			reload    - Cooldown before firing again in frames
+			laser     - The width of their laser sight
+			palm      - Their palm tree fort's 'id', if residing in one
+	*/
+	
 	with(instance_create(_x, _y, CustomEnemy)){
 		 // Visual:
 		spr_idle   = spr.DiverIdle;
@@ -717,12 +759,12 @@
 		gonnafire  = false;
 		reload     = 0;
 		laser      = 0;
-		laser_draw = noone;
+		palm       = noone;
 		
 		 // Alarms:
 		alarm1 = 90 + irandom(90);
 		
-		return id;
+		return self;
 	}
 
 #define Diver_step
@@ -730,7 +772,13 @@
 	if(alarm1_run) exit;
 	
 	 // Movement:
-	enemy_walk(walkspeed, maxspeed);
+	if(walk > 0){
+		walk -= current_time_scale;
+		speed += walkspeed * current_time_scale;
+	}
+	if(speed > maxspeed){
+		speed = maxspeed;
+	}
 	
 	 // Animate:
 	sprite_index = enemy_sprite;
@@ -739,35 +787,27 @@
 	if(reload > 0){
 		reload -= current_time_scale;
 		
-		if(in_range(reload, 6, 12)){
-			wkick += ((6 - wkick) * 3/5) * current_time_scale;
+		if(reload >= 6 && reload <= 12){
+			wkick = lerp_ct(wkick, 6, 3/5);
 		}
 		
 		else if(reload <= 0){
 			alarm1 = max(alarm1, 30)
-			wkick = -2;
+			wkick  = -2;
 			sound_play_hit(sndCrossReload, 0.1);
 			
-			var	l = 8,
-				d = gunangle;
+			var	_l = 8,
+				_d = gunangle;
 				
-			instance_create(x + lengthdir_x(l, d), y + lengthdir_y(l, d), WepSwap);
+			instance_create(x + lengthdir_x(_l, _d), y + lengthdir_y(_l, _d), WepSwap);
 		}
 	}
 	
 	 // Laser Sight:
-	laser += (gonnafire - laser) * 0.3 * current_time_scale;
-	if(laser > 0 && variable_instance_get(self, "wading", 0) > 0){
-		if(!instance_exists(laser_draw)){
-			laser_draw = script_bind_draw(Diver_draw_laser, depth - 1, id);
-		}
-	}
-	else if(instance_exists(laser_draw)){
-		with(laser_draw) instance_destroy();
-	}
+	laser = lerp_ct(laser, gonnafire, 0.3);
 	
 #define Diver_draw
-	var _back = (gunangle <= 180 || instance_exists(laser_draw));
+	var _back = (gunangle <= 180 || laser != 0);
 	
 	 // Gun Behind:
 	if(_back) Diver_draw_wep();
@@ -776,16 +816,11 @@
 	draw_self_enemy();
 	
 	 // Tree:
-	with(instances_matching(instances_matching(CustomProp, "name", "Palm"), "creator", id)){
-		draw_self();
+	if(instance_exists(palm)){
+		with(palm){
+			draw_self();
+		}
 	}
-	
-	 // Laser Sight:
-	if(instance_exists(laser_draw)){
-		laser_draw.x = x;
-		laser_draw.y = y;
-	}
-	else Diver_draw_laser(id);
 	
 	 // Gun Above:
 	if(!_back) Diver_draw_wep();
@@ -809,14 +844,16 @@
 		
 		alarm1 = 20 + random(30);
 		reload = 90 + random(30);
-		wkick = 8;
+		wkick  = 8;
 	}
 	
 	else{
-		if(enemy_target(x, y) && instance_seen(x, y, target)){
-			scrAim(point_direction(x, y, target.x + target.hspeed, target.y + target.vspeed));
+		if(enemy_target(x, y) && target_visible){
+			enemy_look(point_direction(x, y, target.x + target.hspeed, target.y + target.vspeed));
 			
-			if(instance_near(x, y, target, [64, 320]) || array_length(instances_matching(instances_matching(CustomProp, "name", "Palm"), "creator", id)) > 0){
+			var _targetDis = target_distance;
+			
+			if((_targetDis > 64 && _targetDis < 320) || instance_exists(palm)){
 				 // Prepare to Shoot:
 				if(reload <= 0 && chance(1, 2)){
 					alarm1 = 12;
@@ -830,7 +867,10 @@
 				else{
 					alarm1 = 20 + random(30);
 					if(chance(1, 2)){
-						scrWalk(gunangle + choose(-90, 90) + orandom(10), 10);
+						enemy_walk(
+							gunangle + choose(-90, 90) + orandom(10),
+							10
+						);
 					}
 				}
 			}
@@ -838,72 +878,45 @@
 			 // Move Away From Target:
 			else{
 				alarm1 = 20 + irandom(30);
-				scrWalk(gunangle + 180 + orandom(30), [15, 30]);
+				enemy_walk(
+					gunangle + 180 + orandom(30),
+					random_range(15, 30)
+				);
 			}
 			
 			 // Go to Nearest Non-Pit Floor:
-			if(array_length(instances_matching(Floor, "sprite_index", spr.FloorTrenchB)) > 0){
-				var f = instance_nearest_bbox(x + (hspeed * 4), y + (vspeed * 4), instances_matching_ne(Floor, "sprite_index", spr.FloorTrenchB));
-				if(!place_meeting(x, y, f) && instance_exists(f)){
-					direction = point_direction(x, y, f.x, f.y) + orandom(20);
+			if(array_length(instances_matching(Floor, "sprite_index", spr.FloorTrenchB))){
+				with(instance_nearest_bbox(x + (hspeed * 4), y + (vspeed * 4), instances_matching_ne(Floor, "sprite_index", spr.FloorTrenchB))){
+					if(!place_meeting(x, y, other)){
+						other.direction = point_direction(other.x, other.y, bbox_center_x, bbox_center_y) + orandom(20);
+					}
 				}
 			}
 		}
 		
 		 // Wander:
 		else{
-			scrWalk(random(360), 30);
-			scrAim(direction);
+			enemy_walk(random(360), 30);
+			enemy_look(direction);
 		}
 	}
 	
 #define Diver_death
 	pickup_drop(20, 0);
 	
-#define Diver_cleanup
-	with(laser_draw) instance_destroy();
-	
 #define Diver_draw_wep
 	 // Bolt:
 	if(reload < 6){
 		var	_ox = 6 - (wkick + reload),
 			_oy = -right,
-			_x = x + lengthdir_x(_ox, gunangle) + lengthdir_x(_oy, gunangle - 90),
-			_y = y + lengthdir_y(_ox, gunangle) + lengthdir_y(_oy, gunangle - 90);
+			_x  = x + lengthdir_x(_ox, gunangle) + lengthdir_x(_oy, gunangle - 90),
+			_y  = y + lengthdir_y(_ox, gunangle) + lengthdir_y(_oy, gunangle - 90);
 			
 		draw_sprite_ext(sprBolt, 1, _x, _y, 1, right, gunangle, image_blend, image_alpha);
 	}
 	
 	 // Weapon:
-	draw_weapon(spr_weap, x, y, gunangle, 0, wkick, right, image_blend, image_alpha);
-	
-#define Diver_draw_laser(_inst)
-	with(_inst){
-		draw_set_color(c_white);
-		draw_set_alpha(0.8 * laser);
-		
-		 // Main:
-		var	_x = other.x - 1,
-			_y = other.y - 3,
-			_angle = gunangle,
-			_width = (1 + random(0.5)) * laser,
-			_laser = draw_lasersight(_x, _y, _angle, 1000 * laser, _width);
-			
-		 // Bloom:
-		draw_set_alpha(draw_get_alpha() * 0.2);
-		draw_set_blend_mode(bm_add);
-		draw_line_width(
-			_x,
-			_y,
-			_laser[0] + lengthdir_x(2, _angle),
-			_laser[1] + lengthdir_y(2, _angle),
-			_width * 2
-		);
-		
-		draw_set_blend_mode(bm_normal);
-		draw_set_alpha(1);
-	}
-	
+	draw_weapon(spr_weap, 0, x, y, gunangle, 0, wkick, right, image_blend, image_alpha);
 	
 #define DiverHarpoon_create(_x, _y)
 	with(instance_create(_x, _y, CustomProjectile)){
@@ -917,7 +930,7 @@
 		force      = 8;
 		typ        = 2;
 		
-		return id;
+		return self;
 	}
 	
 #define DiverHarpoon_step
@@ -945,15 +958,17 @@
 	
 #define DiverHarpoon_hit
 	var _inst = other;
-	if(speed > 0 && projectile_canhit(_inst) && variable_instance_get(other, "creator") != creator){
+	if(speed > 0 && projectile_canhit(_inst)){
 		projectile_hit(_inst, damage, force, direction);
 		
 		 // Stick in Player:
-		with(instance_create(x, y, BoltStick)){
-			image_angle = other.image_angle;
-			target = _inst;
+		if(instance_exists(self)){
+			with(instance_create(x, y, BoltStick)){
+				image_angle = other.image_angle;
+				target      = _inst;
+			}
+			instance_destroy();
 		}
-		instance_destroy();
 	}
 	
 #define DiverHarpoon_wall
@@ -1000,7 +1015,7 @@
 		alarm1 = 60 + irandom(60);
 		alarm2 = -1;
 		
-		return id;
+		return self;
 	}
 	
 #define Gull_step
@@ -1009,26 +1024,34 @@
 	if(alarm2_run) exit;
 	
 	 // Movement:
-	enemy_walk(walkspeed, maxspeed);
+	if(walk > 0){
+		walk -= current_time_scale;
+		speed += walkspeed * current_time_scale;
+	}
+	if(speed > maxspeed){
+		speed = maxspeed;
+	}
 	
 	 // Animate:
 	sprite_index = enemy_sprite;
 	
 #define Gull_draw
-	if(gunangle <= 180) draw_weapon(spr_weap, x, y, gunangle, wepangle, wkick, 1, image_blend, image_alpha);
+	if(gunangle <= 180) draw_weapon(spr_weap, 0, x, y, gunangle, wepangle, wkick, 1, image_blend, image_alpha);
 	draw_self_enemy();
-	if(gunangle >  180) draw_weapon(spr_weap, x, y, gunangle, wepangle, wkick, 1, image_blend, image_alpha);
+	if(gunangle >  180) draw_weapon(spr_weap, 0, x, y, gunangle, wepangle, wkick, 1, image_blend, image_alpha);
 	
 #define Gull_alrm1
 	alarm1 = 40 + irandom(30);
 	
-	if(enemy_target(x, y) && instance_seen(x, y, target)){
-		scrAim(point_direction(x, y, target.x, target.y));
+	if(enemy_target(x, y) && target_visible){
+		enemy_look(target_direction);
+		
+		var _targetDis = target_distance;
 		
 		 // Target Nearby:
-		if(instance_near(x, y, target, [10, 480])){
+		if(_targetDis > 10 && _targetDis < 480){
 			 // Attack:
-			if(instance_near(x, y, target, 60)){
+			if(_targetDis < 60){
 				alarm2 = 8;
 				instance_create(x, y, AssassinNotice);
 				sound_play_pitch(sndRavenScreech, 1.15 + random(0.1));
@@ -1037,26 +1060,34 @@
 			 // Move Toward Target:
 			else{
 				alarm1 = 40 + irandom(10);
-				scrWalk(gunangle + orandom(20), [20, 35]);
+				enemy_walk(
+					gunangle + orandom(20),
+					random_range(20, 35)
+				);
 			}
 		}
 		
 		 // Move Toward Target:
 		else{
 			alarm1 = 30 + irandom(10);
-			scrWalk(gunangle + orandom(20), [10, 30]);
+			enemy_walk(
+				gunangle + orandom(20),
+				random_range(10, 30)
+			);
 		}
 	}
 	
 	 // Wander:
 	else{
-		scrWalk(random(360), 30);
-		scrAim(direction);
+		enemy_walk(random(360), 30);
+		enemy_look(direction);
 	}
 	
 #define Gull_alrm2
 	 // Slash:
-	scrAim(point_direction(x, y, target.x, target.y) + orandom(10));
+	if(instance_exists(target)){
+		enemy_look(target_direction + orandom(10));
+	}
 	with(projectile_create(x, y, EnemySlash, gunangle, 4)){
 		damage = 2;
 	}
@@ -1064,6 +1095,9 @@
 	motion_add(gunangle, 4);
 	wepangle *= -1;
 	wkick = -3;
+	
+#define Gull_death
+	pickup_drop(16, 0);
 	
 	
 #define Harpoon_create(_x, _y)
@@ -1084,7 +1118,7 @@
 		pickup     = false;
 		setup      = true;
 		
-		return id;
+		return self;
 	}
 	
 #define Harpoon_setup
@@ -1136,11 +1170,11 @@
 		
 		 // Bolt Marrow:
 		if(skill_get(mut_bolt_marrow) > 0){
-			var n = instance_nearest_array(x, y, instances_matching_ne(instances_matching_ne(hitme, "team", team, 0), "mask_index", mskNone, sprVoid));
-			if(distance_to_object(n) < (16 * skill_get(mut_bolt_marrow))){
-				if(!place_meeting(x, y, n)){
-					if(instance_seen(x, y, n)){
-						direction = point_direction(x, y, n.x, n.y);
+			var _target = instance_nearest_array(x, y, instances_matching_ne(instances_matching_ne(hitme, "team", team, 0), "mask_index", mskNone, sprVoid));
+			if(distance_to_object(_target) < (16 * skill_get(mut_bolt_marrow))){
+				if(!place_meeting(x, y, _target)){
+					if(!collision_line(x, y, _target.x, _target.y, Wall, false, false)){
+						direction   = point_direction(x, y, _target.x, _target.y);
 						image_angle = direction;
 					}
 				}
@@ -1151,13 +1185,13 @@
 		if(place_meeting(x, y, Corpse)){
 			with(instances_meeting(x, y, instances_matching_ne(instances_matching_gt(Corpse, "speed", 1), "mask_index", -1))){
 				if(place_meeting(x, y, other)){
-					var c = id;
+					var _corpse = self;
 					with(other){
-						if(array_find_index(corpses, c) < 0){
-							if(sprite_get_width(c.sprite_index) < 64 && sprite_get_height(c.sprite_index) < 64){
+						if(array_find_index(corpses, _corpse) < 0){
+							if(sprite_get_width(_corpse.sprite_index) < 64 && sprite_get_height(_corpse.sprite_index) < 64){
 								var _canTake = true;
 								with(instances_matching(object_index, "name", name)){
-									if(array_find_index(corpses, c) >= 0){
+									if(array_find_index(corpses, _corpse) >= 0){
 										_canTake = false;
 										break;
 									}
@@ -1165,22 +1199,22 @@
 								
 								if(_canTake){
 									 // Skewer:
-									array_push(corpses, c);
+									array_push(corpses, _corpse);
 									if(hspeed != 0){
-										c.image_xscale = -sign(hspeed);
+										_corpse.image_xscale = -sign(hspeed);
 									}
-									speed = max(speed - (3 * (1 + c.size)), 12);
+									speed = max(speed - (3 * (1 + _corpse.size)), 12);
 									
 									 // Effects:
 									view_shake_at(x, y, 6);
-									with(instance_create(c.x, c.y, ThrowHit)){
+									with(instance_create(_corpse.x, _corpse.y, ThrowHit)){
 										motion_add(other.direction + orandom(30), 3);
 										image_speed = random_range(0.8, 1);
-										image_xscale = min(0.5 * (c.size + 1), 1);
+										image_xscale = min(0.5 * (_corpse.size + 1), 1);
 										image_yscale = image_xscale;
 									}
 									sound_play_pitchvol(sndChickenThrow,   0.4 + random(0.2), 3);
-									sound_play_pitchvol(sndGrenadeShotgun, 0.6 + random(0.2), 0.3 + (0.2 * c.size));
+									sound_play_pitchvol(sndGrenadeShotgun, 0.6 + random(0.2), 0.3 + (0.2 * _corpse.size));
 								}
 							}
 						}
@@ -1274,7 +1308,7 @@
 	
 	 // Stick in Object:
 	else if(instance_exists(target)){
-		var _harpoon = id;
+		var _harpoon = self;
 		with(obj_create(x, y, "HarpoonStick")){
 			image_yscale = other.image_yscale;
 			image_angle  = other.image_angle;
@@ -1384,7 +1418,7 @@
 		pull_speed = 2;
 		rope = [];
 		
-		return id;
+		return self;
 	}
 	
 	
@@ -1408,7 +1442,7 @@
 		alarm1 = 3;
 		alarm2 = alarm0 - 15;
 		
-		return id;
+		return self;
 	}
 	
 #define NetNade_step
@@ -1510,14 +1544,16 @@
 			
 			 // Link harpoons to each other:
 			if(!instance_exists(_first)){
-				_first = id;
+				_first = self;
 			}
 			if(instance_exists(other.lasthit)){
-				Harpoon_rope(id, other.lasthit);
+				Harpoon_rope(self, other.lasthit);
 			}
 			else{
-				if(instance_exists(_link)) Harpoon_rope(id, _link);
-				_link = id;
+				if(instance_exists(_link)){
+					Harpoon_rope(self, _link);
+				}
+				_link = self;
 			}
 		}
 	}
@@ -1529,10 +1565,6 @@
 #define Palanking_create(_x, _y)
 	with(instance_create(_x, _y, CustomEnemy)){
 		boss = true;
-		
-		 // For Sani's bosshudredux:
-		bossname = "PALANKING";
-		col = c_red;
 		
 		 // Visual:
 		spr_bott        = spr.PalankingBott;
@@ -1597,7 +1629,11 @@
 		alarm2 = -1;
 		alarm3 = -1;
 		
-		return id;
+		 // For Sani's bosshudredux:
+		bossname = "PALANKING";
+		col = c_red;
+		
+		return self;
 	}
 
 #define Palanking_step
@@ -1608,8 +1644,16 @@
 	if(alarm3_run) exit;
 	
 	 // Movement:
-	if(z <= 0) walk = 0;
-	enemy_walk(walkspeed, maxspeed);
+	if(z <= 0){
+		walk = 0;
+	}
+	else if(walk > 0){
+		walk -= current_time_scale;
+		speed += walkspeed * current_time_scale;
+	}
+	if(speed > maxspeed){
+		speed = maxspeed;
+	}
 	
 	 // Seals:
 	var	_sealNum = (seal_max - array_count(seal, noone)),
@@ -1664,8 +1708,8 @@
 		 // Seals Run Over to Lift:
 		if(_sealNum < seal_max){
 			with(instances_matching(CustomEnemy, "name", "Seal")){
-				if(!array_exists(other.seal, id)){
-					seal_add(other, id);
+				if(array_find_index(other.seal, self) < 0){
+					seal_add(other, self);
 					break;
 				}
 			}
@@ -1729,68 +1773,53 @@
 				}
 			}
 		}
-		
-		if(instance_exists(Player) && intro_pan > 15){
-			 // Freeze Things:
-			if(current_frame_active){
-				with(instances_matching([WantRevivePopoFreak, VanSpawn, IDPDSpawn], "", null)){
-					for(var i = 0; i <= 1; i++){
-						var _alarm = alarm_get(i);
-						if(_alarm > 0){
-							alarm_set(i, _alarm + 1);
-						}
-					}
-				}
-				with(Seal){
-					var _alarm = alarm_get(1);
-					if(_alarm > 0){
-						alarm_set(1, _alarm + 1);
-					}
-				}
-			}
-			
-			 // Just in case:
-			with(instances_matching_ne(enemy, "name", "Palanking", "Seal", "SealHeavy")){
-				my_health = 0;
-			}
-			
-			 // Attract Pickups:
-			portal_pickups();
-		}
 	}
 	
 	 // Pan Intro Camera:
+	var _pan = false;
 	if(intro_pan > 0){
-		intro_pan -= min(1, current_time_scale);
+		intro_pan -= current_time_scale;
 		
-		 // Pan:
-		global.palanking_pan = [
-			point_direction(x, y, intro_pan_x, intro_pan_y),
-			point_distance(x, y, intro_pan_x, intro_pan_y) / 1.5
-		];
-		
-		 // Still Camera:
-		for(var i = 0; i < maxp; i++){
-			view_object[i] = id;
-			view_pan_factor[i] = 10000;
-			if(intro_pan <= 0){
-				view_pan_factor[i] = null;
+		 // Just in Case:
+		if(alarm0 > 0 && intro_pan < alarm0){
+			intro_pan = alarm0;
+		}
+		if(instance_number(enemy) <= array_length(instances_matching(object_index, "name", name)) + array_length(Seal) + instance_number(Van)){
+			_pan = true;
+			
+			 // Delay Popo:
+			if(instance_exists(IDPDSpawn) || instance_exists(VanSpawn) || instance_exists(WantRevivePopoFreak)){
+				if(instance_exists(Player) && current_frame_active){
+					var _inst = instances_matching_gt([IDPDSpawn, VanSpawn, WantRevivePopoFreak], "alarm0", 0);
+					if(array_length(_inst)) with(_inst){
+						alarm0++;
+					}
+				}
 			}
 		}
+		
+		 // Attract Pickups:
+		portal_pickups();
 		
 		 // Hold Off Seals:
 		with(Seal){
 			attack_delay = 15 + random(30);
 		}
 	}
-	else{
-		global.palanking_pan = [0, 0];
-		for(var i = 0; i < maxp; i++){
-			if(view_object[i] == id){
-				view_object[i] = noone;
-			}
+	for(var i = 0; i < maxp; i++){
+		if(_pan){
+			view_object[i] = self;
+			view_pan_factor[i] = 10000;
+		}
+		else if(view_object[i] == self){
+			view_object[i] = noone;
+			view_pan_factor[i] = null;
 		}
 	}
+	global.palanking_pan = [
+		(_pan ? point_direction(x, y, intro_pan_x, intro_pan_y)        : 0),
+		(_pan ? (point_distance(x, y, intro_pan_x, intro_pan_y) / 1.5) : 0)
+	];
 	
 	 // Z-Axis:
 	z += zspeed * current_time_scale;
@@ -1936,7 +1965,7 @@
 					
 					 // Important Stuff:
 					if(creator.active) kills = 0;
-					array_push(mod_variable_get("area", "coast", "sea_inst"), id);
+					array_push(mod_variable_get("area", "coast", "sea_inst"), self);
 				}
 				
 				 // Alert:
@@ -1963,32 +1992,35 @@
 #define Palanking_end_step
 	with(instances_matching_ne(instances_matching_ne(instances_matching(seal, "hold", true), "hold_x", null), "hold_y", null)){
 		if(mask_index != mskNone){
-			x = other.x + hold_x;
-			y = other.y + hold_y;
+			x         = other.x + hold_x;
+			y         = other.y + hold_y;
 			xprevious = x;
 			yprevious = y;
-			hspeed = other.hspeed;
-			vspeed = other.vspeed;
-			depth = other.depth - (hold_y > 24 && hold);
+			hspeed    = other.hspeed;
+			vspeed    = other.vspeed;
+			depth     = other.depth - (hold_y > 24 && hold);
 		}
 		else hold = false;
 	}
 
 #define Palanking_draw
-	var h = ((nexthurt > current_frame + 3 && active) || (sprite_index == spr_hurt && image_index < 1));
+	var _hurt = (
+		(nexthurt >= current_frame + 4 && active) ||
+		(sprite_index == spr_hurt && image_index < 1)
+	);
 	
 	 // Palanquin Bottom:
 	if(z > 4 || place_meeting(x, y, Floor)){
-		if(h) draw_set_fog(true, image_blend, 0, 0);
+		if(_hurt) draw_set_fog(true, image_blend, 0, 0);
 		draw_sprite_ext(spr_bott, image_index, x, y - z, image_xscale * right, image_yscale, image_angle, image_blend, image_alpha);
-		if(h) draw_set_fog(false, 0, 0, 0);
+		if(_hurt) draw_set_fog(false, 0, 0, 0);
 	}
 	
 	 // Self:
-	h = (h && sprite_index != spr_hurt);
-	if(h) draw_set_fog(true, image_blend, 0, 0);
+	_hurt &= (sprite_index != spr_hurt);
+	if(_hurt) draw_set_fog(true, image_blend, 0, 0);
 	draw_sprite_ext(sprite_index, image_index, x, y - z, image_xscale * right, image_yscale, image_angle, image_blend, image_alpha);
-	if(h) draw_set_fog(false, 0, 0, 0);
+	if(_hurt) draw_set_fog(false, 0, 0, 0);
 	
 #define Palanking_alrm0
 	if(intro_pan <= 0){
@@ -2010,18 +2042,18 @@
 			
 			case 0: // Wave of Seals
 				
-				var	_delay = 20,
+				var	_delay  = 20,
 					_groups = 5;
 					
-				for(var d = 0; d < 360; d += (360 / _groups)){
+				for(var _d = 0; _d < 360; _d += (360 / _groups)){
 					var	_x = 10016,
 						_y = 10016,
-						s = seal_wave(_x, _y, point_direction(_x, _y, x, y) + d, _delay);
+						_s = seal_wave(_x, _y, point_direction(_x, _y, x, y) + _d, _delay);
 						
-					if(d == 0){
-						intro_pan_x = s.x;
-						intro_pan_y = s.y;
-						intro_pan += _delay + (6 * s.num);
+					if(_d == 0){
+						intro_pan_x = _s.x;
+						intro_pan_y = _s.y;
+						intro_pan += _delay + (6 * _s.num);
 					}
 					
 					_delay += 15 + random(15);
@@ -2044,7 +2076,12 @@
 					for(var _dir = _ang; _dir < _ang + 360; _dir += (360 / 3)){
 						var _dis = 64 + random(16);
 						
-						seal_wave(x + lengthdir_x(_odis, _odir) + lengthdir_x(_dis, _dir), y + lengthdir_y(_odis, _odir) + lengthdir_y(_dis, _dir), _dir + 180, _delay);
+						seal_wave(
+							x + lengthdir_x(_odis, _odir) + lengthdir_x(_dis, _dir),
+							y + lengthdir_y(_odis, _odir) + lengthdir_y(_dis, _dir),
+							_dir + 180,
+							_delay
+						);
 						
 						_delay += 10 + random(10);
 					}
@@ -2056,7 +2093,7 @@
 				
 				 // Palanquin Holders:
 				var _seal = obj_create(x, y, "Seal");
-				seal_add(id, _seal);
+				seal_add(self, _seal);
 				with(_seal){
 					hold = true;
 					creator = other;
@@ -2089,8 +2126,8 @@
 					
 					 // Walk Towards Player:
 					if(enemy_target(x, y)){
-						scrAim(point_direction(x, y, target.x, target.y));
-						scrWalk(gunangle, 90);
+						enemy_look(target_direction);
+						enemy_walk(gunangle, 90);
 					}
 				}
 				
@@ -2113,13 +2150,13 @@
 	if(intro){
 		alarm1 = 40 + random(20);
 		
-		if(enemy_target(x, y) && instance_seen(x, y, target)){
-			scrAim(point_direction(x, y, target.x, target.y));
-			scrWalk(gunangle + orandom(30), 60);
+		if(enemy_target(x, y) && target_visible){
+			enemy_look(target_direction);
+			enemy_walk(gunangle + orandom(30), 60);
 			
 			 // Kingly Slap:
 			if(
-				(instance_near(x, y, target, 80) && array_length(Seal) > 2)
+				(target_distance < 80 && array_length(Seal) > 2)
 				||
 				(variable_instance_get(target, "reload", 0) > 0 && chance(1, 3))
 			){
@@ -2213,12 +2250,13 @@
 	 // Effects:
 	sound_play(sndHammer);
 	
-#define Palanking_hurt(_hitdmg, _hitvel, _hitdir)
-	nexthurt = current_frame + 6;	// I-Frames
+#define Palanking_hurt(_damage, _force, _direction)
+	nexthurt = current_frame + 6; // I-Frames
+	
 	if(active){
-		my_health -= _hitdmg;			// Damage
-		motion_add(_hitdir, _hitvel);	// Knockback
-		sound_play_hit(snd_hurt, 0.3);	// Sound
+		my_health -= _damage;
+		motion_add(_direction, _force)
+		sound_play_hit(snd_hurt, 0.3);
 		
 		 // Hurt Sprite:
 		if(sprite_index != spr_call && sprite_index != spr_burp && sprite_index != spr_fire){
@@ -2238,26 +2276,32 @@
 	}
 	
 	 // Half HP:
-	var h = (maxhealth / 2);
-	if(in_range(my_health, h - _hitdmg + 1, h)){
-		if(snd_lowh == sndRocket) sound_play_pitch(snd_lowh, 0.5);
+	var _half = maxhealth / 2;
+	if(my_health <= _half && my_health + _damage > _half){
+		if(snd_lowh == sndRocket){
+			sound_play_pitch(snd_lowh, 0.5);
+		}
 		else sound_play(snd_lowh);
 		
 		 // Extra FX:
 		view_shake_at(x, y, 30);
-		repeat(5) instance_create(x, y - z + 16, Debris);
+		repeat(5){
+			instance_create(x, y - z + 16, Debris);
+		}
 	}
 	
 	 // Effects:
 	if(instance_exists(other) && instance_is(other, projectile)){
 		with(instance_create(other.x, other.y, Dust)){
 			coast_water = 1;
-			if(y > other.y + 12) depth = other.depth - 1;
+			if(y > other.y + 12){
+				depth = other.depth - 1;
+			}
 		}
 		if(chance(other.damage, 8)) with(other){
 			sound_play_hit(sndHitRock, 0.3);
 			with(instance_create(x, y, Debris)){
-				motion_set(_hitdir + 180 + orandom(other.force * 4), 2 + random(other.force / 2));
+				motion_set(_direction + 180 + orandom(other.force * 4), 2 + random(other.force / 2));
 			}
 		}
 	}
@@ -2369,7 +2413,7 @@
 		raddrop   = 80;
 		snd_dead  = snd.PalankingDead;
 		
-		return id;
+		return self;
 	}
 	
 #define PalankingDie_step
@@ -2461,7 +2505,7 @@
 		damage     = 3;
 		force      = 8;
 		
-		return id;
+		return self;
 	}
 	
 #define PalankingSlash_step
@@ -2516,7 +2560,7 @@
 			if(typ == 1 || typ == 2){
 				 // Deflect (No Team Change):
 				if(typ == 1 && other.candeflect){
-					direction = other.direction;
+					direction   = other.direction;
 					image_angle = direction;
 					
 					 // Effects:
@@ -2542,7 +2586,119 @@
 		 // Vars:
 		mask_index = -1;
 		
-		return id;
+		return self;
+	}
+	
+	
+#define PalankingStatue_create(_x, _y)
+	/*
+		A statue of the Big Seal himself, spawns on Frozen City's Seal Plaza event
+	*/
+	
+	with(instance_create(_x, _y, CustomProp)){
+		var _phase = 0;
+		
+		 // Visual:
+		spr_idle     = spr.PalankingStatueIdle[_phase];
+		spr_hurt     = spr.PalankingStatueHurt[_phase];
+		spr_dead     = spr.PalankingStatueDead;
+		sprite_index = spr_idle;
+		
+		 // Sounds:
+		snd_hurt = sndHitRock;
+		snd_dead = sndPillarBreak;
+		
+		 // Vars:
+		mask_index = sprPortalClear;
+		maxhealth  = 260;
+		team       = 1;
+		size       = 4;
+		phase      = _phase;
+		
+		return self;
+	}
+	
+#define PalankingStatue_step
+	 // Change Phase:
+	if(sprite_index == spr_hurt){
+		var	_mPhase = 4,
+			_cPhase = floor(_mPhase - ((my_health / maxhealth) * _mPhase));
+			
+		while(phase < _cPhase){
+			phase++;
+			
+			 // Resprite:
+			spr_idle     = spr.PalankingStatueIdle[phase];
+			spr_hurt     = spr.PalankingStatueHurt[phase];
+			sprite_index = spr_hurt;
+			
+			 // Chunks:
+			repeat(3){
+				PalankingStatue_chunk(x, y, random(360), random_range(2, 5), random_range(4, 5));
+			}
+			
+			 // Sound:
+			sound_play_hit_ext(snd.PalankingHurt, 0.7 + random(0.2), 0.5);
+		}
+	}
+
+#define PalankingStatue_death
+	 // Boomba:
+	team = 2;
+	var _dis = 16;
+	for(var _dir = 0; _dir < 360; _dir += 90){
+		projectile_create(
+			x + lengthdir_x(_dis, _dir) + orandom(32),
+			y + lengthdir_y(_dis, _dir) + orandom(32),
+			"BubbleExplosion",
+			0,
+			0
+		);
+		projectile_create(x, y, "HyperBubble", _dir, 4);
+	}
+	
+	 // Pickups:
+	for(var i = 0; i < 3; i++){
+		pickup_drop(100, 10, i);
+	}
+	
+	 // Sound:
+	sound_play_hit_ext(snd.PalankingDead, 0.7 + random(0.2), 0.5);
+	
+	 // Effects:
+	repeat(5){
+		PalankingStatue_chunk(x, y, random(360), random_range(1, 3), random_range(6, 10));
+	}
+	for(var i = 0; i < maxp; i++){
+		var	_x = view_xview[i] + (game_width  / 2),
+			_y = view_yview[i] + (game_height / 2);
+			
+		view_shift(
+			i,
+			point_direction(_x, _y, x, y),
+			point_distance(_x, _y, x, y) * 1.5
+		);
+	}
+	sleep(100);
+	
+#define PalankingStatue_chunk(_x, _y, _dir, _spd, _zspd)
+	with(scrFX(_x, _y, [_dir, _spd], ScrapBossCorpse)){
+		sprite_index = spr.PalankingStatueChunk;
+		image_index  = irandom(image_number - 1);
+		friction	 = 0.2;
+		
+		 // Z-ify:
+		with(obj_create(_x, _y, "BackpackPickup")){
+			target    = other;
+			zfriction = 0.6;
+			zspeed    = _zspd;
+			speed     = _spd;
+			with(self){
+				event_perform(ev_step, ev_step_end);
+			}
+		}
+		
+		return self;
 	}
 	
 	
@@ -2563,7 +2719,7 @@
 		mask_index   = mskPlayer;
 		spr_shadow_y = 0;
 		
-		return id;
+		return self;
 	}
 	
 #define PalankingToss_end_step
@@ -2604,24 +2760,20 @@
 		}
 	}
 	else{
+		script_ref_call(on_cleanup);
+		on_cleanup = [];
+		
 		with(creator){
-			 // Reset Vars:
-			mask_index = other.mask_index;
-			depth = other.depth;
-			if("spr_shadow_y" in self) spr_shadow_y = other.spr_shadow_y;
-			if("angle" in self) angle = 0;
-			else image_angle = 0;
-			
 			 // Damage:
 			if(instance_is(self, hitme) && (place_meeting(x, y, Floor) || GameCont.area != "coast")){
-				projectile_hit(id, 1);
+				projectile_hit(self, 1);
 			}
 			
 			 // On Walls:
 			if(!place_meeting(x, y, Floor) || place_meeting(x, y, Wall)){
 				if(!place_meeting(x, y, Floor)){
 					with(instance_nearest_bbox(x, y, Floor)){
-						if(!instance_seen(bbox_center_x, bbox_center_y, other)){
+						if(collision_line(other.x, other.y, bbox_center_x, bbox_center_y, Wall, false, false)){
 							with(other){
 								top_create(x, y, self, 0, 0);
 							}
@@ -2666,15 +2818,25 @@
 		instance_destroy();
 	}
 	
+#define PalankingToss_cleanup
+	 // Reset Vars:
+	with(creator){
+		mask_index = other.mask_index;
+		depth = other.depth;
+		if("spr_shadow_y" in self) spr_shadow_y = other.spr_shadow_y;
+		if("angle" in self) angle = 0;
+		else image_angle = 0;
+	}
+	
 	
 #define Palm_create(_x, _y)
 	with(instance_create(_x, _y, CustomProp)){
 		 // Visual:
-		spr_idle = spr.PalmIdle;
-		spr_hurt = spr.PalmHurt;
-		spr_dead = spr.PalmDead;
+		spr_idle   = spr.PalmIdle;
+		spr_hurt   = spr.PalmHurt;
+		spr_dead   = spr.PalmDead;
 		spr_shadow = -1;
-		depth = -3;
+		depth      = -7;
 		
 		 // Sound:
 		snd_hurt = sndHitRock;
@@ -2682,54 +2844,84 @@
 		
 		 // Vars:
 		mask_index = mskStreetLight;
-		maxhealth = 30;
-		size = 2;
-		creator = noone;
-		creator_mask = mskNone;
+		maxhealth  = 30;
+		my_health  = maxhealth;
+		size       = 2;
+		target     = noone;
 		
 		 // Fortify:
 		if(chance(1, 8)){
-			creator = obj_create(x, y, "Diver");
-			with(creator) depth = -3;
-			
+			 // Visual:
 			spr_idle = spr.PalmFortIdle;
 			spr_hurt = spr.PalmFortHurt;
+			depth    = -4;
+			
+			 // Sound:
 			snd_dead = sndGeneratorBreak;
-			maxhealth = 40;
+			
+			 // Bro:
+			target = obj_create(x, y, "Diver");
+			with(target){
+				depth      = other.depth - 1;
+				mask_index = mskNone;
+				canfly     = true;
+				palm       = other;
+				
+				 // Become Tree:
+				with(palm){
+					team       = other.team;
+					maxhealth += other.maxhealth;
+					my_health += other.my_health;
+				}
+			}
+			
+			 // Clear Walls:
+			instance_create(x, y - 24, PortalClear);
 		}
 		
-		return id;
+		return self;
 	}
 	
 #define Palm_step
 	 // Hold Bro:
-	with(creator){
-		x            = other.x;
-		y            = other.y - 44;
-		walk         = 0;
-		speed        = 0;
-		sprite_index = spr_idle;
-		
-		 // Disable Hitbox:
-		if(mask_index != mskNone){
-			other.creator_mask = mask_index;
-			mask_index = mskNone;
+	if(instance_exists(target)){
+		with(target){
+			x         = other.x;
+			y         = other.y - 46;
+			xprevious = x;
+			yprevious = y;
+			speed     = 0;
+			walk      = 0;
+			if(sprite_index == spr_walk){
+				sprite_index = spr_idle;
+			}
 		}
 	}
 
 #define Palm_death
-	with(creator){
-		y += 8;
-		vspeed += 10;
-		mask_index = other.creator_mask;
+	 // Fall to Death:
+	with(target){
+		mask_index = -1;
+		my_health  = 0;
+		vspeed     = 5;
+		motion_add(other.direction, clamp(-other.my_health / 4, 0, 6));
 	}
-
+	
 	 // Leaves:
-	repeat(15) with(instance_create(x + orandom(15), y - 30 + orandom(10), Feather)){
-		sprite_index = sprLeaf;
-		image_yscale = random_range(1, 3);
-		motion_add(point_direction(other.x, other.y, x, y), 1 + random(1));
-		vspeed += 2;
+	repeat(15){
+		with(scrFX(
+			[x,      15],
+			[y - 30, 10],
+			[270,     2],
+			Feather
+		)){
+			sprite_index = sprLeaf;
+			image_yscale = random_range(1, 3);
+			motion_add(
+				point_direction(other.x, other.y, x, y),
+				1 + random(1)
+			);
+		}
 	}
 
 
@@ -2768,7 +2960,7 @@
 		 // Alarms:
 		alarm1 = 30 + irandom(60);
 		
-		return id;
+		return self;
 	}
 	
 #define Pelican_step
@@ -2777,7 +2969,13 @@
 	if(alarm2_run) exit;
 	
 	 // Movement:
-	enemy_walk(walkspeed, maxspeed);
+	if(walk > 0){
+		walk -= current_time_scale;
+		speed += walkspeed * current_time_scale;
+	}
+	if(speed > maxspeed){
+		speed = maxspeed;
+	}
 	
 	 // Dash:
 	if(dash > 0){
@@ -2799,11 +2997,11 @@
 #define Pelican_draw
 	var	_charge = max(alarm2, 0),
 		_angOff = sign(wepangle) * (60 * (_charge / chrg_time));
-
+		
 	if(gunangle >  180) draw_self_enemy();
-	draw_weapon(spr_weap, x, y, gunangle, wepangle - _angOff, wkick, 1, image_blend, image_alpha);
+	draw_weapon(spr_weap, 0, x, y, gunangle, wepangle - _angOff, wkick, 1, image_blend, image_alpha);
 	if(gunangle <= 180) draw_self_enemy();
-
+	
 #define Pelican_alrm1
 	alarm1 = 40 + random(20); // 1-2 Seconds
 	
@@ -2821,18 +3019,21 @@
 	 // Aggroed:
 	if(
 		enemy_target(x, y)
-		&& instance_seen(x, y, target)
-		&& instance_near(x, y, target, 320)
+		&& target_distance < 320
+		&& target_visible
 	){
-		scrAim(point_direction(x, y, target.x, target.y));
+		enemy_look(target_direction);
 		
 		 // Attack:
-		if(((instance_near(x, y, target, 128) && chance(2, 3)) || chance(1, my_health)) && alarm2 < 0){
+		if(((target_distance < 128 && chance(2, 3)) || chance(1, my_health)) && alarm2 < 0){
 			alarm2 = chrg_time;
 			alarm1 = alarm2 - 10;
 			
 			 // Move away a tiny bit:
-			scrWalk(gunangle + 180 + orandom(10), 5);
+			enemy_walk(
+				gunangle + 180 + orandom(10),
+				5
+			);
 			
 			 // Warn:
 			with(instance_create(x, y, AssassinNotice)){
@@ -2842,14 +3043,17 @@
 		}
 		
 		 // Move Toward Target:
-		else scrWalk(gunangle + orandom(10), [20, 30]);
+		else enemy_walk(
+			gunangle + orandom(10),
+			random_range(20, 30)
+		);
 	}
 	
 	 // Wander:
 	else{
 		alarm1 = 90 + random(30);
-		scrWalk(random(360), [10, 15]);
-		scrAim(direction);
+		enemy_walk(random(360), random_range(10, 15));
+		enemy_look(direction);
 	}
 	
 #define Pelican_alrm2
@@ -2867,35 +3071,47 @@
 	}
 	
 	 // Misc. Visual/Sound:
-	wkick = -10;
+	wkick = -4;
 	wepangle = -wepangle;
 	view_shake_at(x, y, 20); // Mmm that's heavy
 	sound_play(sndEnergyHammer);
 	sound_play_pitch(sndHammer, 0.75);
 	sound_play_pitch(sndRavenScreech, 0.5 + random(0.1));
 	
-#define Pelican_hurt(_hitdmg, _hitvel, _hitdir)
-	if(dash > 0) _hitvel = min(_hitvel, speed - 1);
-	enemy_hurt(_hitdmg, _hitvel, _hitdir);
+#define Pelican_hurt(_damage, _force, _direction)
+	if(dash > 0){
+		_force = min(_force, speed - 1);
+	}
+	enemy_hurt(_damage, _force, _direction);
 	
 #define Pelican_death
-	var _minID = GameObject.id;
+	var _minID = instance_max;
 	
 	 // Pickups:
-	pickup_drop(80, 0);
-	pickup_drop(60, 5, 0);
+	pickup_drop(60, 20, 0);
+	pickup_drop(80, 0, 1);
 	
 	 // Hmm:
-	with(instances_matching(instances_matching_gt(WepPickup, "id", _minID), "wep", wep_sledgehammer)){
-		sprite_index = other.spr_weap;
-		
-		var	_dis = 16,
-			_dir = rotation;
+	with(instances_matching_gt(WepPickup, "id", _minID)){
+		if(wep_raw(wep) == wep_sledgehammer){
+			wep = wep_wrap(
+				wep,
+				"weapon_sprt",
+				script_ref_create(cool_hammer, other.spr_weap)
+			);
 			
-		with(instance_create(x + lengthdir_x(_dis, _dir), y + lengthdir_y(_dis, _dir), ThrowHit)){
-			image_speed = 0.35;
+			 // Sparkle:
+			var	_len = 16,
+				_dir = rotation;
+				
+			with(instance_create(x + lengthdir_x(_len, _dir), y + lengthdir_y(_len, _dir), ThrowHit)){
+				image_speed = 0.35;
+			}
 		}
 	}
+	
+#define cool_hammer(_sprHammer, _spr, _wep)
+	return _sprHammer;
 	
 	
 #define Seal_create(_x, _y)
@@ -2950,7 +3166,7 @@
 		alarm1 = 20 + random(20);
 		alarm2 = -1;
 		
-		return id;
+		return self;
 	}
 	
 #macro seal_none        0
@@ -3015,7 +3231,13 @@
 	if(alarm2_run) exit;
 	
 	 // Movement:
-	enemy_walk(walkspeed, maxspeed);
+	if(walk > 0){
+		walk -= current_time_scale;
+		speed += walkspeed * current_time_scale;
+	}
+	if(speed > maxspeed){
+		speed = maxspeed;
+	}
 	
 	 // Slide:
 	if(slide > 0){
@@ -3047,7 +3269,9 @@
 		case seal_hookpole:
 			
 			 // About to Stab:
-			if(alarm2 > 0) wkick += 2 * current_time_scale;
+			if(alarm2 > 0){
+				wkick += 2 * current_time_scale;
+			}
 			
 			 // Decrease wkick Faster:
 			else if(wkick < 0){
@@ -3066,59 +3290,13 @@
 						mask_index = sprWall0Out;
 					}
 				}
-				/*
-				 // Turn:
-				var	m = random(10/3) * current_time_scale,
-					t = clamp(angle_difference(gunangle, shield_ang) / 8, -m, m);
-					
-				shield_ang = (shield_ang + t + 360) % 360;
-				
-				 // Draw Shield:
-				if(t != 0 && point_seen_ext(x, y, 16, 16, -1)){
-					shield_draw = true;
-				}
-				
-				 // Reflect Projectiles:
-				var	o = 6,
-					r = 12,
-					_x = x + lengthdir_x(o, shield_ang),
-					_y = y + lengthdir_y(o, shield_ang),
-					b = r + 32;
-					
-				if(collision_circle(_x, _y, b, projectile, false, false)){
-					with(instances_matching_ne(instances_matching_ne(instances_matching_gt(instances_matching_ne(instances_matching_ne(instance_rectangle(_x - b, _y - b, _x + b, _y + b, projectile), "team", team), "typ", 0), "speed", 0), "object_index", ToxicGas), "mask_index", mskNone, sprVoid)){
-						if(abs(angle_difference(direction + 180, other.shield_ang)) < 80){
-							if(point_in_circle(x + hspeed_raw, y + vspeed_raw, _x, _y, r + (speed_raw / 2))){
-								other.wkick = 8 + orandom(1);
-								speed += friction * 3;
-								
-								 // Knockback:
-								if(force > 3){
-									with(other) motion_add(shield_ang + 180, min(other.damage / 3, 3));
-								}
-								
-								 // Reflect:
-								var _reflectLine = other.shield_ang;
-								direction = _reflectLine - clamp(angle_difference(direction + 180, _reflectLine), -40, 40);
-								image_angle = direction;
-								
-								 // Effects:
-								sound_play(sndShielderDeflect);
-								with(instance_create(x, y, Deflect)) image_angle = _reflectLine;
-								instance_create(x, y, Dust);
-								
-								 // Destroyables:
-								if(typ == 2) instance_destroy();
-							}
-						}
-					}
-				}
-				*/
 			}
 			
 			 // Sword Stabby Mode:
 			else if(instance_exists(shield_inst)){
-				with(shield_inst) instance_destroy();
+				with(shield_inst){
+					instance_destroy();
+				}
 			}
 			
 			break;
@@ -3144,11 +3322,14 @@
 			 // Tossing:
 			if(instance_exists(toss)){
 				 // Move Away from Walls:
-				var n = instance_nearest_bbox(x, y, Wall);
-				if(instance_exists(n)){
-					with(n) if(distance_to_point(other.x, other.y) < other.toss_speed + (max(other.toss.sprite_height, other.toss.sprite_width) / 2)){
-						var _dir = point_direction(bbox_center_x, bbox_center_x, other.x, other.y);
-						with(other) motion_add_ct(_dir, 1);
+				if(instance_exists(Wall)){
+					with(instance_nearest_bbox(x, y, Wall)){
+						if(distance_to_point(other.x, other.y) < other.toss_speed + (max(other.toss.sprite_height, other.toss.sprite_width) / 2)){
+							var _dir = point_direction(bbox_center_x, bbox_center_x, other.x, other.y);
+							with(other){
+								motion_add_ct(_dir, 1);
+							}
+						}
 					}
 				}
 				
@@ -3181,9 +3362,9 @@
 					}
 					
 					 // Holding:
-					var l = (speed + other.wkick) - (speed_raw - friction_raw);
-					x = other.x + lengthdir_x(l, direction);
-					y = other.y + lengthdir_y(l, direction);
+					var _l = (speed + other.wkick) - (speed_raw - friction_raw);
+					x = other.x + lengthdir_x(_l, direction);
+					y = other.y + lengthdir_y(_l, direction);
 					xprevious = x;
 					yprevious = y;
 					
@@ -3218,7 +3399,9 @@
 						alarm0 = max(alarm0, 9);
 					}
 					
-					with(other) scrRight(other.direction);
+					with(other){
+						enemy_face(other.direction);
+					}
 				}
 			}
 			else{
@@ -3318,7 +3501,7 @@
 	
 	 // Weapon:
 	if(_drawWep && !instance_exists(shield_inst)){
-		draw_weapon(spr_weap, x, y, gunangle, wepangle, wkick, ((wepangle == 0) ? right : sign(wepangle)), image_blend, image_alpha);
+		draw_weapon(spr_weap, 0, x, y, gunangle, wepangle, wkick, ((wepangle == 0) ? right : sign(wepangle)), image_blend, image_alpha);
 	}
 	
 	 // Self:
@@ -3336,43 +3519,53 @@
 	trident_dist = 0; // Reset
 	
 	if(enemy_target(x, y)){
-		var	_aimLast = gunangle,
+		var	_aimLast   = gunangle,
 			_canAttack = (attack_delay <= 0);
 			
-		scrAim(point_direction(x, y, target.x, target.y));
+		enemy_look(target_direction);
 		
-		if(instance_seen(x, y, target) || type == seal_none){
+		if(type == seal_none || target_visible){
+			var _targetDis = target_distance;
+			
 			 // Seal Types:
 			switch(type){
+				
 				case seal_hookpole:
 					
 					alarm1 = 10 + random(15);
 					
 					 // Too Close:
-					if(instance_near(x, y, target, 20)){
-						scrWalk(gunangle + 180 + orandom(60), 10);
+					if(_targetDis < 20){
+						enemy_walk(
+							gunangle + 180 + orandom(60),
+							10
+						);
 					}
 					
 					else{
 						if(chance(4, 5)){
 							 // Attack:
-							if(_canAttack && instance_near(x, y, target, 70)){
-								alarm1 = 30;
-								alarm2 = 10;
-								trident_dist = point_distance(x, y, target.x, target.y) - 24;
+							if(_canAttack && _targetDis < 70){
+								alarm1       = 30;
+								alarm2       = 10;
+								trident_dist = _targetDis - 24;
 							}
 							
 							 // Too Far:
 							else{
-								scrWalk(gunangle + orandom(20), 10);
-								if(chance(1, 10)) slide = 10;
+								enemy_walk(gunangle + orandom(20), 10);
+								if(chance(1, 10)){
+									slide = 10;
+								}
 							}
 						}
 						
 						 // Side Step:
 						else{
-							scrWalk(gunangle + choose(-80, 80), 15);
-							if(chance(1, 2)) slide = 5 + random(10);
+							enemy_walk(gunangle + choose(-80, 80), 15);
+							if(chance(1, 2)){
+								slide = 5 + random(10);
+							}
 						}
 					}
 					
@@ -3385,22 +3578,25 @@
 						alarm1 = 15 + irandom(5);
 						
 						 // Dagger Time:
-						if(wkick == 0 && instance_near(x, y, target, 80)){
-							scrWalk(gunangle + orandom(10), [4, 8]);
+						if(wkick == 0 && _targetDis < 80){
+							enemy_walk(
+								gunangle + orandom(10),
+								random_range(4, 8)
+							);
 							
 							shield = false;
 							alarm1 = 20;
 							
 							 // Swap FX:
-							var o = 8;
-							instance_create(x + lengthdir_x(o, gunangle), y + lengthdir_y(o, gunangle), WepSwap);
+							var _len = 8;
+							instance_create(x + lengthdir_x(_len, gunangle), y + lengthdir_y(_len, gunangle), WepSwap);
 							sound_play(sndSwapSword);
 						}
 						
 						 // Reposition:
 						else if(chance(2, 3)){
-							scrWalk(gunangle + orandom(50), [6, 12]);
-							scrAim(direction);
+							enemy_walk(gunangle + orandom(50), random_range(6, 12));
+							enemy_look(direction);
 						}
 					}
 					
@@ -3408,17 +3604,20 @@
 					else{
 						alarm1 = 20 + random(10);
 						
-						if(instance_near(x, y, target, 120)){
-							scrWalk(gunangle + (180 * chance(1, 3)) + orandom(20), [5, 10]);
+						if(_targetDis < 120){
+							enemy_walk(
+								gunangle + (180 * chance(1, 3)) + orandom(20),
+								random_range(5, 10)
+							);
 							
 							 // Stabby:
-							if(_canAttack && instance_near(x, y, target, 80)){
+							if(_canAttack && _targetDis < 80){
 								with(projectile_create(x, y, Shank, gunangle, 3)){
 									damage = 2;
 								}
 								motion_add(gunangle, 2);
 								wepangle *= -1;
-								wkick = -5;
+								wkick = -4;
 								
 								 // Effects:
 								instance_create(x, y, Dust);
@@ -3440,10 +3639,10 @@
 							wkick = 2;
 							
 							 // Swap FX:
-							var	l = 8,
-								d = gunangle;
+							var	_l = 8,
+								_d = gunangle;
 								
-							instance_create(x + lengthdir_x(l, d), y + lengthdir_y(l, d), WepSwap);
+							instance_create(x + lengthdir_x(_l, _d), y + lengthdir_y(_l, _d), WepSwap);
 							sound_play(sndSwapHammer);
 						}
 					}
@@ -3453,7 +3652,7 @@
 				case seal_blunderbuss:
 					
 					 // Slide Away:
-					if(instance_near(x, y, target, 80)){
+					if(_targetDis < 80){
 						direction = gunangle + 180;
 						slide = 15;
 						alarm1 = slide + random(10);
@@ -3462,7 +3661,7 @@
 					 // Good Distance Away:
 					else{
 						 // Aim & Ignite Powder:
-						if(_canAttack && instance_near(x, y, target, 192) && chance(2, 3)){
+						if(_canAttack && _targetDis < 192 && chance(2, 3)){
 							alarm1 = alarm1 + 90;
 							alarm2 = 15;
 							
@@ -3473,8 +3672,10 @@
 						
 						 // Reposition:
 						else{
-							scrWalk(gunangle + orandom(90), 10);
-							if(chance(1, 2)) slide = 15;
+							enemy_walk(gunangle + orandom(90), 10);
+							if(chance(1, 2)){
+								slide = 15;
+							}
 						}
 						
 						 // Important:
@@ -3490,7 +3691,7 @@
 				case seal_mercenary:
 					
 					 // Slide Towards:
-					if(!instance_near(x, y, target, 160)){
+					if(_targetDis > 160){
 						direction = gunangle + orandom(60);
 						slide = 15;
 						alarm1 = slide + random(20);
@@ -3498,7 +3699,7 @@
 					
 					 // Within Range:
 					else{
-						scrWalk(gunangle + orandom(90), 15);
+						enemy_walk(gunangle + orandom(90), 15);
 						
 						 // Pew Time:
 						if(_canAttack){
@@ -3522,7 +3723,10 @@
 					if(!instance_exists(toss)){
 						 // Hobble Around:
 						if(chance(1, 2)){
-							scrWalk(gunangle + choose(-80, 80) + orandom(20), [4, 20]);
+							enemy_walk(
+								gunangle + choose(-80, 80) + orandom(20),
+								random_range(4, 20)
+							);
 						}
 						
 						 // Toss Disc:
@@ -3541,7 +3745,7 @@
 				case seal_dasher:
 					
 					 // Move Away:
-					if(instance_near(x, y, target, 32) || chance(1, 4)){
+					if(_targetDis < 32 || chance(1, 4)){
 						slide = 5 + random(5);
 						direction = gunangle + 180 + orandom(40);
 					}
@@ -3562,53 +3766,64 @@
 					
 					 // Follow Big Seal:
 					if(instance_exists(creator) && variable_instance_get(creator, "active", false)){
-						scrAim(point_direction(x, y, creator.x, creator.y));
-						scrWalk(gunangle, [10, 20]);
+						enemy_look(point_direction(x, y, creator.x, creator.y));
+						enemy_walk(gunangle, random_range(10, 20));
 					}
 					
 					 // Normal:
 					else{
 						 // "Don't kill me!"
 						if(scared){
-							if(instance_near(x, y, target, 120) || chance(2, array_length(instances_matching(object_index, "name", name)))){
-								scrWalk(gunangle + 180 + orandom(50), [20, 30]);
-								if(chance(1, 3)) slide = walk - 5;
+							if(_targetDis < 120 || chance(2, array_length(instances_matching(object_index, "name", name)))){
+								enemy_walk(
+									gunangle + 180 + orandom(50),
+									random_range(20, 30)
+								);
+								if(chance(1, 3)){
+									slide = walk - 5;
+								}
 								alarm1 = walk;
 							}
-							else{
-								scrWalk(random(360), [5, 10]);
-							}
-							scrAim(direction);
+							else enemy_walk(
+								random(360),
+								random_range(5, 10)
+							);
+							enemy_look(direction);
 						}
 						
 						 // Idle:
 						else{
-							scrWalk(point_direction(x, y, xstart + orandom(24), ystart + orandom(24)), [5, 10]);
-							if(!instance_near(x, y, target, 120)){
-								scrAim(direction);
+							enemy_walk(
+								point_direction(x, y, xstart + orandom(24), ystart + orandom(24)),
+								random_range(5, 10)
+							);
+							if(_targetDis > 120){
+								enemy_look(direction);
 							}
 						}
 					}
+					
 			}
 			
 			 // Sliding Time:
 			if(alarm2 > 0 && slide > 0){
-				scrRight(gunangle - (direction - 90));
+				enemy_face(gunangle - (direction - 90));
 			}
 		}
 		
 		 // Looking for Player:
 		else{
-			scrWalk(gunangle + orandom(60), [5, 25]);
+			 // Move:
+			enemy_walk(gunangle + orandom(60), random_range(5, 25));
 			alarm1 = 5 + irandom(walk) + irandom(15);
 			
 			 // Aiming:
-			scrAim(direction);
+			enemy_look(direction);
 			switch(type){
 				case seal_shield:
 					
 					if(shield){
-						scrAim(angle_lerp(_aimLast, direction, 1/5));
+						enemy_look(angle_lerp(_aimLast, direction, 1/5));
 					}
 					
 					break;
@@ -3624,8 +3839,8 @@
 	
 	 // Wander:
 	else{
-		scrWalk(random(360), [5, 25]);
-		scrAim(direction);
+		enemy_walk(random(360), random_range(5, 25));
+		enemy_look(direction);
 		alarm1 += walk;
 	}
 	
@@ -3643,6 +3858,7 @@
 	
 #define Seal_alrm2
 	switch(type){
+		
 		case seal_hookpole:
 			
 			 // Hookpole Stabby:
@@ -3671,7 +3887,10 @@
 			wkick = -trident_dist;
 			
 			 // Walk Backwards:
-			scrWalk(gunangle + 180 + orandom(20), [6, 10]);
+			enemy_walk(
+				gunangle + 180 + orandom(20),
+				random_range(6, 10)
+			);
 			
 			break;
 			
@@ -3699,7 +3918,9 @@
 			
 		case seal_mercenary:
 			
-			if(chance(1, 3)) alarm2 = irandom_range(3, 5);
+			if(chance(1, 3)){
+				alarm2 = irandom_range(3, 5);
+			}
 			
 			 // Pew:
 			projectile_create(x, y, EnemyBullet3, gunangle + orandom(4), 12 + random(2));
@@ -3713,7 +3934,7 @@
 			
 			 // Aim:
 			if(enemy_target(x, y)){
-				scrAim(point_direction(x, y, target.x, target.y));
+				enemy_look(target_direction);
 			}
 			
 			break;
@@ -3721,8 +3942,8 @@
 		case seal_dasher:
 			
 			 // Aim:
-			if(enemy_target(x, y) && instance_seen(x, y, target)){
-				scrAim(point_direction(x, y, target.x, target.y));
+			if(enemy_target(x, y) && target_visible){
+				enemy_look(target_direction);
 			}
 			
 			 // Shooty:
@@ -3735,10 +3956,11 @@
 			sound_play_hit_ext(sndTurretFire, 1.3 + orandom(0.2), 1.5);
 			
 			break;
+			
 	}
 	
-#define Seal_hurt(_hitdmg, _hitvel, _hitdir)
-	enemy_hurt(_hitdmg, _hitvel, _hitdir);
+#define Seal_hurt(_damage, _force, _direction)
+	enemy_hurt(_damage, _force, _direction);
 	
 	switch(type){
 		case seal_none:
@@ -3746,7 +3968,7 @@
 			 // Alert:
 			with(instances_matching(object_index, "name", name)){
 				if(!scared && type == other.type){
-					if(instance_near(x, y, other, 80)){
+					if(instance_exists(target) && target_distance < 80){
 						scared = true;
 						instance_create(x, y, AssassinNotice);
 					}
@@ -3783,8 +4005,8 @@
 	 // Skeal FX:
 	if(skeal){
 		sound_play_hit(sndBloodGamble, 0.1);
-		for(var d = direction; d < direction + 360; d += (360 / 3)){
-			scrFX(x, y, [d, 3], Smoke);
+		for(var _d = direction; _d < direction + 360; _d += (360 / 3)){
+			scrFX(x, y, [_d, 3], Smoke);
 		}
 	}
 	
@@ -3804,7 +4026,7 @@
 		last_x     = [x, x];
 		last_y     = [y, y];
 		
-		return id;
+		return self;
 	}
 	
 #define SealAnchor_step
@@ -3851,24 +4073,24 @@
 	
 #define SealAnchor_draw
 	if(instance_exists(creator)){
-		var	_oy = 2,
-			_x = x + lengthdir_x(_oy, direction - 90),
-			_y = y + lengthdir_y(_oy, direction - 90),
+		var	_oy  = 2,
+			_x   = x + lengthdir_x(_oy, direction - 90),
+			_y   = y + lengthdir_y(_oy, direction - 90),
 			_spr = spr.SealChain,
 			_dir = point_direction(_x, _y, creator.x, creator.y),
-			n = ceil(point_distance(x, y, creator.x, creator.y)) / sprite_get_width(_spr),
-			l = 0,
-			t = 0,
-			w = sprite_get_width(_spr),
-			h = sprite_get_height(_spr);
+			_n   = ceil(point_distance(x, y, creator.x, creator.y)) / sprite_get_width(_spr),
+			_l   = 0,
+			_t   = 0,
+			_w   = sprite_get_width(_spr),
+			_h   = sprite_get_height(_spr);
 
-		for(var i = 0; i < n; i++){
-			if(i >= n - 1){
-				w = point_distance(_x, _y, creator.x, creator.y);
+		for(var i = 0; i < _n; i++){
+			if(i >= _n - 1){
+				_w = point_distance(_x, _y, creator.x, creator.y);
 			}
-			draw_sprite_general(_spr, 0, l, t, w, h, _x, _y, 1, 1, _dir, image_blend, image_blend, image_blend, image_blend, image_alpha);
-			_x += lengthdir_x(w, _dir);
-			_y += lengthdir_y(w, _dir);
+			draw_sprite_general(_spr, 0, _l, _t, _w, _h, _x, _y, 1, 1, _dir, image_blend, image_blend, image_blend, image_blend, image_alpha);
+			_x += lengthdir_x(_w, _dir);
+			_y += lengthdir_y(_w, _dir);
 		}
 	}
 	draw_self();
@@ -3884,7 +4106,7 @@
 			if(typ == 1 || typ == 2){
 				 // Deflect (No Team Change):
 				if(typ == 1 && other.candeflect){
-					direction = other.direction;
+					direction   = other.direction;
 					image_angle = direction;
 					
 					 // Effects:
@@ -3894,9 +4116,7 @@
 				}
 				
 				 // Destroy:
-				else if(typ == 2){
-					instance_destroy();
-				}
+				else instance_destroy();
 			}
 		}
 	}
@@ -3923,7 +4143,7 @@
 		 // Vars:
 		trail_color = make_color_rgb(252, 56, 0);
 		
-		return id;
+		return self;
 	}
 	
 #define SealDisc_end_step
@@ -3979,7 +4199,7 @@
 		 // Alarms:
 		alarm1 = 40 + random(30);
 		
-		return id;
+		return self;
 	}
 
 #define SealHeavy_step
@@ -3987,7 +4207,13 @@
 	if(alarm1_run) exit;
 	
 	 // Movement:
-	enemy_walk(walkspeed, maxspeed);
+	if(walk > 0){
+		walk -= current_time_scale;
+		speed += walkspeed * current_time_scale;
+	}
+	if(speed > maxspeed){
+		speed = maxspeed;
+	}
 	
 	 // Animate:
 	if(sprite_index == spr_spwn){
@@ -4002,7 +4228,7 @@
 	
 	 // Anchor Flail:
 	if(anchor_spin != 0){
-		scrAim(gunangle + (anchor_spin * current_time_scale));
+		enemy_look(gunangle + (anchor_spin * current_time_scale));
 		speed = max(speed, 1.5);
 		
 		if(instance_exists(anchor)){
@@ -4081,8 +4307,8 @@
 			 // Spinny Momentum:
 			else{
 				my_mine_ang += my_mine_spin * current_time_scale;
-				my_mine_ang = ((my_mine_ang + 360) % 360);
-				scrRight(my_mine_ang);
+				my_mine_ang = (((my_mine_ang % 360) + 360) % 360);
+				enemy_face(my_mine_ang);
 				
 				my_mine_spin += 1.5 * sign(my_mine_spin) * current_time_scale;
 				
@@ -4122,14 +4348,13 @@
 				with(instances_meeting(x, y, instances_matching(CustomHitme, "name", "SealMine"))){
 					if(
 						place_meeting(x, y, other) &&
-						array_length(instances_matching(instances_matching(other.object_index, "name", other.name), "my_mine", id)) <= 0
+						!array_length(instances_matching(instances_matching(other.object_index, "name", other.name), "my_mine", self))
 					){
 						with(other){
 							alarm1      = 20;
 							my_mine     = other;
 							my_mine_ang = point_direction(x, y, other.x, other.y);
-							
-							scrRight(my_mine_ang);
+							enemy_face(my_mine_ang);
 						}
 						creator = other;
 						hitid   = other.hitid;
@@ -4158,7 +4383,7 @@
 	if(gunangle >  180) draw_self_enemy();
 
 	if(anchor_swap && _drawWep && !instance_exists(anchor)){
-		draw_weapon(spr_weap, x, y, gunangle, 0, wkick, 1, image_blend, image_alpha);
+		draw_weapon(spr_weap, 0, x, y, gunangle, 0, wkick, 1, image_blend, image_alpha);
 	}
 
 	if(gunangle <= 180) draw_self_enemy();
@@ -4166,24 +4391,21 @@
 #define SealHeavy_alrm1
 	alarm1 = 90 + random(30);
 	
-	enemy_target(x, y);
-	
 	 // Lob Mine:
 	if(my_mine != noone && my_mine_spin != 0){
 		sprite_index = spr_idle;
 		with(my_mine){
-			zspeed = 10;
+			zspeed    = 10;
 			direction = point_direction(x, y, other.target_x, other.target_y);
-			speed = (point_distance(x, y, other.target_x, other.target_y) * zfriction) / (zspeed * 2);
-			x -= hspeed_raw;
-			y -= vspeed_raw;
+			speed     = (point_distance(x, y, other.target_x, other.target_y) * zfriction) / (zspeed * 2);
+			x        -= hspeed_raw;
+			y        -= vspeed_raw;
 		}
-		my_mine = noone;
+		my_mine      = noone;
 		my_mine_spin = 0;
+		enemy_walk(gunangle, 5);
 		
-		scrWalk(gunangle, 5);
-		
-		 // Effects:
+		 // Sound:
 		sound_play_pitch(sndAssassinGetUp, 0.5 + orandom(0.2));
 		sound_play_pitchvol(sndAssassinAttack, 0.8 + orandom(0.1), 0.8);
 	}
@@ -4193,12 +4415,12 @@
 		if(anchor_spin != 0){
 			 // Throw Out Anchor:
 			if(!instance_exists(anchor)){
-				alarm1 = 60;
-				anchor = projectile_create(x, y, "SealAnchor", gunangle, 0);
+				alarm1       = 60;
+				anchor       = projectile_create(x, y, "SealAnchor", gunangle, 0);
 				anchor_throw = 8;
-				anchor_spin = max(20, abs(anchor_spin)) * sign(anchor_spin);
-				if(instance_exists(target)){
-					direction = point_direction(x, y, target.x, target.y);
+				anchor_spin  = max(20, abs(anchor_spin)) * sign(anchor_spin);
+				if(enemy_target(x, y)){
+					direction = target_direction;
 				}
 				
 				 // Effects:
@@ -4215,8 +4437,8 @@
 			}
 		}
 		
-		else if(instance_seen(x, y, target)){
-			scrAim(point_direction(x, y, target.x, target.y));
+		else if(enemy_target(x, y) && target_visible){
+			enemy_look(target_direction);
 			
 			target_x = target.x;
 			target_y = target.y;
@@ -4225,20 +4447,22 @@
 			if(my_mine == noone){
 				 // Pick Up Mine:
 				if(distance_to_object(Floor) > 24 && chance(3, 4)){
-					alarm1 = 20;
-					my_mine = obj_create(x, y, "SealMine");
+					alarm1      = 20;
+					my_mine     = obj_create(x, y, "SealMine");
 					my_mine_ang = gunangle;
 					with(my_mine){
-						zspeed = 5;
+						zspeed  = 5;
 						creator = other;
-						hitid = other.hitid;
+						hitid   = other.hitid;
 					}
 				}
 				
 				 // On Land:
 				else{
+					var _targetDis = target_distance;
+					
 					 // Start Spinning Anchor:
-					if((instance_near(x, y, target, 180) && chance(3, 4)) || instance_near(x, y, target, 100)){
+					if((_targetDis < 180 && chance(3, 4)) || _targetDis < 100){
 						alarm1 = 45;
 						anchor_spin = choose(-1, 1) * 5;
 						sound_play_pitch(sndRatMelee, 0.5 + orandom(0.1));
@@ -4251,7 +4475,10 @@
 					
 					 // Walk Closer:
 					else alarm1 = 30 + random(30);
-					scrWalk(gunangle + orandom(30), [8, 24]);
+					enemy_walk(
+						gunangle + orandom(30),
+						random_range(8, 24)
+					);
 				}
 			}
 			
@@ -4260,15 +4487,17 @@
 				if(instance_exists(my_mine)){
 					alarm1 = 20;
 					
-					if(instance_near(x, y, target, 144)){
+					var _targetDis = target_distance;
+					
+					if(_targetDis < 144){
 						 // Too Close:
-						if(instance_near(x, y, target, 48)){
-							scrWalk(gunangle + 180, 20);
+						if(_targetDis < 48){
+							enemy_walk(gunangle + 180, 20);
 						}
 						
 						 // Start Toss:
 						else{
-							my_mine_ang = gunangle;
+							my_mine_ang  = gunangle;
 							my_mine_spin = choose(-1, 1);
 							
 							sound_play_pitch(sndRatMelee, 0.5 + orandom(0.1));
@@ -4280,7 +4509,10 @@
 					}
 					
 					 // Out of Range:
-					else scrWalk(gunangle + orandom(20), [10, 20]);
+					else enemy_walk(
+						gunangle + orandom(20),
+						random_range(10, 20)
+					);
 				}
 				else my_mine = noone;
 			}
@@ -4288,8 +4520,8 @@
 		
 		 // Passive Movement:
 		else{
-			scrWalk(random(360), 5);
-			scrAim(direction);
+			enemy_walk(random(360), 5);
+			enemy_look(direction);
 		}
 	}
 	
@@ -4307,10 +4539,10 @@
 		hitid       = [spr_idle, "WATER MINE"];
 		image_speed = 0.4;
 		depth       = -3;
-
+		
 		 // Sound:
 		snd_hurt = sndHitMetal;
-
+		
 		 // Vars:
 		mask_index = mskNone;
 		friction   = 0;
@@ -4323,12 +4555,12 @@
 		zspeed     = 0;
 		zfriction  = 1;
 		right      = choose(-1, 1);
-
+		
 		motion_add(random(360), 3);
-
-		return id;
+		
+		return self;
 	}
-
+	
 #define SealMine_step
 	 // Animate:
 	if(sprite_index != spr_hurt || anim_end){
@@ -4461,7 +4693,7 @@
 		 // Alarms:
 		alarm1 = 30 + random(90);
 		
-		return id;
+		return self;
 	}
 
 #define TrafficCrab_step
@@ -4469,13 +4701,19 @@
 	if(alarm1_run) exit;
 	
 	 // Movement:
-	enemy_walk(walkspeed, maxspeed);
+	if(walk > 0){
+		walk -= current_time_scale;
+		speed += walkspeed * current_time_scale;
+	}
+	if(speed > maxspeed){
+		speed = maxspeed;
+	}
 	
 	 // Inactive:
 	if(!active){
-		x = xstart;
-		y = ystart;
-		speed = 0;
+		x           = xstart;
+		y           = ystart;
+		speed       = 0;
 		image_index = 0;
 		
 		 // Disable Melee:
@@ -4497,7 +4735,7 @@
 	}
 	
 #define TrafficCrab_draw
-	var _hurt = (sprite_index == spr_hide && nexthurt > current_frame + 3);
+	var _hurt = (sprite_index == spr_hide && nexthurt >= current_frame + 4);
 	if(_hurt) draw_set_fog(true, image_blend, 0, 0);
 	draw_self_enemy();
 	if(_hurt) draw_set_fog(false, 0, 0, 0);
@@ -4511,7 +4749,7 @@
 		 // Spray Venom:
 		if(ammo > 0){
 			alarm1 = 2;
-			scrWalk(direction, 1);
+			enemy_walk(direction, 1);
 			
 			sound_play(sndOasisCrabAttack);
 			sound_play_pitchvol(sndFlyFire, 2 + random(1), 0.5);
@@ -4531,7 +4769,7 @@
 				sprite_index = spr_idle;
 				
 				 // Move Towards Player:
-				scrWalk((instance_exists(target) ? point_direction(x, y, target.x, target.y) : random(360)), 15);
+				enemy_walk((instance_exists(target) ? target_direction : random(360)), 15);
 				
 				 // Switch Claws:
 				sweep_dir *= -1;
@@ -4542,15 +4780,15 @@
 		else{
 			alarm1 = 35 + random(15);
 			
-			if(instance_seen(x, y, target)){
-				scrAim(point_direction(x, y, target.x, target.y));
+			if(instance_exists(target) && target_visible){
+				enemy_look(target_direction);
 				
 				 // Attack:
-				if(instance_near(x, y, target, 128)){
-					scrWalk(gunangle + (sweep_dir * random(90)), 1);
+				if(target_distance < 128){
+					enemy_walk(gunangle + (sweep_dir * random(90)), 1);
 					
-					alarm1 = 1;
-					ammo = 10;
+					alarm1    = 1;
+					ammo      = 10;
 					gunangle -= sweep_dir * (sweep_spd * (ammo / 2));
 					
 					sound_play_pitch(sndScorpionFireStart, 0.8);
@@ -4558,22 +4796,25 @@
 				}
 				
 				 // Move Towards Player:
-				else scrWalk(gunangle + (random_range(20, 40) * choose(-1, 1)), 30);
+				else enemy_walk(
+					gunangle + (random_range(20, 40) * choose(-1, 1)),
+					30
+				);
 			}
 			
 			 // Passive Movement:
 			else{
-				scrWalk(random(360), 10);
-				scrAim(direction);
+				enemy_walk(random(360), 10);
+				enemy_look(direction);
 			}
 		}
 	}
 	
 	 // Awaken:
-	else if(instance_near(x, y, target, 80) || chance(1, instance_number(enemy))){
+	else if((instance_exists(target) && target_distance < 80) || chance(1, instance_number(enemy))){
 		active = true;
 		if(place_meeting(x, y, hitme)){
-			scrWalk(random(360), 4);
+			enemy_walk(random(360), 4);
 		}
 		
 		 // Effects:
@@ -4582,11 +4823,11 @@
 		instance_create(x + (6 * right), y, AssassinNotice);
 	}
 	
-#define TrafficCrab_hurt(_hitdmg, _hitvel, _hitdir)
-	my_health -= _hitdmg;          // Damage
-	motion_add(_hitdir, _hitvel);  // Knockback
-	nexthurt = current_frame + 6;  // I-Frames
-	sound_play_hit(snd_hurt, 0.3); // Sound
+#define TrafficCrab_hurt(_damage, _force, _direction)
+	my_health -= _damage;
+	nexthurt = current_frame + 6;
+	motion_add(_direction, _force);
+	sound_play_hit(snd_hurt, 0.3);
 
 	 // Hurt Sprite:
 	if(sprite_index != spr_hide){
@@ -4615,7 +4856,7 @@
 	with(instance_create(_x, _y, CustomProjectile)){
 		 // Visual:
 		sprite_index = spr.Trident;
-		image_speed = 0.4;
+		image_speed  = 0.4;
 		
 		 // Vars:
 		mask_index         = msk.Trident;
@@ -4623,19 +4864,19 @@
 		force              = 5;
 		typ                = 1;
 		curse              = false;
-		curse_return       = false;
+	//	curse_return       = false;
 		curse_return_delay = false;
 		rotspeed           = 0;
 		target             = noone;
 		marrow_target      = noone;
 		hit_time           = 0;
-		hit_list           = {};
+		hit_list           = -1;
 		wep                = "trident";
 		
 		 // Alarms:
 		alarm0 = 15;
 		
-		return id;
+		return self;
 	}
 	
 #define Trident_step
@@ -4646,9 +4887,9 @@
 	hit_time += current_time_scale;
 	
 	 // Cursed:
-	if(curse){
+	if(curse > 0){
 		 // Cursed Trident Returns:
-		curse_return = (instance_exists(creator) && (variable_instance_get(creator, "wep") == wep || variable_instance_get(creator, "bwep") == wep));
+		//curse_return = (instance_exists(creator) && (variable_instance_get(creator, "wep") == wep || variable_instance_get(creator, "bwep") == wep));
 		
 		 // FX:
 		if(visible && current_frame_active){
@@ -4667,20 +4908,20 @@
 	 // Bolt Marrow:
 	if(speed > 0){
 		if(skill_get(mut_bolt_marrow) > 0){
-			var n = marrow_target;
-			if(!instance_seen(x, y, n)){
-				var	_x = x + hspeed,
-					_y = y + vspeed,
+			var _target = marrow_target;
+			if(!instance_exists(_target) || collision_line(x, y, _target.x, _target.y, Wall, false, false)){
+				var	_x      = x + hspeed,
+					_y      = y + vspeed,
 					_disMax = 160;
 					
 				with(instances_matching_ne(instances_matching_ne(instance_rectangle(_x - _disMax, _y - _disMax, _x + _disMax, _y + _disMax, [enemy, Player, Sapling, Ally, SentryGun, CustomHitme]), "team", team, 0), "mask_index", mskNone, sprVoid)){
 					var _dis = point_distance(x, y, _x, _y);
 					if(_dis < _disMax){
-						if(instance_seen(x, y, other)){
-							if(lq_defget(other.hit_list, string(self), 0) <= other.hit_time){
-								if(array_length(instances_matching(PopoShield, "creator", id)) <= 0){
+						if(!collision_line(x, y, other.x, other.y, Wall, false, false)){
+							if(!ds_map_valid(other.hit_list) || !ds_map_exists(other.hit_list, self) || other.hit_list[? self] <= other.hit_time){
+								if(!array_length(instances_matching(PopoShield, "creator", self))){
 									_disMax = _dis;
-									other.marrow_target = id;
+									other.marrow_target = self;
 								}
 							}
 						}
@@ -4688,13 +4929,13 @@
 				}
 			}
 			else{
-				rotspeed += (angle_difference(point_direction(x, y, n.x, n.y), direction) / max(1, 60 / (point_distance(x, y, n.x, n.y) + 1))) * min(1, 0.1 * skill_get(mut_bolt_marrow)) * current_time_scale;
+				rotspeed += (angle_difference(point_direction(x, y, _target.x, _target.y), direction) / max(1, 60 / (point_distance(x, y, _target.x, _target.y) + 1))) * min(1, 0.1 * skill_get(mut_bolt_marrow)) * current_time_scale;
 				//rotspeed = clamp(rotspeed, -90, 90);
 			}
 			
-			var f = min(1, abs(rotspeed) / 90);
-			x -= hspeed_raw * f;
-			y -= vspeed_raw * f;
+			var _f = min(1, abs(rotspeed) / 90);
+			x -= hspeed_raw * _f;
+			y -= vspeed_raw * _f;
 		}
 		
 		 // Rotatin:
@@ -4707,14 +4948,21 @@
 	
 	else{
 		 // Trident Return:
-		if(curse_return){
+		if(
+			curse > 0
+			&& instance_exists(creator)
+			&& (
+				("wep"  in creator && creator.wep  == wep) ||
+				("bwep" in creator && creator.bwep == wep)
+			)
+		){
 			if(curse_return_delay < 6){
 				 // Movin:
-				var	l = max(5, point_distance(x, y, creator.x, creator.y) * 0.1 * current_time_scale) / (curse_return_delay + 1),
-					d = point_direction(x, y, creator.x, creator.y);
+				var	_l = max(5, point_distance(x, y, creator.x, creator.y) * 0.1 * current_time_scale) / (curse_return_delay + 1),
+					_d = point_direction(x, y, creator.x, creator.y);
 					
-				x += lengthdir_x(l, d);
-				y += lengthdir_y(l, d);
+				x += lengthdir_x(_l, _d);
+				y += lengthdir_y(_l, _d);
 				
 				 // Walled:
 				if(!place_free(x, y)){
@@ -4724,7 +4972,7 @@
 						visible = false;
 						sound_play_pitch(sndCursedReminder, 1 + orandom(0.3));
 						repeat(4) with(instance_create(x + orandom(8), y + orandom(8), Smoke)){
-							motion_add(d + 180, random(1));
+							motion_add(_d + 180, random(1));
 						}
 					}
 				}
@@ -4733,23 +4981,23 @@
 						visible = true;
 						sound_play_pitch(sndSwapCursed, 1 + orandom(0.3));
 						repeat(4) with(instance_create(x + orandom(8), y + orandom(8), Smoke)){
-							motion_add(d, random(2));
+							motion_add(_d, random(2));
 						}
 					}
 				}
 				
 				 // Rotatin:
-				if(instance_near(x, y, creator, 40)){
-					d += 180;
+				if(point_distance(x, y, creator.x, creator.y) < 40){
+					_d += 180;
 				}
-				image_angle = angle_lerp(image_angle, d, (0.05 * current_time_scale) / (curse_return_delay + 1));
+				image_angle = angle_lerp_ct(image_angle, _d, 0.05 / (curse_return_delay + 1));
 			}
 			if(curse_return_delay <= 8){
 				image_angle += orandom(2 + curse_return_delay) * current_time_scale;
 			}
 			
-			var f = 0.5 * current_time_scale;
-			curse_return_delay -= clamp(curse_return_delay, -f, f);
+			var _f = 0.5 * current_time_scale;
+			curse_return_delay -= clamp(curse_return_delay, -_f, _f);
 			
 			 // Grab Weapon:
 			if(place_meeting(x, y, creator) || (creator.mask_index == mskNone && place_meeting(x, y, Portal))){
@@ -4771,8 +5019,10 @@
 			
 		with(instance_create(_x1, _y1, BoltTrail)){
 			image_xscale = point_distance(_x1, _y1, _x2, _y2);
-			image_angle = point_direction(_x1, _y1, _x2, _y2);
-			if(other.curse) image_blend = make_color_rgb(235, 0, 67);
+			image_angle  = point_direction(_x1, _y1, _x2, _y2);
+			if(other.curse > 0){
+				image_blend = make_color_rgb(235, 0, 67);
+			}
 			creator = other.creator;
 			
 			/*
@@ -4800,43 +5050,53 @@
 	friction = 0.5; // Stop movin
 	
 #define Trident_hit
-	if(speed > 0 && lq_defget(hit_list, string(other), 0) <= hit_time){
-		projectile_hit_push(other, damage, force);
-		
-		if(marrow_target == other) marrow_target = noone;
-		
-		 // Keep Movin:
-		if(!lq_exists(hit_list, string(other)) && speed > 12){
-			speed = 18;
+	if(speed > 0){
+		if(!ds_map_valid(hit_list)){
+			hit_list = ds_map_create();
 		}
-		
-		 // Stick:
-		if(other.my_health > 0){
-			//replacing this interaction for now cause of stabby trident interaction// if(!skill_get(mut_long_arms)){
-			if(!instance_exists(creator) || !skill_get(mut_throne_butt) || creator.race != "chicken"){
-				sound_play_pitch(sndAssassinAttack, 2);
-				target = other;
-				speed = 0;
-				
-				 // Curse Return:
-				if(curse){
-					curse_return_delay = 8 + random(2);
-					mask_index = mskFlakBullet;
+		var _firstHit = !ds_map_exists(hit_list, other);
+		if(_firstHit || hit_list[? other] <= hit_time){
+			hit_list[? other] = hit_time + 3;
+			
+			 // Damage:
+			projectile_hit_push(other, damage, force);
+			
+			if(instance_exists(self)){
+				 // Untarget:
+				if(marrow_target == other){
+					marrow_target = noone;
 				}
+				
+				 // Keep Movin:
+				if(_firstHit && speed > 12){
+					speed = 18;
+				}
+				
+				 // Stick:
+				if(instance_exists(other) && other.my_health > 0){
+					if("race" not in creator || creator.race != "chicken" || skill_get(mut_throne_butt) <= 0){
+						sound_play_pitch(sndAssassinAttack, 2);
+						target = other;
+						speed = 0;
+						
+						 // Curse Return:
+						if(curse > 0){
+							curse_return_delay = 8 + random(2);
+							mask_index = mskFlakBullet;
+						}
+					}
+				}
+				
+				 // Impact:
+				else if(rotspeed < 5){
+					x -= hspeed / 3;
+					y -= vspeed / 3;
+				}
+				var _f = clamp((("size" in other) ? other.size : 1), 1, 5);
+				view_shake_at(x, y, 12 * _f);
+				sleep(16 * _f);
 			}
 		}
-		
-		 // Impact:
-		else if(rotspeed < 5){
-			x -= hspeed / 3;
-			y -= vspeed / 3;
-		}
-		var f = clamp(other.size, 1, 5);
-		view_shake_at(x, y, 12 * f);
-		sleep(16 * f);
-		
-		 // Set Custom IFrames:
-		lq_set(hit_list, string(other), hit_time + 3);
 	}
 	
 #define Trident_wall
@@ -4848,10 +5108,12 @@
 			}
 			if(
 				marrow_target != creator
-				&& instance_seen(x, y, marrow_target)
-				&& instance_near(x, y, marrow_target, 160)
+				&& instance_exists(marrow_target)
+				&& point_distance(x, y, marrow_target.x, marrow_target.y) < 160
+				&& !collision_line(x, y, marrow_target.x, marrow_target.y, Wall, false, false)
 			){
-				if(in_range(abs(angle_difference(image_angle, point_direction(x, y, marrow_target.x, marrow_target.y))), 10, 160)){
+				var _angTurn = abs(angle_difference(image_angle, point_direction(x, y, marrow_target.x, marrow_target.y)));
+				if(_angTurn >= 10 && _angTurn <= 160){
 					_canWall = false;
 				}
 			}
@@ -4863,7 +5125,7 @@
 			move_contact_solid(direction, 16);
 			
 			 // Curse Return:
-			if(curse){
+			if(curse > 0){
 				curse_return_delay = 8 + random(2);
 				mask_index = mskFlakBullet;
 			}
@@ -4877,7 +5139,7 @@
 		
 		 // Marrow Homin on Target:
 		else if(instance_exists(marrow_target)){
-			direction = angle_lerp(direction, point_direction(x, y, marrow_target.x, marrow_target.y), 0.25 * current_time_scale);
+			direction = angle_lerp_ct(direction, point_direction(x, y, marrow_target.x, marrow_target.y), 0.25);
 			image_angle = direction;
 			alarm0 = min(alarm0, 1);
 		}
@@ -4885,10 +5147,10 @@
 	
 #define Trident_destroy
 	 // Hit FX:
-	var	l = 18,
-		d = direction,
-		_x = x + lengthdir_x(l, d),
-		_y = y + lengthdir_y(l, d);
+	var	_l = 18,
+		_d = direction,
+		_x = x + lengthdir_x(_l, _d),
+		_y = y + lengthdir_y(_l, _d);
 		
 	with(instance_create(_x, _y, BubblePop)){
 		image_index = 1;
@@ -4901,32 +5163,52 @@
 	);
 	
 #define Trident_cleanup // pls why do portals instance_delete everything
-	var w = wep;
-	if(is_object(w)) w.visible = true;
+	var _wep = wep;
+	
+	 // Destroy I-Frame Map:
+	if(ds_map_valid(hit_list)){
+		ds_map_destroy(hit_list);
+	}
+	
+	 // Reactivate Trident:
+	if(is_object(_wep)){
+		_wep.visible = true;
+	}
 	
 	 // Return to Player:
-	if(curse_return) with(creator){
-		if(instance_is(self, Player)){
-			var _b = ((bwep == w) ? "b" : "");
-			if(is_object(w)){
-				w.wepangle = angle_difference(other.image_angle, gunangle)
-				if(chance(1, 8)) w.wepangle += 360 * sign(w.wepangle);
-				variable_instance_set(self, _b + "wepangle", w.wepangle);
+	if(
+		curse > 0
+		&& instance_exists(creator)
+		&& (
+			("wep"  in creator && creator.wep  == wep) ||
+			("bwep" in creator && creator.bwep == wep)
+		)
+	){
+		with(creator){
+			if(instance_is(self, Player)){
+				var _b = ((bwep == _wep) ? "b" : "");
+				if(is_object(_wep)){
+					_wep.wepangle = angle_difference(other.image_angle, gunangle)
+					if(chance(1, 8)) _wep.wepangle += 360 * sign(_wep.wepangle);
+					variable_instance_set(self, _b + "wepangle", _wep.wepangle);
+				}
 			}
+			
+			 // Effects:
+			if(instance_is(self, Player)){
+				with(instance_create(x, y, WepSwap)){
+					creator = other;
+				}
+			}
+			sound_play(weapon_get_swap(_wep));
+			sound_play(sndSwapCursed);
 		}
-		
-		 // Effects:
-		if(instance_is(self, Player)){
-			with(instance_create(x, y, WepSwap)) creator = other;
-		}
-		sound_play(weapon_get_swap(w));
-		sound_play(sndSwapCursed);
 	}
 	
 	 // Drop Weapon:
-	else if(w != wep_none){
+	else if(_wep != wep_none){
 		 // Delete Existing:
-		with(instances_matching([WepPickup, ThrownWep], "wep", w)){
+		with(instances_matching([WepPickup, ThrownWep], "wep", _wep)){
 			instance_destroy();
 		}
 		
@@ -4942,9 +5224,9 @@
 		 // WepPickup:
 		var _stickTarget = target;
 		with(obj_create(x, y, (instance_exists(_stickTarget) ? "WepPickupStick" : WepPickup))){
-			wep      = w;
-			curse    = other.curse;
 			rotation = other.image_angle;
+			curse    = other.curse;
+			wep      = _wep;
 			
 			 // Stick:
 			if(instance_exists(_stickTarget)){
@@ -5017,7 +5299,7 @@
 									|| instance_is(self, CarVenus)
 									|| instance_is(self, CarVenusFixed)
 								){
-									_inst = id;
+									_inst = self;
 								}
 							}
 							
@@ -5080,13 +5362,11 @@
 			inst = _ropeDraw[i++];
 			if(array_length(inst)){
 				visible = true;
-				depth++;
-				depth--;
 			}
 		}
 	}
 	
-#define ntte_shadows
+#define ntte_draw_shadows
 	 // Shield Shadows:
 	if(instance_exists(CustomSlash)){
 		var _inst = instances_matching(instances_matching(CustomSlash, "name", "ClamShield"), "visible", true)
@@ -5100,7 +5380,7 @@
 		}
 	}
 	
-#define ntte_dark(_type)
+#define ntte_draw_dark(_type)
 	switch(_type){
 		
 		case "normal":
@@ -5130,6 +5410,38 @@
 		
 	if(_dis > 0){
 		view_shift(-1, _dir, _dis);
+	}
+	
+#define draw_diver_laser
+	if(instance_exists(CustomEnemy)){
+		var _inst = instances_matching_ne(instances_matching(CustomEnemy, "name", "Diver"), "laser", 0);
+		if(array_length(_inst)){
+			draw_set_color(c_white);
+			with(_inst){
+				var _alpha = 0.8 * laser;
+				draw_set_alpha(_alpha);
+				
+				 // Main:
+				var	_x     = x,
+					_y     = y - 1.5,
+					_angle = gunangle,
+					_width = (1 + random(0.5)) * laser,
+					_laser = draw_lasersight(_x, _y, _angle, 1000, _width);
+					
+				 // Bloom:
+				draw_set_alpha(0.2 * _alpha);
+				draw_set_blend_mode(bm_add);
+				draw_line_width(
+					_x - 1,
+					_y - 1,
+					_laser[0] + lengthdir_x(2, _angle) - 1,
+					_laser[1] + lengthdir_y(2, _angle) - 1,
+					_width * 2
+				);
+				draw_set_blend_mode(bm_normal);
+			}
+			draw_set_alpha(1);
+		}
 	}
 	
 #define draw_harpoon_rope
@@ -5182,38 +5494,46 @@
 #macro  area_hq                                                                                 106
 #macro  area_crib                                                                               107
 #macro  infinity                                                                                1/0
+#macro  instance_max                                                                            instance_create(0, 0, DramaCamera)
 #macro  current_frame_active                                                                    (current_frame % 1) < current_time_scale
+#macro  game_scale_nonsync                                                                      game_screen_get_width_nonsync() / game_width
 #macro  anim_end                                                                                (image_index + image_speed_raw >= image_number || image_index + image_speed_raw < 0)
 #macro  enemy_sprite                                                                            (sprite_index != spr_hurt || anim_end) ? ((speed <= 0) ? spr_idle : spr_walk) : sprite_index
-#macro  enemy_boss                                                                              (('boss' in self) ? boss : ('intro' in self)) || array_exists([Nothing, Nothing2, BigFish, OasisBoss], object_index)
+#macro  enemy_boss                                                                              ('boss' in self) ? boss : ('intro' in self || array_find_index([Nothing, Nothing2, BigFish, OasisBoss], object_index) >= 0)
 #macro  player_active                                                                           visible && !instance_exists(GenCont) && !instance_exists(LevCont) && !instance_exists(SitDown) && !instance_exists(PlayerSit)
-#macro  game_scale_nonsync                                                                      game_screen_get_width_nonsync() / game_width
+#macro  target_visible                                                                          !collision_line(x, y, target.x, target.y, Wall, false, false)
+#macro  target_direction                                                                        point_direction(x, y, target.x, target.y)
+#macro  target_distance                                                                         point_distance(x, y, target.x, target.y)
 #macro  bbox_width                                                                              (bbox_right + 1) - bbox_left
 #macro  bbox_height                                                                             (bbox_bottom + 1) - bbox_top
 #macro  bbox_center_x                                                                           (bbox_left + bbox_right + 1) / 2
 #macro  bbox_center_y                                                                           (bbox_top + bbox_bottom + 1) / 2
 #macro  FloorNormal                                                                             instances_matching(Floor, 'object_index', Floor)
-#macro  alarm0_run                                                                              alarm0 >= 0 && --alarm0 == 0 && (script_ref_call(on_alrm0) || !instance_exists(self))
-#macro  alarm1_run                                                                              alarm1 >= 0 && --alarm1 == 0 && (script_ref_call(on_alrm1) || !instance_exists(self))
-#macro  alarm2_run                                                                              alarm2 >= 0 && --alarm2 == 0 && (script_ref_call(on_alrm2) || !instance_exists(self))
-#macro  alarm3_run                                                                              alarm3 >= 0 && --alarm3 == 0 && (script_ref_call(on_alrm3) || !instance_exists(self))
-#macro  alarm4_run                                                                              alarm4 >= 0 && --alarm4 == 0 && (script_ref_call(on_alrm4) || !instance_exists(self))
-#macro  alarm5_run                                                                              alarm5 >= 0 && --alarm5 == 0 && (script_ref_call(on_alrm5) || !instance_exists(self))
-#macro  alarm6_run                                                                              alarm6 >= 0 && --alarm6 == 0 && (script_ref_call(on_alrm6) || !instance_exists(self))
-#macro  alarm7_run                                                                              alarm7 >= 0 && --alarm7 == 0 && (script_ref_call(on_alrm7) || !instance_exists(self))
-#macro  alarm8_run                                                                              alarm8 >= 0 && --alarm8 == 0 && (script_ref_call(on_alrm8) || !instance_exists(self))
-#macro  alarm9_run                                                                              alarm9 >= 0 && --alarm9 == 0 && (script_ref_call(on_alrm9) || !instance_exists(self))
+#macro  alarm0_run                                                                              alarm0 && !--alarm0 && !--alarm0 && (script_ref_call(on_alrm0) || !instance_exists(self))
+#macro  alarm1_run                                                                              alarm1 && !--alarm1 && !--alarm1 && (script_ref_call(on_alrm1) || !instance_exists(self))
+#macro  alarm2_run                                                                              alarm2 && !--alarm2 && !--alarm2 && (script_ref_call(on_alrm2) || !instance_exists(self))
+#macro  alarm3_run                                                                              alarm3 && !--alarm3 && !--alarm3 && (script_ref_call(on_alrm3) || !instance_exists(self))
+#macro  alarm4_run                                                                              alarm4 && !--alarm4 && !--alarm4 && (script_ref_call(on_alrm4) || !instance_exists(self))
+#macro  alarm5_run                                                                              alarm5 && !--alarm5 && !--alarm5 && (script_ref_call(on_alrm5) || !instance_exists(self))
+#macro  alarm6_run                                                                              alarm6 && !--alarm6 && !--alarm6 && (script_ref_call(on_alrm6) || !instance_exists(self))
+#macro  alarm7_run                                                                              alarm7 && !--alarm7 && !--alarm7 && (script_ref_call(on_alrm7) || !instance_exists(self))
+#macro  alarm8_run                                                                              alarm8 && !--alarm8 && !--alarm8 && (script_ref_call(on_alrm8) || !instance_exists(self))
+#macro  alarm9_run                                                                              alarm9 && !--alarm9 && !--alarm9 && (script_ref_call(on_alrm9) || !instance_exists(self))
 #define orandom(_num)                                                                   return  random_range(-_num, _num);
 #define chance(_numer, _denom)                                                          return  random(_denom) < _numer;
-#define chance_ct(_numer, _denom)                                                       return  random(_denom) < (_numer * current_time_scale);
+#define chance_ct(_numer, _denom)                                                       return  random(_denom) < _numer * current_time_scale;
 #define pround(_num, _precision)                                                        return  (_num == 0) ? _num : round(_num / _precision) * _precision;
 #define pfloor(_num, _precision)                                                        return  (_num == 0) ? _num : floor(_num / _precision) * _precision;
 #define pceil(_num, _precision)                                                         return  (_num == 0) ? _num :  ceil(_num / _precision) * _precision;
-#define in_range(_num, _lower, _upper)                                                  return  (_num >= _lower && _num <= _upper);
 #define frame_active(_interval)                                                         return  (current_frame % _interval) < current_time_scale;
+#define lerp_ct(_val1, _val2, _amount)                                                  return  lerp(_val2, _val1, power(1 - _amount, current_time_scale));
 #define angle_lerp(_ang1, _ang2, _num)                                                  return  _ang1 + (angle_difference(_ang2, _ang1) * _num);
+#define angle_lerp_ct(_ang1, _ang2, _num)                                               return  _ang2 + (angle_difference(_ang1, _ang2) * power(1 - _num, current_time_scale));
 #define draw_self_enemy()                                                                       image_xscale *= right; draw_self(); image_xscale /= right;
-#define enemy_walk(_add, _max)                                                                  if(walk > 0){ walk -= current_time_scale; motion_add_ct(direction, _add); } if(speed > _max) speed = _max;
+#define enemy_walk(_dir, _num)                                                                  direction = _dir; walk = _num; if(speed < friction_raw) speed = friction_raw;
+#define enemy_face(_dir)                                                                        _dir = ((_dir % 360) + 360) % 360; if(_dir < 90 || _dir > 270) right = 1; else if(_dir > 90 && _dir < 270) right = -1;
+#define enemy_look(_dir)                                                                        _dir = ((_dir % 360) + 360) % 360; if(_dir < 90 || _dir > 270) right = 1; else if(_dir > 90 && _dir < 270) right = -1; if('gunangle' in self) gunangle = _dir;
+#define enemy_target(_x, _y)                                                                    target = (instance_exists(Player) ? instance_nearest(_x, _y, Player) : ((instance_exists(target) && target >= 0) ? target : noone)); return (target != noone);
 #define save_get(_name, _default)                                                       return  mod_script_call_nc  ('mod', 'teassets', 'save_get', _name, _default);
 #define save_set(_name, _value)                                                                 mod_script_call_nc  ('mod', 'teassets', 'save_set', _name, _value);
 #define option_get(_name)                                                               return  mod_script_call_nc  ('mod', 'teassets', 'option_get', _name);
@@ -5225,7 +5545,7 @@
 #define surface_setup(_name, _w, _h, _scale)                                            return  mod_script_call_nc  ('mod', 'teassets', 'surface_setup', _name, _w, _h, _scale);
 #define shader_setup(_name, _texture, _args)                                            return  mod_script_call_nc  ('mod', 'teassets', 'shader_setup', _name, _texture, _args);
 #define shader_add(_name, _vertex, _fragment)                                           return  mod_script_call_nc  ('mod', 'teassets', 'shader_add', _name, _vertex, _fragment);
-#define script_bind(_name, _scriptObj, _scriptRef, _depth, _visible)                    return  mod_script_call_nc  ('mod', 'teassets', 'script_bind', _name, _scriptObj, _scriptRef, _depth, _visible);
+#define script_bind(_scriptObj, _scriptRef, _depth, _visible)                           return  mod_script_call_nc  ('mod', 'teassets', 'script_bind', script_ref_create(script_bind), _scriptObj, (is_real(_scriptRef) ? script_ref_create(_scriptRef) : _scriptRef), _depth, _visible);
 #define obj_create(_x, _y, _obj)                                                        return  (is_undefined(_obj) ? [] : mod_script_call_nc('mod', 'telib', 'obj_create', _x, _y, _obj));
 #define top_create(_x, _y, _obj, _spawnDir, _spawnDis)                                  return  mod_script_call_nc  ('mod', 'telib', 'top_create', _x, _y, _obj, _spawnDir, _spawnDis);
 #define projectile_create(_x, _y, _obj, _dir, _spd)                                     return  mod_script_call_self('mod', 'telib', 'projectile_create', _x, _y, _obj, _dir, _spd);
@@ -5236,8 +5556,6 @@
 #define trace_error(_error)                                                                     mod_script_call_nc  ('mod', 'telib', 'trace_error', _error);
 #define view_shift(_index, _dir, _pan)                                                          mod_script_call_nc  ('mod', 'telib', 'view_shift', _index, _dir, _pan);
 #define sleep_max(_milliseconds)                                                                mod_script_call_nc  ('mod', 'telib', 'sleep_max', _milliseconds);
-#define instance_seen(_x, _y, _obj)                                                     return  mod_script_call_nc  ('mod', 'telib', 'instance_seen', _x, _y, _obj);
-#define instance_near(_x, _y, _obj, _dis)                                               return  mod_script_call_nc  ('mod', 'telib', 'instance_near', _x, _y, _obj, _dis);
 #define instance_budge(_objAvoid, _disMax)                                              return  mod_script_call_self('mod', 'telib', 'instance_budge', _objAvoid, _disMax);
 #define instance_random(_obj)                                                           return  mod_script_call_nc  ('mod', 'telib', 'instance_random', _obj);
 #define instance_clone()                                                                return  mod_script_call_self('mod', 'telib', 'instance_clone');
@@ -5253,10 +5571,9 @@
 #define instance_get_name(_inst)                                                        return  mod_script_call_nc  ('mod', 'telib', 'instance_get_name', _inst);
 #define variable_instance_get_list(_inst)                                               return  mod_script_call_nc  ('mod', 'telib', 'variable_instance_get_list', _inst);
 #define variable_instance_set_list(_inst, _list)                                                mod_script_call_nc  ('mod', 'telib', 'variable_instance_set_list', _inst, _list);
-#define draw_weapon(_sprite, _x, _y, _ang, _meleeAng, _wkick, _flip, _blend, _alpha)            mod_script_call_nc  ('mod', 'telib', 'draw_weapon', _sprite, _x, _y, _ang, _meleeAng, _wkick, _flip, _blend, _alpha);
+#define draw_weapon(_spr, _img, _x, _y, _ang, _angMelee, _kick, _flip, _blend, _alpha)          mod_script_call_nc  ('mod', 'telib', 'draw_weapon', _spr, _img, _x, _y, _ang, _angMelee, _kick, _flip, _blend, _alpha);
 #define draw_lasersight(_x, _y, _dir, _maxDistance, _width)                             return  mod_script_call_nc  ('mod', 'telib', 'draw_lasersight', _x, _y, _dir, _maxDistance, _width);
 #define draw_surface_scale(_surf, _x, _y, _scale)                                               mod_script_call_nc  ('mod', 'telib', 'draw_surface_scale', _surf, _x, _y, _scale);
-#define array_exists(_array, _value)                                                    return  mod_script_call_nc  ('mod', 'telib', 'array_exists', _array, _value);
 #define array_count(_array, _value)                                                     return  mod_script_call_nc  ('mod', 'telib', 'array_count', _array, _value);
 #define array_combine(_array1, _array2)                                                 return  mod_script_call_nc  ('mod', 'telib', 'array_combine', _array1, _array2);
 #define array_delete(_array, _index)                                                    return  mod_script_call_nc  ('mod', 'telib', 'array_delete', _array, _index);
@@ -5265,11 +5582,7 @@
 #define array_shuffle(_array)                                                           return  mod_script_call_nc  ('mod', 'telib', 'array_shuffle', _array);
 #define data_clone(_value, _depth)                                                      return  mod_script_call_nc  ('mod', 'telib', 'data_clone', _value, _depth);
 #define scrFX(_x, _y, _motion, _obj)                                                    return  mod_script_call_nc  ('mod', 'telib', 'scrFX', _x, _y, _motion, _obj);
-#define scrRight(_dir)                                                                          mod_script_call_self('mod', 'telib', 'scrRight', _dir);
-#define scrWalk(_dir, _walk)                                                                    mod_script_call_self('mod', 'telib', 'scrWalk', _dir, _walk);
-#define scrAim(_dir)                                                                            mod_script_call_self('mod', 'telib', 'scrAim', _dir);
-#define enemy_hurt(_hitdmg, _hitvel, _hitdir)                                                   mod_script_call_self('mod', 'telib', 'enemy_hurt', _hitdmg, _hitvel, _hitdir);
-#define enemy_target(_x, _y)                                                            return  mod_script_call_self('mod', 'telib', 'enemy_target', _x, _y);
+#define enemy_hurt(_damage, _force, _direction)                                                 mod_script_call_self('mod', 'telib', 'enemy_hurt', _damage, _force, _direction);
 #define boss_hp(_hp)                                                                    return  mod_script_call_nc  ('mod', 'telib', 'boss_hp', _hp);
 #define boss_intro(_name)                                                               return  mod_script_call_nc  ('mod', 'telib', 'boss_intro', _name);
 #define corpse_drop(_dir, _spd)                                                         return  mod_script_call_self('mod', 'telib', 'corpse_drop', _dir, _spd);
@@ -5282,7 +5595,6 @@
 #define area_get_secret(_area)                                                          return  mod_script_call_nc  ('mod', 'telib', 'area_get_secret', _area);
 #define area_get_underwater(_area)                                                      return  mod_script_call_nc  ('mod', 'telib', 'area_get_underwater', _area);
 #define area_get_back_color(_area)                                                      return  mod_script_call_nc  ('mod', 'telib', 'area_get_back_color', _area);
-#define area_border(_y, _area, _color)                                                  return  mod_script_call_nc  ('mod', 'telib', 'area_border', _y, _area, _color);
 #define area_generate(_area, _sub, _loops, _x, _y, _setArea, _overlapFloor, _scrSetup)  return  mod_script_call_nc  ('mod', 'telib', 'area_generate', _area, _sub, _loops, _x, _y, _setArea, _overlapFloor, _scrSetup);
 #define floor_set(_x, _y, _state)                                                       return  mod_script_call_nc  ('mod', 'telib', 'floor_set', _x, _y, _state);
 #define floor_set_style(_style, _area)                                                  return  mod_script_call_nc  ('mod', 'telib', 'floor_set_style', _style, _area);
@@ -5303,13 +5615,14 @@
 #define sound_play_hit_ext(_snd, _pit, _vol)                                            return  mod_script_call_self('mod', 'telib', 'sound_play_hit_ext', _snd, _pit, _vol);
 #define race_get_sprite(_race, _sprite)                                                 return  mod_script_call     ('mod', 'telib', 'race_get_sprite', _race, _sprite);
 #define race_get_title(_race)                                                           return  mod_script_call_self('mod', 'telib', 'race_get_title', _race);
-#define player_create(_x, _y, _index)                                                   return  mod_script_call_nc  ('mod', 'telib', 'player_create', _x, _y, _index);
 #define player_swap()                                                                   return  mod_script_call_self('mod', 'telib', 'player_swap');
 #define wep_raw(_wep)                                                                   return  mod_script_call_nc  ('mod', 'telib', 'wep_raw', _wep);
+#define wep_wrap(_wep, _scrName, _scrRef)                                               return  mod_script_call_nc  ('mod', 'telib', 'wep_wrap', _wep, _scrName, _scrRef);
+#define wep_skin(_wep, _race, _skin)                                                    return  mod_script_call_nc  ('mod', 'telib', 'wep_skin', _wep, _race, _skin);
 #define wep_merge(_stock, _front)                                                       return  mod_script_call_nc  ('mod', 'telib', 'wep_merge', _stock, _front);
 #define wep_merge_decide(_hardMin, _hardMax)                                            return  mod_script_call_nc  ('mod', 'telib', 'wep_merge_decide', _hardMin, _hardMax);
 #define weapon_decide(_hardMin, _hardMax, _gold, _noWep)                                return  mod_script_call_self('mod', 'telib', 'weapon_decide', _hardMin, _hardMax, _gold, _noWep);
-#define weapon_get_red(_wep)                                                            return  mod_script_call_self('mod', 'telib', 'weapon_get_red', _wep);
+#define weapon_get(_name, _wep)                                                         return  mod_script_call     ('mod', 'telib', 'weapon_get', _name, _wep);
 #define skill_get_icon(_skill)                                                          return  mod_script_call_self('mod', 'telib', 'skill_get_icon', _skill);
 #define skill_get_avail(_skill)                                                         return  mod_script_call_self('mod', 'telib', 'skill_get_avail', _skill);
 #define string_delete_nt(_string)                                                       return  mod_script_call_nc  ('mod', 'telib', 'string_delete_nt', _string);
@@ -5317,11 +5630,12 @@
 #define path_shrink(_path, _wall, _skipMax)                                             return  mod_script_call_nc  ('mod', 'telib', 'path_shrink', _path, _wall, _skipMax);
 #define path_reaches(_path, _xtarget, _ytarget, _wall)                                  return  mod_script_call_nc  ('mod', 'telib', 'path_reaches', _path, _xtarget, _ytarget, _wall);
 #define path_direction(_path, _x, _y, _wall)                                            return  mod_script_call_nc  ('mod', 'telib', 'path_direction', _path, _x, _y, _wall);
-#define path_draw(_path)                                                                return  mod_script_call_self('mod', 'telib', 'path_draw', _path);
 #define portal_poof()                                                                   return  mod_script_call_nc  ('mod', 'telib', 'portal_poof');
 #define portal_pickups()                                                                return  mod_script_call_nc  ('mod', 'telib', 'portal_pickups');
 #define pet_spawn(_x, _y, _name)                                                        return  mod_script_call_nc  ('mod', 'telib', 'pet_spawn', _x, _y, _name);
-#define pet_get_icon(_modType, _modName, _name)                                         return  mod_script_call_self('mod', 'telib', 'pet_get_icon', _modType, _modName, _name);
+#define pet_get_name(_name, _modType, _modName, _skin)                                  return  mod_script_call_self('mod', 'telib', 'pet_get_name', _name, _modType, _modName, _skin);
+#define pet_get_sprite(_name, _modType, _modName, _skin, _sprName)                      return  mod_script_call_self('mod', 'telib', 'pet_get_sprite', _name, _modType, _modName, _skin, _sprName);
+#define pet_set_skin(_skin)                                                             return  mod_script_call_self('mod', 'telib', 'pet_set_skin', _skin);
 #define team_get_sprite(_team, _sprite)                                                 return  mod_script_call_nc  ('mod', 'telib', 'team_get_sprite', _team, _sprite);
 #define team_instance_sprite(_team, _inst)                                              return  mod_script_call_nc  ('mod', 'telib', 'team_instance_sprite', _team, _inst);
 #define sprite_get_team(_sprite)                                                        return  mod_script_call_nc  ('mod', 'telib', 'sprite_get_team', _sprite);

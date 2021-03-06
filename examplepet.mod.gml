@@ -21,6 +21,7 @@
 		spr_walk        = The pet's walk sprite.
 		spr_hurt        = The pet's hurt OR dodge sprite.
 		spr_dead        = The pet's death sprite, only used if the pet takes damage.
+		bskin           = The pet's skin value (use 'mod_script_call("mod", "telib", "pet_set_skin", skin)' to set skin)
 		right           = Determines if the pet is facing left(-1) or right(1).
 		leader          = The current leader (Player ID).
 		can_take        = Determines if a player can take the pet. Set to false when a leader exists.
@@ -44,16 +45,23 @@
 		<Name>_create - Runs once when the pet is created.
 			Set sprites and important variables in here.
 			
-		<Name>_icon - Return the pet's icon sprite here.
-			Icons are used for the map, offscreen pets, revivable pets, and the stats screen.
-			You can also return an array of [spr,img,xoff,yoff,xscale,yscale,angle,blend,alpha].
+		<Name>_name - Return the pet's display name here.
+			Arguments: (Skin)
 			
 		<Name>_ttip - Return loading screen tips here.
 			Return a string or an array of strings for the game to randomly pick one.
+			Arguments: (Skin)
+			
+		<Name>_sprite - Return the pet's sprites here.
+			Returns the sprite associated with a given skin and name.
+			Arguments: (Skin, Name)
+			
+		<Name>_sound - Return the pet's sounds here.
+			Returns the sound associated with a given skin and name.
+			Arguments: (Skin, Name)
 			
 		<Name>_stat - Return stats screen info here.
-			If the name argument equals "" then you should return a sprite or title for the stats block.
-			Otherwise you can return the stat's display name or an array containing [Display Name, Display Value].
+			Return a stat's display name or an array containing [Display Name, Display Value].
 			Arguments: (Name, Value)
 			
 		<Name>_anim - Runs every frame. Handles animations.
@@ -95,13 +103,6 @@
 	}
 	
 #define Baby_create
-	 // Visual:
-	spr_idle     = global.sprBabyIdle;
-	spr_walk     = global.sprBabyWalk;
-	spr_hurt     = global.sprBabyHurt;
-	spr_shadow   = shd16;
-	spr_shadow_y = 5;
-	
 	 // Vars:
 	walkspeed = 0.8;
 	maxspeed  = 3;
@@ -111,22 +112,25 @@
 		stat.tears = 0;
 	}
 	
-#define Baby_icon
-	return global.sprBabyIcon;
-	
 #define Baby_ttip
 	return [
 		"JUST A BABY",
 		"DON'T MAKE THEM SAD"
 	];
 	
-#define Baby_stat(_name, _value)
+#define Baby_sprite(_skin, _name)
 	switch(_name){
-		case "":
-			return global.sprBabyIdle;
-			
-		case "tears":
-			return [_name, `@(color:${make_color_rgb(30, 160, 240)})${_value}`];
+		case "icon"     : return global.sprBabyIcon;
+		case "idle"     : return global.sprBabyIdle;
+		case "walk"     : return global.sprBabyWalk;
+		case "hurt"     : return global.sprBabyHurt;
+		case "shadow"   : return shd16;
+		case "shadow_y" : return 5;
+	}
+	
+#define Baby_stat(_name, _value)
+	if(_name == "tears"){
+		return [_name, `@(color:${make_color_rgb(30, 160, 240)})${_value}`];
 	}
 	
 #define Baby_step
@@ -204,9 +208,14 @@
 		to a given angle. Put this wherever the pet will change directions.
 	*/
 	
-	_dir = (_dir + 360) mod 360;
-	if(_dir < 90 || _dir > 270) right = 1;
-	if(_dir > 90 && _dir < 270) right = -1;
+	_dir = ((_dir % 360) + 360) % 360;
+	
+	if(_dir < 90 || _dir > 270){
+		right = 1;
+	}
+	else if(_dir > 90 && _dir < 270){
+		right = -1;
+	}
 	
 #define pet_create(_x, _y, _pet)
 	return mod_script_call_nc("mod", "telib", "pet_create", _x, _y, _pet, "mod", mod_current);

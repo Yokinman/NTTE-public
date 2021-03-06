@@ -1,12 +1,12 @@
 #define init
-	spr = mod_variable_get("mod", "teassets", "spr");
+	mod_script_call("mod", "teassets", "ntte_init", script_ref_create(init));
 	
 	 // Sprites:
 	global.sprWep            = spr.Trident;
 	global.sprWepGold        = spr.GoldTrident;
 	global.sprWepLoadout     = spr.TridentLoadout;
 	global.sprWepGoldLoadout = spr.GoldTridentLoadout;
-	global.sprWepLocked      = mskNone;
+	global.sprWepLocked      = sprTemp;
 	
 	 // LWO:
 	global.lwoWep = {
@@ -19,68 +19,70 @@
 		"visible"  : true
 	};
 	
+#define cleanup
+	mod_script_call("mod", "teassets", "ntte_cleanup", script_ref_create(cleanup));
+	
 #macro spr global.spr
 
-#define weapon_name(_wep)  return (weapon_avail(_wep) ? ((weapon_gold(_wep) != 0) ? "GOLDEN " : "") + "TRIDENT" : "LOCKED");
-#define weapon_text(_wep)  return ((weapon_get_gold(_wep) != 0) ? "SHINE THROUGH THE SKY" : "SCEPTER OF THE @bSEA");
-#define weapon_swap(_wep)  return (lq_defget(_wep, "visible", true) ? sndSwapSword : sndSwapCursed);
-#define weapon_sprt(_wep)  return (lq_defget(_wep, "visible", true) ? (weapon_avail() ? ((weapon_get_gold(_wep) == 0) ? global.sprWep : global.sprWepGold) : global.sprWepLocked) : mskNone);
-#define weapon_loadout     return ((argument_count > 0 && weapon_get_gold(argument0) != 0) ? global.sprWepGoldLoadout : global.sprWepLoadout);
-#define weapon_area(_wep)  return ((argument_count > 0 && weapon_avail(_wep) && weapon_get_gold(_wep) == 0) ? 7 : -1); // 3-2
-#define weapon_gold(_wep)  return ((argument_count > 0 && lq_defget(_wep, "gold", false)) ? -1 : 0);
-#define weapon_type        return type_melee;
-#define weapon_load        return 14;
-#define weapon_auto        return true;
-#define weapon_melee       return false;
-#define weapon_avail       return (unlock_get("pack:" + weapon_ntte_pack()) || unlock_get("wep:" + mod_current));
-#define weapon_ntte_pack   return "coast";
-#define weapon_shrine      return [mut_long_arms, mut_bolt_marrow];
-#define weapon_chrg(_wep)  return true;
+#define weapon_name(_wep)     return (weapon_avail(_wep) ? ((weapon_gold(_wep) != 0) ? "GOLDEN " : "") + "TRIDENT" : "LOCKED");
+#define weapon_text(_wep)     return ((weapon_get_gold(_wep) != 0) ? "SHINE THROUGH THE SKY" : "SCEPTER OF THE @bSEA");
+#define weapon_swap(_wep)     return (lq_defget(_wep, "visible", true) ? sndSwapSword : sndSwapCursed);
+#define weapon_sprt(_wep)     return (lq_defget(_wep, "visible", true) ? (weapon_avail() ? ((weapon_get_gold(_wep) == 0) ? global.sprWep : global.sprWepGold) : global.sprWepLocked) : mskNone);
+#define weapon_loadout(_wep)  return ((argument_count > 0 && weapon_get_gold(_wep) != 0) ? global.sprWepGoldLoadout : global.sprWepLoadout);
+#define weapon_area(_wep)     return ((argument_count > 0 && weapon_avail(_wep) && weapon_get_gold(_wep) == 0) ? 7 : -1); // 3-2
+#define weapon_gold(_wep)     return ((argument_count > 0 && lq_defget(_wep, "gold", false)) ? -1 : 0);
+#define weapon_type           return type_melee;
+#define weapon_load           return 14;
+#define weapon_auto           return true;
+#define weapon_melee          return false;
+#define weapon_avail          return (unlock_get("pack:" + weapon_ntte_pack()) || unlock_get("wep:" + mod_current));
+#define weapon_ntte_pack      return "coast";
+#define weapon_shrine         return [mut_long_arms, mut_bolt_marrow];
+#define weapon_chrg           return true;
 
 #define weapon_fire(_wep)
 	var _fire = weapon_fire_init(_wep);
 	_wep = _fire.wep;
 	
 	if(_wep.visible){
-		var _num = (_wep.chrg_num / _wep.chrg_max);
+		var _charge = (_wep.chrg_num / _wep.chrg_max);
 		
 		 // Charging:
 		if(_wep.chrg){
 			 // Pullback:
-			var _kick = 9 * _num;
+			var _kick = 9 * _charge;
 			if(wkick != _kick){
-				weapon_post(_kick, 8 * _num * current_time_scale, 0);
+				weapon_post(_kick, 8 * _charge * current_time_scale, 0);
 			}
 			
 			 // Effects:
 			if(_wep.chrg == 1){
-				sound_play_pitch(sndOasisMelee, 1 / (1 - (_num * 0.25)));
+				 // Sound:
+				sound_play_pitch(sndOasisMelee, 1 / (1 - (_charge * 0.25)));
 				
 				 // Full:
-				if(_num >= 1){
-					var	_l = 16,
-						_d = gunangle;
-						
-					instance_create(x + lengthdir_x(_l, _d), y + lengthdir_y(_l, _d), ThrowHit);
-					instance_create(x + lengthdir_x(_l, _d), y + lengthdir_y(_l, _d), ImpactWrists);
+				if(_charge >= 1){
+					 // Sound:
 					sound_play_pitch(sndCrystalRicochet, 3);
 					sound_play_pitch(sndSewerDrip,       3);
+					
+					 // Flash:
+					var	_l = 16,
+						_d = gunangle + wepangle;
+						
+					with(instance_create(x + lengthdir_x(_l, _d), y + lengthdir_y(_l, _d), ThrowHit)){
+						depth = other.depth - 1;
+						instance_create(x, y, ImpactWrists);
+					}
 					sleep(5);
-				}
-			}
-			
-			 // Fully Charged - Blink:
-			else if((current_frame % 12) < current_time_scale){
-				with(_fire.creator) if(instance_is(self, Player)){
-					gunshine = 2;
 				}
 			}
 		}
 		
-		 // Attack:
-		else if(_num > 0){
+		 // Fire:
+		else if(_charge > 0){
 			 // Stab Trident:
-			if(_num < 1){
+			if(_charge < 1){
 				var	_dis = weapon_get_load(_wep) + (8 * skill_get(mut_long_arms)),
 					_dir = gunangle;
 					
@@ -184,8 +186,14 @@
 	
 	 // LWO Setup:
 	if(!is_object(_wep)){
-		_wep = lq_clone(global.lwoWep);
+		_wep = { "wep" : _wep };
 		wep_set(_primary, "wep", _wep);
+	}
+	for(var i = lq_size(global.lwoWep) - 1; i >= 0; i--){
+		var _key = lq_get_key(global.lwoWep, i);
+		if(_key not in _wep){
+			lq_set(_wep, _key, lq_get_value(global.lwoWep, i));
+		}
 	}
 	
 	 // Cursed Trident Grab Reorient:
@@ -229,7 +237,7 @@
 #define weapon_fire_init(_wep)                                                          return  mod_script_call     ('mod', 'telib', 'weapon_fire_init', _wep);
 #define weapon_ammo_fire(_wep)                                                          return  mod_script_call     ('mod', 'telib', 'weapon_ammo_fire', _wep);
 #define weapon_ammo_hud(_wep)                                                           return  mod_script_call     ('mod', 'telib', 'weapon_ammo_hud', _wep);
-#define weapon_get_red(_wep)                                                            return  mod_script_call_self('mod', 'telib', 'weapon_get_red', _wep);
+#define weapon_get(_name, _wep)                                                         return  mod_script_call     ('mod', 'telib', 'weapon_get', _name, _wep);
 #define wep_raw(_wep)                                                                   return  mod_script_call_nc  ('mod', 'telib', 'wep_raw', _wep);
 #define wep_get(_primary, _name, _default)                                              return  variable_instance_get(self, (_primary ? '' : 'b') + _name, _default);
 #define wep_set(_primary, _name, _value)                                                        variable_instance_set(self, (_primary ? '' : 'b') + _name, _value);

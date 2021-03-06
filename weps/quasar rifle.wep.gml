@@ -1,13 +1,18 @@
 #define init
+	mod_script_call("mod", "teassets", "ntte_init", script_ref_create(init));
+	
 	 // Sprites:
-	global.sprWep = sprite_add_weapon("../sprites/weps/sprQuasarRifle.png", 8, 5);
-	global.sprWepLocked = mskNone;
+	global.sprWep       = sprite_add_weapon("../sprites/weps/sprQuasarRifle.png", 8, 5);
+	global.sprWepLocked = sprTemp;
 	
 	 // LWO:
 	global.lwoWep = {
-		wep  : mod_current,
-		beam : noone
+		"wep"  : mod_current,
+		"beam" : noone
 	};
+	
+#define cleanup
+	mod_script_call("mod", "teassets", "ntte_cleanup", script_ref_create(cleanup));
 	
 #define weapon_name         return (weapon_avail() ? "QUASAR RIFLE" : "LOCKED");
 #define weapon_text         return "BLINDING LIGHT";
@@ -49,13 +54,15 @@
 	
 	 // Charge Beam:
 	else with(_wep.beam){
-		if(image_yscale < 1) scale_goal = 1;
+		if(image_yscale < 1){
+			scale_goal = 1;
+		}
 		else{
-			var	a = 0.25,
-				m = 1 + (a * (1 + (0.4 * skill_get(mut_laser_brain))));
+			var	_a = 0.25,
+				_m = 1 + (_a * (1 + (0.4 * skill_get(mut_laser_brain))));
 				
-			if(scale_goal < m){
-				scale_goal = min((floor(image_yscale / a) * a) + a, m);
+			if(scale_goal < _m){
+				scale_goal = min((floor(image_yscale / _a) * _a) + _a, _m);
 				flash_frame = max(flash_frame, current_frame + 2);
 			}
 		}
@@ -91,7 +98,7 @@
 #define weapon_fire_init(_wep)                                                          return  mod_script_call     ('mod', 'telib', 'weapon_fire_init', _wep);
 #define weapon_ammo_fire(_wep)                                                          return  mod_script_call     ('mod', 'telib', 'weapon_ammo_fire', _wep);
 #define weapon_ammo_hud(_wep)                                                           return  mod_script_call     ('mod', 'telib', 'weapon_ammo_hud', _wep);
-#define weapon_get_red(_wep)                                                            return  mod_script_call_self('mod', 'telib', 'weapon_get_red', _wep);
+#define weapon_get(_name, _wep)                                                         return  mod_script_call     ('mod', 'telib', 'weapon_get', _name, _wep);
 #define wep_raw(_wep)                                                                   return  mod_script_call_nc  ('mod', 'telib', 'wep_raw', _wep);
 #define wep_get(_primary, _name, _default)                                              return  variable_instance_get(self, (_primary ? '' : 'b') + _name, _default);
 #define wep_set(_primary, _name, _value)                                                        variable_instance_set(self, (_primary ? '' : 'b') + _name, _value);

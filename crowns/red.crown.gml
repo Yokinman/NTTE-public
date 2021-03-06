@@ -1,9 +1,14 @@
 #define init
+	mod_script_call("mod", "teassets", "ntte_init", script_ref_create(init));
+	
 	 // Sprites:
 	global.sprCrownIcon    = sprite_add("../sprites/crowns/Red/sprCrownRedIcon.png",     1, 12, 16);
 	global.sprCrownIdle    = sprite_add("../sprites/crowns/Red/sprCrownRedIdle.png",    10,  8,  8);
 	global.sprCrownWalk    = sprite_add("../sprites/crowns/Red/sprCrownRedWalk.png",     6,  8,  8);
 	global.sprCrownLoadout = sprite_add("../sprites/crowns/Red/sprCrownRedLoadout.png",  2, 16, 16);
+	
+#define cleanup
+	mod_script_call("mod", "teassets", "ntte_cleanup", script_ref_create(cleanup));
 	
 #define crown_name        return "RED CROWN";
 #define crown_text        return "CHAOTIC @rCRYSTAL HEARTS#@sSMALLER @wAREAS";

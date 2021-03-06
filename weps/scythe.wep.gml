@@ -1,11 +1,13 @@
 #define init
+	mod_script_call("mod", "teassets", "ntte_init", script_ref_create(init));
+	
 	 // Sprites:
 	global.sprWep        = sprite_add_weapon("../sprites/weps/sprScythe.png",   5, 7);
 	global.sprWepHUD     = sprite_add_weapon("../sprites/weps/sprScythe.png",  10, 7);
 	global.sprShotbow    = sprite_add_weapon("../sprites/weps/sprShotbow.png",  6, 3);
 	global.sprSlugbow    = sprite_add_weapon("../sprites/weps/sprSlugbow.png",  6, 5);
 	global.sprSlugbowHUD = sprite_add_weapon("../sprites/weps/sprSlugbow.png", 11, 5);
-	global.sprWepLocked	 = mskNone;
+	global.sprWepLocked	 = sprTemp;
 	
 	 // LWO:
 	global.lwoWep = {
@@ -56,6 +58,9 @@
 		"melee"    : false
 	};
 	
+#define cleanup
+	mod_script_call("mod", "teassets", "ntte_cleanup", script_ref_create(cleanup));
+	
 #macro scythe_mode    global.scythe_mode
 #macro scythe_basic   0
 #macro scythe_shotbow 1
@@ -92,8 +97,14 @@
 	else{
 		 // LWO Setup:
 		if(!is_object(_wep)){
-			_wep = lq_clone(global.lwoWep);
+			_wep = { "wep" : _wep };
 			wep_set(_primary, "wep", _wep);
+		}
+		for(var i = lq_size(global.lwoWep) - 1; i >= 0; i--){
+			var _key = lq_get_key(global.lwoWep, i);
+			if(_key not in _wep){
+				lq_set(_wep, _key, lq_get_value(global.lwoWep, i));
+			}
 		}
 		
 		 // Swap:
@@ -117,7 +128,7 @@
 		
 		 // !
 		with(instance_create(x, y, PopupText)){
-			text = weapon_get_name(_wep) + "!";
+			text   = weapon_get_name(_wep) + "!";
 			target = other.index;
 		}
 		
@@ -141,16 +152,19 @@
 		}
 	}
 	
-#define scythe_swap_step
-	for(var i = 0; i < maxp; i++){
-		if(button_pressed(i, "pick")){
-			with(instances_matching(Player, "index", i)){
-				if(wep_raw(wep) == mod_current && nearwep == noone){
-					 // Swap:
-					scythe_swap(true);
-					
-					 // Silence:
-					mod_variable_set("mod", "ntte", "scythe_tip_index", -1);
+#define ntte_end_step
+	 // Swap Scythe Mode:
+	if(instance_exists(Player)){
+		for(var i = 0; i < maxp; i++){
+			if(button_pressed(i, "pick")){
+				with(instances_matching(instances_matching(Player, "index", i), "nearwep", noone)){
+					if(wep_raw(wep) == mod_current){
+						 // Swap:
+						scythe_swap(true);
+						
+						 // Silence:
+						mod_variable_set("mod", "ntte", "scythe_tip_index", -1);
+					}
 				}
 			}
 		}
@@ -280,8 +294,14 @@
 	
 	 // LWO Setup:
 	if(!is_object(_wep)){
-		_wep = lq_clone(global.lwoWep);
+		_wep = { "wep" : _wep };
 		wep_set(_primary, "wep", _wep);
+	}
+	for(var i = lq_size(global.lwoWep) - 1; i >= 0; i--){
+		var _key = lq_get_key(global.lwoWep, i);
+		if(_key not in _wep){
+			lq_set(_wep, _key, lq_get_value(global.lwoWep, i));
+		}
 	}
 	
 	 // Back Muscle:
@@ -325,14 +345,6 @@
 		}
 	}
 	
-	 // Bind End Step:
-	if(array_length(instances_matching(CustomScript, "name", "scythe_swap_step")) <= 0){
-		with(script_bind_end_step(scythe_swap_step, 0)){
-			name = script[2];
-			persistent = true;
-		}
-	}
-	
 	
 /// SCRIPTS
 #macro  type_melee                                                                              0
@@ -351,7 +363,7 @@
 #define weapon_fire_init(_wep)                                                          return  mod_script_call     ('mod', 'telib', 'weapon_fire_init', _wep);
 #define weapon_ammo_fire(_wep)                                                          return  mod_script_call     ('mod', 'telib', 'weapon_ammo_fire', _wep);
 #define weapon_ammo_hud(_wep)                                                           return  mod_script_call     ('mod', 'telib', 'weapon_ammo_hud', _wep);
-#define weapon_get_red(_wep)                                                            return  mod_script_call_self('mod', 'telib', 'weapon_get_red', _wep);
+#define weapon_get(_name, _wep)                                                         return  mod_script_call     ('mod', 'telib', 'weapon_get', _name, _wep);
 #define wep_raw(_wep)                                                                   return  mod_script_call_nc  ('mod', 'telib', 'wep_raw', _wep);
 #define wep_get(_primary, _name, _default)                                              return  variable_instance_get(self, (_primary ? '' : 'b') + _name, _default);
 #define wep_set(_primary, _name, _value)                                                        variable_instance_set(self, (_primary ? '' : 'b') + _name, _value);

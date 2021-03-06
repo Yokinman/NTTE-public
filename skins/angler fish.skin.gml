@@ -1,6 +1,8 @@
 #define init
-	spr = mod_variable_get("mod", "teassets", "spr");
-	snd = mod_variable_get("mod", "teassets", "snd");
+	mod_script_call("mod", "teassets", "ntte_init", script_ref_create(init));
+	
+#define cleanup
+	mod_script_call("mod", "teassets", "ntte_cleanup", script_ref_create(cleanup));
 	
 #macro spr global.spr
 #macro msk spr.msk
@@ -13,12 +15,12 @@
 #define skin_unlock    return "FOR DEFEATING A @yGOLDEN ANGLER";
 #define skin_ttip      return choose("SO BRIGHT OUT", "MISSED THE SUN", "SHAPED BY THE DEPTHS", "LOST YOUR MIND");
 #define skin_avail     return unlock_get("skin:" + mod_current);
-#define skin_portrait  return spr.FishAnglerPortrait;
-#define skin_mapicon   return spr.FishAnglerMapIcon;
+#define skin_portrait  return skin_sprite(sprBigPortrait);
+#define skin_mapicon   return skin_sprite(sprMapIcon);
 
 #define skin_button
-	sprite_index = spr.FishAnglerLoadout;
-	image_index  = skin_avail();
+	sprite_index = skin_sprite(sprLoadoutSkin);
+	image_index  = !skin_avail();
 	
 #define skin_sprite(_spr)
 	switch(_spr){
@@ -32,7 +34,43 @@
 		case sprLoadoutSkin  : return spr.FishAnglerLoadout;
 		case sprMapIcon      : return spr.FishAnglerMapIcon;
 	}
-	return -1;
+	
+#define skin_weapon_sprite(_spr, _wep)
+	switch(_spr){
+		case sprGoldARifle       : return spr.AnglerAssaultRifle;
+		case sprGoldBazooka      : return spr.AnglerBazooka;
+		case sprGoldCrossbow     : return spr.AnglerCrossbow;
+		case sprGoldDiscgun      : return spr.AnglerDiscGun;
+		case sprGoldNader        : return spr.AnglerGrenadeLauncher;
+		case sprGoldLaserGun     : return spr.AnglerLaserPistol;
+		case sprGoldMachinegun   : return spr.AnglerMachinegun;
+		case sprGoldNukeLauncher : return spr.AnglerNukeLauncher;
+		case sprGoldPlasmaGun    : return spr.AnglerPlasmaGun;
+		case sprGoldRevolver     : return spr.AnglerRevolver;
+		case sprGoldScrewdriver  : return spr.AnglerScrewdriver;
+		case sprGoldShotgun      : return spr.AnglerShotgun;
+		case sprGoldSlugger      : return spr.AnglerSlugger;
+		case sprGoldSplinterGun  : return spr.AnglerSplinterGun;
+		case sprGoldWrench       : return spr.AnglerWrench;
+		case sprGuitar           : return spr.AnglerGuitar;
+		
+		 // Projectiles:
+		case sprBoltGold         : return spr.AnglerBolt;
+		case sprGoldDisc         : return spr.AnglerDisc;
+		case sprGoldGrenade      : return spr.AnglerGrenade;
+		case sprGoldNuke         : return spr.AnglerNuke;
+		case sprGoldRocket       : return spr.AnglerRocket;
+		
+		 // Modded:
+		default:
+			if(_spr == spr.GoldTrident  ) return spr.AnglerTrident;
+			if(_spr == spr.GoldTunneller) return spr.AnglerTunneller;
+	}
+	return _spr;
+	
+#define skin_weapon_sprite_hud(_spr, _wep)
+	if(_spr == spr.TunnellerHUD) return spr.AnglerTunnellerHUD;
+	return _spr;
 	
 	
 /// SCRIPTS

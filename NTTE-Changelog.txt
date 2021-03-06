@@ -1,3 +1,101 @@
+2.04 ~ Interdimensional Terror
+	
+	   @(sprite:menu/banners/sprTerrorMain.png:1)
+	GENERAL
+	+	@wLoop Boss @sfor @rCrystal Heart @schunks
+	+	NT:TE's custom skins now have special reskins for their starting @yGolden Weapons @(sprite:skins/Weapons/Orchid/sprOrchidAssaultRifle.png:1) @(sprite:skins/Weapons/Red/sprRedAssaultRifle.png:1) @(sprite:skins/Weapons/Angler/sprAnglerAssaultRifle.png:1)
+	+	@yElite Eels @sspawn lightning rings on death
+	~	@wCrown of Crime @(sprite:crowns/Crime/sprCrownCrimeIdle.png:20:-0.4:-1:12) @sis now pre-loop exclusive
+	~	@bCrown of Bonus @(sprite:crowns/Bonus/sprCrownBonusIdle.png:15:-0.4:-1:12) @sis now loop exclusive
+	~	Reduced the size of @rCrystal Heart @sarea chunks by about @w20%@s, but increased their enemy spawns
+	~	Reduced the spawn chance of @rCrystal Brains @sand decreased the lifespan of their clones
+	~	Reduced the @bSuper Ambush @sevent's intensity, and lowered its spawn chance
+	~	Reduced how much @bCoast's @socean slows the player
+	
+	               @(sprite:menu/banners/sprTerrorWeapons.png:1)
+	WEAPONS
+	+	New weapon, @rEntangler @(sprite:weps/sprEntangler.png:1)
+	+	@yGolden Tunneller @(sprite:weps/sprGoldTunneller.png:1:0:-1:12)
+	+	@wCat Chests @snow offer @(sprite:areas/Crystal/sprRedText.png:12:-0.8) ammo
+	~	@r@(sprite:areas/Crystal/sprRedText.png:12:-0.8) Weapons @sare now charge weapons
+	~	Increased @rAnnihilator's @sslash damage by @w2 @sand reduced its reload time by @w0.2 @sseconds
+	~	Increased @rTunneller's @sorb damage by @w50% @sand tweaked its loot spawns
+	~	@rTunneller's @sarea chunks are no longer increased in size by @gLaser Brain
+	~	Improved @wPizza Cutter's @scharge FX
+	~	@yGolden Merged Weapons @sstart with at least 2 shots
+	*	Fixed @wScythe's @sprompt loading tips changing level gen
+	*	Fixed @wBat Disc Cannon's @shoming sprite being offset
+	*	Fixed errors related to mods firing charge weapons
+	
+	            @(sprite:menu/banners/sprTerrorPets.png:1)
+	PETS
+	+	New pet for @wCrib
+	+	New API for custom pets
+	~	Reduced @rTwins @spet's contact damage from @w2 @sto @w1
+	*	Fixed @wParrot @spet hyper-splashing in @wCoast's @socean when sitting too far out
+	*	Fixed @yGolden Mimic @spet appearing under weapon pickups when closed
+	*	Fixed @pPrism @spet having buggy duplications for some thrown weapons (Bat Disc Guns, Clam Shield, etc.)
+	*	Fixed pet loading tips affecting level generation
+	*	Fixed pets getting getting stuck in walls occasionally
+	*	Fixed pets running around @bCaptain's @scutscene
+	*	Fixed pets that don't exist appearing on the stats screen if another mod spawned one incorrectly
+	
+	       @(sprite:menu/banners/sprTerrorParrot.png:1)
+	PARROT
+	+	Simplified @rParrot's @sactive ability
+	+	Visual improvements to feather HUD  @(sprite:races/Parrot/sprParrotFeatherHUD.png:8:0:0:0)@(sprite:races/Parrot/sprParrotFeatherHUD.png:8:-0.25:0:0)
+	+	Indicator for off-screen charmed enemies
+	~	@rCharm @snow uses @wBodyguard Style
+	~	Ultras adjusted for @wBodyguard Style
+	~	Charmed enemies attack much more often
+	~	Reduced max feathers from @w5 @sto @w3 @sstacks
+	~	Reduced per-feather charm time from @w2 @sto @w1 @sseconds
+	~	Reduced the feathers released by certain chests
+	~	Uncharming enemies no longer gives them i-frames
+	~	Bosses no longer lose charm twice as fast
+	*	Fixed @rParrot's @wBest Area @sstat breaking with area map names that use custom sprites
+	*	Fixed @rParrot's @wLoops @sstat increasing when they visited a @yCrown Vault
+	*	Fixed @rParrot @spitching @wRevolver's @sswap sound around
+	*	Fixed charmed enemies removing i-frames from enemies they touch
+	*	Fixed charmed enemies appearing above feathers when outlines are enabled
+	*	Fixed charmed @wSnipers @stargeting the player
+	*	Fixed charmed @rCrystal Brains @snot charming clones
+	*	Fixed charmed @wCampsite Bandits @shaving partially green bandanas with shaders enabled
+	
+	                    @(sprite:menu/banners/sprTerrorPolish.png:2:-0.01)
+	POLISH & IMPROVEMENT
+	+	Significant performance improvements
+	+	Gave @gToxic Ballguys @sa shadow @(sprite:sprSuperFrogWalk:0:-0.4:20:12)
+	~	Increased the pickup drop chance for @wCats @dslightly
+	~	Increased the weapon drop chance for @wPelicans
+	~	@wDivers @sin @wPalm Tree Forts @snow fall to their death
+	~	@wSeal King @sstops panning the camera during their intro if an enemy is alive
+	~	Improved the @wCoast @socean's mod compatibility
+	~	Increased the volume of @r@(sprite:areas/Crystal/sprRedText.png:12:-0.8)'s @smusic
+	~	Reduced the chance for @(sprite:areas/Crystal/sprRedText.png:12:-0.8) to lead to @wCrib @(sprite:sprCuzInteract:0:-0.4:-1:12)
+	~	@bBonus Ammo @sstops ticking after entering a new level
+	~	@gCat Chest @sturrets no longer get turned into ammo chests by @yCrown of Love
+	*	Partial fix for shaders in NTT beta (9942+) versions
+	*	@gAnomaly @sportals can no longer spawn out of bounds
+	*	Fixed @pMom's @spool covering the @gSewers @smanhole
+	*	Fixed @yLair @smanholes rarely appearing above the player when on the ground
+	*	Fixed @wSilver Tongue @sbeing obtained without @gBig Shots
+	*	Fixed @wSeal King @ssometimes erroring on death
+	*	Fixed @wSeal King @sgetting stuck in their intro due to interactions with other mods
+	*	Fixed @wCoast @wChaos Heart @schunks having @wParrot @spets, and not having walls outside of @wCoast
+	*	Fixed @bOasis @wChaos @schunks having @wSlaughter @spets
+	*	Fixed @bLabs @wChaos @schunks not having @wTechnoMancer
+	*	Fixed @yCrown Vaults @sentered right after @(sprite:areas/Crystal/sprRedText.png:12:-0.8) leading back to the area before @(sprite:areas/Crystal/sprRedText.png:12:-0.8)
+	*	Fixed multiple @rCrystal Hearts @sbeing able to spawn on a loop if none were seen on a previous loop
+	*	Fixed @wAlbino Gator @slaser sights appearing below @wCoast's @socean when aiming down
+	*	Fixed @wCoast @srocks occasionally spawning over floors
+	*	Fixed @wDiver's @sdeath sprite being offset wrongly  @(sprite:enemies/Diver/sprDiverDead.png:9:3:12:12)
+	*	Fixed buggy @wHammerhead Sharks @son non-30 FPS
+	*	Fixed @bPit Squid @sarms flashing multiple times when hit
+	*	Fixed the @bAbyssal Fish @sskin's eye trails not quite lining up with their actual eyes
+	*	Fixed @bBonus Ammo @sHUD being offset in co-op
+	*	Fixed @wWeapon Mimic @snot setting a cause of death for some melee attacks
+	
 2.03 ~ Go for the Gold
 	
 	    @(sprite:menu/banners/sprGoldMain.png:1)
@@ -61,6 +159,7 @@
 	~	Increased @wSalamander @spet's bashing damage by about @w2.5x, @sand made it pierce more
 	~	@wSalamander @spet's @w"MOUNT" @sprompt no longer overrides weapon pickup prompts
 	~	Tripled @bSlaughter @spet's bite damage + radius, and gave them a bigger hurt explosion
+	~	@bOcto @snow spawns on @(sprite:menu/sprRouteIcon.png:2:0)@w3-3 instead of @(sprite:menu/sprRouteIcon.png:2:0)@w3-1
 	*	Fixed pets attacking @wSeal King @swhile he's out at sea
 	*	Fixed @rTwins @spet visually reorienting @gGuardian Orbs
 	
@@ -244,7 +343,7 @@
 	~	Gave playable @wBig Dog @sa bigger @sunderwater bubble
 	~	The @wWater Quality @soption is now @wVisual Quality @sand affects much more
 	~	Merged Disc Gun projectiles now use @rEnemy @ssprites
-	~	@bCoast @snow only spawns sea mines on @(sprite:sprInterfaceIcons)@w1-3
+	~	@bCoast @snow only spawns sea mines on @(sprite:menu/sprRouteIcon.png:2:0)@w1-3
 	~	Slightly increased @bCoast @sand @yLair's @smusic volumes
 	~	@wSeal King @snow plays their boss music for the initial wave of seals
 	~	@yShop Chests @snow automatically select an item if opened by a portal

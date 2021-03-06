@@ -1,12 +1,11 @@
 #define init
-	spr = mod_variable_get("mod", "teassets", "spr");
+	mod_script_call("mod", "teassets", "ntte_init", script_ref_create(init));
 	
 	 // Sprites:
 	global.sprSkillHUD  = sprite_add("../sprites/skills/Lead Ribs/sprLeadRibsHUD.png",  1,  8,  8);
 	
-	/*
-	global.minID = GameObject.id;
-	*/
+#define cleanup
+	mod_script_call("mod", "teassets", "ntte_cleanup", script_ref_create(cleanup));
 	
 #macro spr global.spr
 
@@ -15,10 +14,7 @@
 #define skill_tip    return "HIGHER THRESHOLD";
 #define skill_icon   return global.sprSkillHUD;
 #define skill_avail  return false;
-	
-/*#define skill_take
-	global.minID = GameObject.id;*/
-	
+
 #define step
 	 // More Rads!!!!!
 	if(instance_exists(enemy)){
@@ -50,9 +46,6 @@
 			}
 		}
 	}
-	
-	 // Keep Up:
-	global.minID = GameObject.id;
 	*/
 	
 /// SCRIPTS
