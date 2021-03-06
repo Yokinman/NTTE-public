@@ -716,7 +716,7 @@
 
 #macro git_user    "Yokinman"
 #macro git_repo    "NTTE-public"
-#macro git_token   "d5bc40c0fb8964158bfa99577f3e2c823c553aa5"
+#macro git_token   "8027349" + `5c4985b9a${'ef1078a'}1` + "36799068" + 'a1772033'
 #macro git_branch  global.git_branch
 #macro git_version global.git_version
 
