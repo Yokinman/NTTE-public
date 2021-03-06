@@ -216,7 +216,7 @@
 			
 			 // Wander:
 			else{
-				enemy_walk(direction + orandom(30), [20, 50]);
+				enemy_walk(direction + orandom(30), random_range(20, 50));
 				enemy_look(direction);
 				
 				 // Go to Nearest Non-Pit Floor:
