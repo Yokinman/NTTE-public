@@ -5029,5 +5029,5 @@
 #define charm_instance(_inst, _charm)                                                   return  mod_script_call_nc  ('mod', 'telib', 'charm_instance', _inst, _charm);
 #define motion_step(_mult)                                                              return  mod_script_call_self('mod', 'telib', 'motion_step', _mult);
 #define pool(_pool)                                                                     return  mod_script_call_nc  ('mod', 'telib', 'pool', _pool);
-#define teevent_set_active(_name, _active)                                              return  mod_script_call_nc('mod', 'teevents', 'teevent_set_active', _name, _active);
-#define teevent_get_active(_name)                                                       return  mod_script_call_nc('mod', 'teevents', 'teevent_get_active', _name);
+#define teevent_set_active(_name, _active)                                              return  mod_script_call_nc  ('mod', 'teevents', 'teevent_set_active', _name, _active);
+#define teevent_get_active(_name)                                                       return  mod_script_call_nc  ('mod', 'teevents', 'teevent_get_active', _name);

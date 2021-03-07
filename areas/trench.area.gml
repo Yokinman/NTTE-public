@@ -311,8 +311,7 @@
 		}
 		
 		 // Ammo Chests + End Branch:
-		var n = instance_number(FloorMaker);
-		if(!chance(22, 19 + n)){
+		if(!chance(22, 19 + instance_number(FloorMaker))){
 			if(_outOfSpawn){
 				instance_create(_x + 16, _y + 16, AmmoChest);
 			}
@@ -1064,19 +1063,22 @@
 							_spr = spr.PStatTrenchLights;
 							_img = 0;
 							
-							var	n = instance_nearest(x, y, Portal);
-							switch(n.sprite_index){
-								case sprPortalSpawn:
-								case sprProtoPortal:
-									_img = (sprite_get_number(_spr) - 1) - 2 + (2 * sin(current_frame / 16));
-									break;
-									
-								case sprProtoPortalDisappear:
-									_img = (sprite_get_number(_spr) - 1) * (1 - (n.image_index / n.image_number));
-									break;
-									
-								default:
-									_img = 0;
+							var	_portal = instance_nearest(x, y, Portal);
+							
+							if(instance_exists(_portal)){
+								switch(_portal.sprite_index){
+									case sprPortalSpawn:
+									case sprProtoPortal:
+										_img = (sprite_get_number(_spr) - 1) - 2 + (2 * sin(current_frame / 16));
+										break;
+										
+									case sprProtoPortalDisappear:
+										_img = (sprite_get_number(_spr) - 1) * (1 - (_portal.image_index / _portal.image_number));
+										break;
+										
+									default:
+										_img = 0;
+								}
 							}
 							
 							if(_img > 0){

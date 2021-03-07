@@ -4328,14 +4328,15 @@ var _extraScale = argument_count > 1 ? argument[1] : 0.5;
 #define LairBorder_step
 	 // Cave-In:
 	if(cavein){
+		cavein_inst = instances_matching_ne(cavein_inst, "id", null);
+		
 		if(cavein_dis > 0){
-			var _add = max(4, random(
+			var _spd = max(4, random(
 				(instance_exists(Player) && array_length(instances_matching_gt(Player, "y", y - 64)))
 				? 12
 				: 18
 			));
-			cavein_dis  = max(0, cavein_dis - (_add * current_time_scale));
-			cavein_inst = instances_matching_ne(cavein_inst, "id", null);
+			cavein_dis = max(0, cavein_dis - (_spd * current_time_scale));
 			
 			 // Effects:
 			if(current_frame_active){
@@ -5766,9 +5767,9 @@ var _extraScale = argument_count > 1 ? argument[1] : 0.5;
 	}
 	
 	 // Watchin TV:
-	else if(instance_exists(TV)){
+	else{
 		var _target = instance_nearest(x, y, TV);
-		if(point_distance(x, y, _target.x, _target.y) < 96){
+		if(instance_exists(_target) && point_distance(x, y, _target.x, _target.y) < 96){
 			enemy_look(point_direction(x, y, _target.x, _target.y));
 		}
 	}

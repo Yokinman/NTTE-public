@@ -4149,7 +4149,9 @@
 			case enemy: // Idle, Then Run to Player + Jump Off Wall
 				
 				if(zfriction == 0){
-					if(idle_time > 0) idle_time -= current_time_scale;
+					if(idle_time > 0){
+						idle_time -= current_time_scale;
+					}
 					else{
 						 // Time to Jump Off:
 						if(jump_time == 0){
@@ -4158,7 +4160,9 @@
 									other.idle_time = 10 + random(20);
 									
 									var _target = (instance_exists(Player) ? instance_nearest(other.x, other.y, Player) : instance_nearest(other.x - 16, other.y - 16, Floor));
-									direction = point_direction(other.x, other.y, _target.x, _target.y - 8);
+									if(instance_exists(_target)){
+										direction = point_direction(other.x, other.y, _target.x, _target.y - 8);
+									}
 									speed += current_time_scale;
 									
 									if("walk"     in self) walk     = other.idle_time;
@@ -4315,8 +4319,8 @@
 								
 								with(target){
 									right *= choose(-1, 1);
-									if(instance_exists(Player)){
-										var _target = instance_nearest(x, y, Player);
+									var _target = instance_nearest(x, y, Player);
+									if(instance_exists(_target)){
 										enemy_look(point_direction(x, y, _target.x, _target.y));
 									}
 								}

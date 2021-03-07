@@ -910,20 +910,6 @@
 	sprite_index = spr_hurt;
 	image_index  = 0;
 	
-#define enemy_target(_x, _y)
-	/*
-		Base game targeting for consistency, cause with consistency u can have clever solutions
-	*/
-	
-	if(instance_exists(Player)){
-		target = instance_nearest(_x, _y, Player);
-	}
-	else if(target < 0){
-		target = noone;
-	}
-	
-	return instance_exists(target);
-	
 #define chest_create(_x, _y, _obj, _levelStart)
 	/*
 		Creates a given chest/mimic with some special spawn conditions applied, such as Crown of Love, Crown of Life, and Rogue
@@ -1702,7 +1688,7 @@
 				var _attractDis = 30 + (40 * _pluto);
 				with(instances_matching_ne([AmmoPickup, HPPickup, RoguePickup], "id", null)){
 					var _p = instance_nearest(x, y, Player);
-					if(point_distance(x, y, _p.x, _p.y) >= _attractDis){
+					if(instance_exists(_p) && point_distance(x, y, _p.x, _p.y) >= _attractDis){
 						var	_dis = 6 * current_time_scale,
 							_dir = point_direction(x, y, _p.x, _p.y),
 							_x = x + lengthdir_x(_dis, _dir),
@@ -1727,14 +1713,16 @@
 						|| collision_line(x, y, _proto.x, _proto.y, Wall, false, false)
 					){
 						if(distance_to_object(Player) >= _attractDis){
-							var	_p   = instance_nearest(x, y, Player),
-								_dis = 12 * current_time_scale,
-								_dir = point_direction(x, y, _p.x, _p.y),
-								_x   = x + lengthdir_x(_dis, _dir),
-								_y   = y + lengthdir_y(_dis, _dir);
-								
-							if(place_free(_x, y)) x = _x;
-							if(place_free(x, _y)) y = _y;
+							var _p = instance_nearest(x, y, Player);
+							if(instance_exists(_p)){
+								var	_dis = 12 * current_time_scale,
+									_dir = point_direction(x, y, _p.x, _p.y),
+									_x   = x + lengthdir_x(_dis, _dir),
+									_y   = y + lengthdir_y(_dis, _dir);
+									
+								if(place_free(_x, y)) x = _x;
+								if(place_free(x, _y)) y = _y;
+							}
 						}
 					}
 				}

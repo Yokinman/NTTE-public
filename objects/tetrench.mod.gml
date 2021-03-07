@@ -2026,9 +2026,9 @@
 		else with(eye) blink = true;
 		
 		 // Away From Walls:
-		if(instance_exists(Wall)){
-			var n = instance_nearest(xpos - 8, ypos - 8, Wall);
-			motion_add_ct(point_direction(n.x + 8, n.y + 8, xpos, ypos), 0.5);
+		var _n = instance_nearest(xpos - 8, ypos - 8, Wall);
+		if(instance_exists(_n)){
+			motion_add_ct(point_direction(_n.x + 8, _n.y + 8, xpos, ypos), 0.5);
 		}
 		
 		 // End:

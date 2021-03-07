@@ -209,8 +209,7 @@
 		}
 		
 		 // Dead Ends (Ammo Chests):
-		var n = instance_number(FloorMaker);
-		if(!chance(20, 19 + n)){
+		if(!chance(20, 19 + instance_number(FloorMaker))){
 			if(_outOfSpawn){
 				instance_create(_x + 16, _y + 16, AmmoChest);
 			}

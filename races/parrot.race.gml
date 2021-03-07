@@ -953,7 +953,7 @@
 											}
 											
 											 // Stay in Range:
-											if(distance_to_object(_follow) > 32){
+											if(instance_exists(_follow) && distance_to_object(_follow) > 32){
 												motion_add_ct(point_direction(x, y, _follow.x, _follow.y), 1);
 											}
 										}

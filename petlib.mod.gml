@@ -1151,9 +1151,9 @@
 			enemy_look(direction);
 			
 			 // More Aggressive:
-			if(arcing >= 1 && "index" in leader && instance_exists(enemy)){
+			if(arcing >= 1 && "index" in leader){
 				var _enemy = instance_nearest(x, y, enemy);
-				if(point_distance(x, y, _enemy.x, _enemy.y) < 160){
+				if(instance_exists(_enemy) && point_distance(x, y, _enemy.x, _enemy.y) < 160){
 					motion_add(point_direction(x, y, mouse_x[leader.index], mouse_y[leader.index]) + orandom(10), 2);
 				}
 			}
@@ -1849,7 +1849,7 @@
 				
 				 // Sound:
 				var	_inst = (instance_exists(Player) ? instance_nearest(x, y, Player) : self),
-					_snd = audio_play_sound_at(sndFiretrap, _inst.x - x, _inst.y - y, 0, 64, 320, 1, false, 0);
+					_snd  = audio_play_sound_at(sndFiretrap, _inst.x - x, _inst.y - y, 0, 64, 320, 1, false, 0);
 					
 				audio_sound_gain(_snd, 2, 0);
 				audio_sound_pitch(_snd, 2 + orandom(0.2));

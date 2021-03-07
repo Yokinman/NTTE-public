@@ -542,9 +542,9 @@
 	}
 	
 	 // Wait for Nearby Player:
-	else if(alarm0 < 0 && instance_exists(Player)){
+	else if(alarm0 < 0){
 		var _target = instance_nearest(x, y, Player);
-		if(open || (point_distance(x, y, _target.x, _target.y) < 96 && !collision_line(x, y, _target.x, _target.y, Wall, false, false))){
+		if(open || (instance_exists(_target) && point_distance(x, y, _target.x, _target.y) < 96 && !collision_line(x, y, _target.x, _target.y, Wall, false, false))){
 			alarm0 = 60;
 		}
 	}
