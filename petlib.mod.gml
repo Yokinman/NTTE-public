@@ -285,7 +285,7 @@
 	 // Grabbing Pickup:
 	if(instance_exists(pickup)){
 		if(pickup_held){
-			if(pickup.x == pickup_x && pickup.y == pickup_y){
+			if(point_distance(pickup.x, pickup.y, pickup_x, pickup_y) < maxspeed){
 				with(pickup){
 					x = other.x;
 					y = other.y + 4;
