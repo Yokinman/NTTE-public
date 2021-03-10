@@ -2635,8 +2635,8 @@
 #define NewCocoon_death
 	 // Bits:
 	var _ang = random(360);
-	for(var d = _ang; d < _ang + 360; d += (360 / 5)){
-		with(scrFX(x, y, [d, 1.5], Feather)){
+	for(var _dir = _ang; _dir < _ang + 360; _dir += (360 / 5)){
+		with(scrFX(x, y, [_dir, 1.5], Feather)){
 			sprite_index = spr.PetSpiderWebBits;
 			image_blend  = make_color_hsv(0, 0, 165);
 			image_angle  = orandom(30);

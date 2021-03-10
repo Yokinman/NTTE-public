@@ -363,7 +363,7 @@
 		audio_sound_set_track_position(sound_play_hit_ext(sndNothing2DeadStart, 1, 0.5), 1);
 		
 		 // Angler Fish Skin Unlock:
-		if(player_count_race(char_fish) > 0 && !unlock_get("skin:angler fish")){
+		if(player_count_race(char_fish) > 0){
 			unlock_set("skin:angler fish", true);
 		}
 	}

@@ -577,8 +577,8 @@
 				y = other.y;
 				instance_change(FloorExplo, false);
 				mask_index = mskAlly;
-				visible = false;
-				material = 2;
+				visible    = false;
+				material   = 2;
 			}
 			_off += 100;
 		}

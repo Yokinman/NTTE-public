@@ -1335,32 +1335,50 @@
 			}
 			
 			 // Become Enemy:
-			var _lastObject = object_index;
-			if(instance_is(self, becomenemy)){
-				var	_lastMask       = mask_index,
-					_lastSprite     = sprite_index,
-					_lastImage      = image_index,
-					_lastDepth      = depth,
-					_lastVisible    = visible,
-					_lastPersistent = persistent,
-					_lastSolid      = solid;
-					
-				instance_change(enemy, false);
+			var	_lastObject = object_index,
+				_lastZ      = (("z" in self) ? abs(z) : 0);
 				
-				mask_index   = _lastMask;
-				sprite_index = _lastSprite;
-				image_index  = _lastImage;
-				depth        = _lastDepth;
-				visible      = _lastVisible;
-				persistent   = _lastPersistent;
-				solid        = _lastSolid;
-			}
-			
-			 // Set/Reset Team:
-			if("team" in self){
-				var _lastTeam = team;
-				team = _vars.team;
-				_vars.team = _lastTeam;
+			if(fork()){
+				if(instance_is(self, becomenemy)){
+					 // GMS2:
+					try{
+						if(!null){
+							var	_lastMask       = mask_index,
+								_lastSprite     = sprite_index,
+								_lastImage      = image_index,
+								_lastDepth      = depth,
+								_lastVisible    = visible,
+								_lastPersistent = persistent,
+								_lastSolid      = solid;
+								
+							instance_change(CustomEnemy, false);
+							
+							mask_index   = _lastMask;
+							sprite_index = _lastSprite;
+							image_index  = _lastImage;
+							depth        = _lastDepth;
+							visible      = _lastVisible;
+							persistent   = _lastPersistent;
+							solid        = _lastSolid;
+						}
+					}
+					
+					 // GMS1:
+					catch(_error){
+						while(instance_is(self, becomenemy) && "team" not in self){
+							wait 0;
+						}
+					}
+				}
+				
+				 // Set/Reset Team:
+				if("team" in self){
+					var _lastTeam = team;
+					team = _vars.team;
+					_vars.team = _lastTeam;
+				}
+				
+				exit;
 			}
 			
 			 // Charm:
@@ -1395,7 +1413,7 @@
 			
 			 // Uncharm:
 			else{
-				if(instance_is(self, hitme)){
+				if(instance_is(self, hitme) || instance_is(self, becomenemy)){
 					 // I-Frames:
 					//nexthurt = current_frame + 12;
 					
@@ -1413,20 +1431,26 @@
 					
 					 // Kill:
 					if(_vars.kill){
-						my_health = 0;
-						sound_play_pitchvol(sndEnemyDie, 2 + orandom(0.3), 3);
+						if("my_health" in self){
+							my_health = 0;
+							sound_play_pitchvol(sndEnemyDie, 2 + orandom(0.3), 3);
+						}
 					}
 					
 					 // Wake Up Alert:
 					else{
-						instance_create(x, bbox_top, AssassinNotice);
+						with(instance_create(x, bbox_top - _lastZ, AssassinNotice)){
+							depth = min(-7, other.depth - 1);
+						}
 						sound_play_hit_ext(sndAssassinGetUp, random_range(1.2, 1.5), 1.2);
 					}
 					
 					 // Effects:
-					var _num = 10 * max((is_real(size) ? size : 0), 0.5);
+					var _num = (("size" in self && size == 0) ? 5 : 10);
 					for(var _ang = direction; _ang < direction + 360; _ang += (360 / _num)){
-						scrFX(x, y, [_ang, 3], Dust);
+						with(scrFX(x, y - _lastZ, [_ang, 4], Dust)){
+							depth = other.depth + 1;
+						}
 					}
 				}
 				

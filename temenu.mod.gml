@@ -147,9 +147,9 @@
 						role : [[cred_artist, "Sprite Artist"]],
 						link : [[cred_twitter, "thxsprites"], [cred_discord, "THX\#0011"]]
 						},
-					{	name : "smash brothers",
+					{	name : "matt",
 						role : [[cred_artist, "Sprite Artist"], [cred_coder, "Programmer"]],
-						link : [[cred_twitter, "attfooy"], [cred_discord, "smash brothers\#5026"]]
+						link : [[cred_twitter, "attfooy"], [cred_discord, "attfooy\#5026"]]
 						},
 					{	name : "peas",
 						role : [[cred_artist, "Sprite Artist"]],
@@ -514,9 +514,31 @@
 		 // LoadoutSkin Offset:
 		if(instance_exists(LoadoutSkin)){
 			var _inst = instances_matching(LoadoutSkin, "ntte_crown_xoffset", null);
-			if(array_length(_inst)) with(_inst){
-				ntte_crown_xoffset = -22;
-				xstart += ntte_crown_xoffset;
+			if(array_length(_inst)){
+				with(_inst){
+					ntte_crown_xoffset = -22;
+					xstart += ntte_crown_xoffset;
+				}
+				
+				 // Depth Sorting Fix:
+				var _instSort = [];
+				with(LoadoutSkin){
+					array_push(_instSort, [self, depth]);
+				}
+				array_sort_sub(_instSort, 1, true);
+				with(_instSort){
+					with(self[0]){
+						var _depth = depth;
+						depth--;
+						if(fork()){
+							wait 0;
+							if(instance_exists(self) && depth == _depth - 1){
+								depth = _depth;
+							}
+							exit;
+						}
+					}
+				}
 			}
 		}
 		
