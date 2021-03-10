@@ -13,17 +13,15 @@
 	global.map_bind[? "load" ] = script_bind(CustomDraw, script_ref_create(ntte_map,  -70, 7, null), object_get_depth(GenCont) - 1, false);
 	global.map_bind[? "dead" ] = script_bind(CustomDraw, script_ref_create(ntte_map, -120, 4, 0),    object_get_depth(TopCont) - 1, false);
 	global.map_bind[? "pause"] = noone;
+	global.hud_bind            = script_bind(CustomDraw, script_ref_create(ntte_hud, false, 0),      object_get_depth(TopCont) - 1, true);
 	
 	 // level_start():
 	global.level_start = (instance_exists(GenCont) || instance_exists(Menu));
+	global.area_update = false;
 	
 	 // Instance Updating:
 	global.update_id     = instance_max;
 	global.update_gen_id = global.update_id;
-	
-	 // Area:
-	global.area_update  = false;
-	global.area_mapdata = [];
 	
 	 // Music / Ambience:
 	global.mus_area    = GameCont.area;
@@ -34,16 +32,11 @@
 	global.pet_max     = 1;
 	global.pet_mapicon = array_create(maxp, []);
 	
-	 // Kills:
+	 // Character Kills Stat:
 	global.kills_last = GameCont.kills;
 	
-	 // HUD:
-	global.hud_bind   = script_bind(CustomDraw, script_ref_create(ntte_hud, false, 0), object_get_depth(TopCont) - 1, true);
-	global.hud_reroll = undefined;
-	
 	 // Scythe Tippage:
-	global.scythe_tip_index = 0;
-	global.scythe_tip       = [
+	global.scythe_tip = [
 		"press @1(sprKeySmall:pick) to change modes",
 		"the @rscythe @scan do so much more",
 		"press @1(sprKeySmall:pick) to rearrange a few @rbones",
@@ -76,10 +69,7 @@
 
 #define game_start
 	 // Reset:
-	global.area_mapdata     = [];
-	global.hud_reroll       = undefined;
-	global.kills_last       = GameCont.kills;
-	global.scythe_tip_index = 0;
+	global.kills_last = GameCont.kills;
 	ds_map_clear(global.wep_skin_player);
 	for(var i = 0; i < array_length(global.pet_mapicon); i++){
 		global.pet_mapicon[i] = [];
@@ -1036,7 +1026,7 @@
 		case area_vault: /// CROWN VAULT
 			
 			 // Vault Flower Room:
-			if(mod_variable_get("mod", "tepickups", "VaultFlower_spawn")){
+			if("ntte_vault_flower" not in GameCont || GameCont.ntte_vault_flower){
 				with(CrownPed){
 					var	_w        = 3,
 						_h        = 3,
@@ -2198,7 +2188,10 @@
 				
 				 // Scythe:
 				if(GameCont.hard > 1){
-					if(global.scythe_tip_index != -1){
+					if("ntte_scythe_tip_index" not in GameCont){
+						GameCont.ntte_scythe_tip_index = 0;
+					}
+					if(GameCont.ntte_scythe_tip_index >= 0){
 						var _scythe = false;
 						with(Player){
 							if(wep_raw(wep) == "scythe" || wep_raw(bwep) == "scythe"){
@@ -2207,8 +2200,11 @@
 							}
 						}
 						if(_scythe){
-							tip_ntte = global.scythe_tip[global.scythe_tip_index];
-							global.scythe_tip_index = min(global.scythe_tip_index + 1, array_length(global.scythe_tip) - 1);
+							tip_ntte = global.scythe_tip[GameCont.ntte_scythe_tip_index];
+							GameCont.ntte_scythe_tip_index = min(
+								GameCont.ntte_scythe_tip_index + 1,
+								array_length(global.scythe_tip) - 1
+							);
 						}
 					}
 				}
@@ -2444,7 +2440,7 @@
 			 // NTTE Area B-Themes:
 			if(subarea == 1){
 				if(array_find_index(ntte_mods.area, area) >= 0){
-					if(random(20) < 1 || array_length(instances_matching_le(Player, "my_health", 1))){
+					if(chance(1, 20) || array_length(instances_matching_le(Player, "my_health", 1))){
 						if(vaults < 3){
 							proto = true;
 						}
@@ -2453,9 +2449,12 @@
 			}
 			
 			 // Manually Recreating Pause/Loading/GameOver Map:
-			var i = waypoints - 1;
-			if(i >= 0){
-				global.area_mapdata[i] = [area, subarea, loops];
+			var _pos = waypoints - 1;
+			if(_pos >= 0){
+				if("ntte_mapdata" not in GameCont){
+					GameCont.ntte_mapdata = [];
+				}
+				GameCont.ntte_mapdata[_pos] = [area, subarea, loops];
 			}
 		}
 	}
@@ -3638,49 +3637,51 @@
 			showline : true
 		};
 		
-		if(i >= 0 && i < array_length(global.area_mapdata)){
-			var	_dataLast = _map[i],
-				_waypoint = global.area_mapdata[i];
-				
-			if(is_array(_waypoint)){
-				_data.area    = _waypoint[0];
-				_data.subarea = _waypoint[1];
-				_data.loops   = _waypoint[2];
-			}
-			
-			 // Base Game:
-			if(is_real(_data.area)){
-				if(_data.area < 100){
-					var _num = 0;
-					_num += 3 *  ceil((floor(_data.area) - 1) / 2); // Main Areas
-					_num += 1 * floor((floor(_data.area) - 1) / 2); // Transition Areas
-					_num += _data.subarea - 1;                      // Subarea
-					_num += (_data.area - floor(_data.area));       // Fractional Areas
+		if("ntte_mapdata" in GameCont){
+			if(i >= 0 && i < array_length(GameCont.ntte_mapdata)){
+				var	_dataLast = _map[i],
+					_waypoint = GameCont.ntte_mapdata[i];
 					
-					_data.x = 9 * _num;
-					_data.y = 0;
+				if(is_array(_waypoint)){
+					_data.area    = _waypoint[0];
+					_data.subarea = _waypoint[1];
+					_data.loops   = _waypoint[2];
 				}
 				
-				 // Secret Areas:
-				else{
-					_data.x = _dataLast.x;
-					_data.y = 9;
-				}
-				
-				_data.showdot = (_data.subarea == 1);
-			}
-			
-			 // Modded:
-			else if(is_string(_data.area)){
-				with(UberCont){
-					var	_dataNext = mod_script_call_self("area", _data.area, "area_mapdata", _dataLast.x, _dataLast.y, _dataLast.area, _dataLast.subarea, _data.subarea, _data.loops),
-						_dataSize = array_length(_dataNext);
+				 // Base Game:
+				if(is_real(_data.area)){
+					if(_data.area < 100){
+						var _num = 0;
+						_num += 3 *  ceil((floor(_data.area) - 1) / 2); // Main Areas
+						_num += 1 * floor((floor(_data.area) - 1) / 2); // Transition Areas
+						_num += _data.subarea - 1;                      // Subarea
+						_num += (_data.area - floor(_data.area));       // Fractional Areas
 						
-					if(_dataSize >= 2){
-						_data.x = _dataNext[0];
-						_data.y = _dataNext[1];
-						if(_dataSize >= 3) _data.showdot  = _dataNext[2];
-						if(_dataSize >= 4) _data.showline = _dataNext[3];
+						_data.x = 9 * _num;
+						_data.y = 0;
+					}
+					
+					 // Secret Areas:
+					else{
+						_data.x = _dataLast.x;
+						_data.y = 9;
+					}
+					
+					_data.showdot = (_data.subarea == 1);
+				}
+				
+				 // Modded:
+				else if(is_string(_data.area)){
+					with(UberCont){
+						var	_dataNext = mod_script_call_self("area", _data.area, "area_mapdata", _dataLast.x, _dataLast.y, _dataLast.area, _dataLast.subarea, _data.subarea, _data.loops),
+							_dataSize = array_length(_dataNext);
+							
+						if(_dataSize >= 2){
+							_data.x = _dataNext[0];
+							_data.y = _dataNext[1];
+							if(_dataSize >= 3) _data.showdot  = _dataNext[2];
+							if(_dataSize >= 4) _data.showline = _dataNext[3];
+						}
 					}
 				}
 			}
@@ -3772,20 +3773,23 @@
 				}
 				
 				 // Compile Orchid Rerolls to Draw:
-				if(skill_get(global.hud_reroll) != 0){
-					array_push(_skillType, "reroll");
-					array_push(_skillList, (
-						(global.hud_reroll == mut_patience && skill_get(GameCont.hud_patience) != 0)
-						? GameCont.hud_patience
-						: global.hud_reroll
-					));
-				}
-				else if(!is_undefined(global.hud_reroll)){
-					global.hud_reroll = undefined;
-					
+				if("ntte_reroll_hud" in GameCont && !is_undefined(GameCont.ntte_reroll_hud)){
 					 // Link to Latest Mutation:
-					for(var _pos = 0; !is_undefined(skill_get_at(_pos)); _pos++){
-						global.hud_reroll = skill_get_at(_pos);
+					if(skill_get(GameCont.ntte_reroll_hud) == 0){
+						GameCont.ntte_reroll_hud = undefined;
+						for(var _pos = 0; !is_undefined(skill_get_at(_pos)); _pos++){
+							GameCont.ntte_reroll_hud = skill_get_at(_pos);
+						}
+					}
+					
+					 // Add:
+					if(!is_undefined(GameCont.ntte_reroll_hud) && skill_get(GameCont.ntte_reroll_hud) != 0){
+						array_push(_skillType, "reroll");
+						array_push(_skillList, (
+							(GameCont.ntte_reroll_hud == mut_patience && skill_get(GameCont.hud_patience) != 0)
+							? GameCont.hud_patience
+							: GameCont.ntte_reroll_hud
+						));
 					}
 				}
 				
@@ -3847,7 +3851,11 @@
 										draw_sprite(
 											spr.SkillRerollHUDSmall,
 											0,
-											_x + ((global.hud_reroll == mut_patience && skill_get(GameCont.hud_patience) != 0) ? -4 : 5),
+											_x + (
+												(GameCont.ntte_reroll_hud == mut_patience && skill_get(GameCont.hud_patience) != 0)
+												? -4
+												: 5
+											),
 											_y + 5
 										);
 										

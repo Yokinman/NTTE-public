@@ -163,7 +163,7 @@
 						scythe_swap(true);
 						
 						 // Silence:
-						mod_variable_set("mod", "ntte", "scythe_tip_index", -1);
+						GameCont.ntte_scythe_tip_index = -1;
 					}
 				}
 			}

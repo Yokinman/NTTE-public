@@ -7,10 +7,6 @@
 	 // Custom Pickup Instances (Used in step):
 	global.pickup_custom = [];
 	
-	 // Vault Flower:
-	global.VaultFlower_spawn = true; // used in ntte.mod
-	global.VaultFlower_alive = true;
-	
 #define cleanup
 	mod_script_call("mod", "teassets", "ntte_cleanup", script_ref_create(cleanup));
 	
@@ -4564,7 +4560,7 @@
 		maxhealth  = 30;
 		size       = 3;
 		skill      = mut_last_wish;
-		alive      = global.VaultFlower_alive;
+		alive      = (skill_get("reroll") == 0 && ("ntte_reroll_hud" not in GameCont || is_undefined(GameCont.ntte_reroll_hud)));
 		prompt     = noone;
 		unlock     = false;
 		
@@ -4668,14 +4664,16 @@
 		}
 		
 		 // Wilt:
-		if(!global.VaultFlower_alive || skill_get(skill) == 0){
+		if(
+			skill_get(skill)    == 0 ||
+			skill_get("reroll") != 0 ||
+			("ntte_reroll_hud" in GameCont && !is_undefined(GameCont.ntte_reroll_hud))
+		){
 			alive = false;
 		}
 		
 		 // Interact:
 		else if(instance_exists(prompt) && player_is_active(prompt.pick)){
-			global.VaultFlower_alive = false;
-			
 			 // Reroll:
 			mod_variable_set("skill", "reroll", "skill", skill);
 			skill_set("reroll", true);
@@ -4787,7 +4785,7 @@
 		pet_spawn(x, y, "Orchid");
 		
 		 // Permadeath:
-		global.VaultFlower_spawn = false;
+		GameCont.ntte_vault_flower = false;
 		
 		 // FX:
 		repeat(20) with(scrFX(x, (y - 6), [90 + orandom(100), random(4)], "VaultFlowerSparkle")){
@@ -5115,10 +5113,6 @@
 	
 /// GENERAL
 #define game_start
-	 // Reset Vault Flower:
-	global.VaultFlower_spawn = true;
-	global.VaultFlower_alive = true;
-	
 	 // Delete Orchid Skills:
 	with(instances_matching(CustomObject, "name", "OrchidSkill")){
 		instance_delete(self);

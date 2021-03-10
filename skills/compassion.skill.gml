@@ -5,14 +5,8 @@
 	global.sprSkillIcon = sprite_add("../sprites/skills/Compassion/sprSkillCompassionIcon.png", 1, 12, 16);
 	global.sprSkillHUD  = sprite_add("../sprites/skills/Compassion/sprSkillCompassionHUD.png",  1,  8,  8);
 	
-	 // Reset:
-	game_start();
-	
 #define cleanup
 	mod_script_call("mod", "teassets", "ntte_cleanup", script_ref_create(cleanup));
-	
-#define game_start
-	global.last = skill_get(mod_current);
 	
 #define skill_name    return "COMPASSION";
 #define skill_text    return "EXTRA @wPET @sSLOT";
@@ -29,18 +23,23 @@
 			
 		if(_max > 0){
 			with(_pet) _num += instance_exists(self);
-			if(_num >= _max) return true;
+			if(_num >= _max){
+				return true;
+			}
 		}
 	}
 	
-	return false;
+	return (skill_get(mod_current) != 0);
 	
 #define skill_take(_num)
-	mod_variable_set("mod", "ntte", "pet_max", mod_variable_get("mod", "ntte", "pet_max") + (_num - global.last));
+	var _last = variable_instance_get(GameCont, `skill_last_${mod_current}`, 0);
+	variable_instance_set(GameCont, `skill_last_${mod_current}`, _num);
+	
+	 // Update Max Pets:
+	mod_variable_set("mod", "ntte", "pet_max", mod_variable_get("mod", "ntte", "pet_max") + (_num - _last));
 	with(instances_matching_ne(Player, "ntte_pet_max", null)){
-		ntte_pet_max += (_num - global.last);
+		ntte_pet_max += (_num - _last);
 	}
-	global.last = _num;
 	
 	 // Sound:
 	if(_num > 0 && instance_exists(LevCont)){

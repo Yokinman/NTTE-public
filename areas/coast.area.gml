@@ -530,7 +530,6 @@
 		 // Underwater Portal Setup:
 		if(instance_exists(Portal) && Portal.id > _newID){
 			with(instances_matching_gt(Portal, "id", _newID)){
-				alarm0 = -1;
 				if(type == 1 && endgame == 100 && image_alpha == 1){
 					visible = false;
 					sound_stop(sndPortalOpen);
@@ -538,6 +537,11 @@
 					 // Flash Sea:
 					with(global.sea_bind[? "main"].id){
 						flash = 0;
+					}
+					
+					 // Move to Floor:
+					if(alarm0 > 0){
+						event_perform(ev_alarm, 0);
 					}
 					
 					 // Move to Sea:
@@ -569,6 +573,7 @@
 					xprevious = x;
 					yprevious = y;
 				}
+				alarm0 = -1;
 			}
 		}
 	}
@@ -636,7 +641,7 @@
 			if(array_length(_instPush)){
 				var _noPortal = !instance_exists(Portal);
 				with(_instPush){
-					if(_noPortal || (distance_to_object(Portal) > 96 && (object_index != Player || array_length(instances_matching_lt(Portal, "endgame", 100)) > 0))){
+					if(_noPortal || (distance_to_object(Portal) > 96 && (object_index != Player || array_length(instances_matching_lt(Portal, "endgame", 100))))){
 						if(!instance_is(self, hitme) || (team != 0 && !instance_is(self, prop))){
 							var _player = (object_index == Player),
 								_target = instance_nearest(x - 16, y - 16, Floor),
@@ -647,7 +652,7 @@
 							
 							 // Extra Player Push:
 							if(_player && wading > 120){
-								if(array_length(instances_matching_ge(Portal, "endgame", 100)) <= 0){
+								if(!array_length(instances_matching_ge(Portal, "endgame", 100))){
 									var _dis = ((wading - 120) / 10) * current_time_scale;
 									x += lengthdir_x(_dis, _dir);
 									y += lengthdir_y(_dis, _dir);
@@ -675,8 +680,8 @@
 			),
 			instances_matching(CustomSlash, "name", "ClamShield")
 		);
-		global.sea_inst = instances_matching_le(global.sea_inst, "depth", _depthMax);
-		global.sea_inst = instances_matching(global.sea_inst, "visible", true);
+		global.sea_inst = instances_matching_le(global.sea_inst, "depth",   _depthMax);
+		global.sea_inst = instances_matching(   global.sea_inst, "visible", true);
 		global.sea_inst = instances_matching_ne(global.sea_inst, "canwade", false);
 		
 		if(array_length(global.sea_inst)){

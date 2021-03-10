@@ -2911,11 +2911,13 @@
 	my_health -= _damage;
 	
 	 // Hurt Papa Squid:
-	with(other) with(other.creator){
-		PitSquid_hurt(min(_damage, max(0, _armHealth)), _force, _direction);
-	}
-	with(instances_matching(instances_matching(object_index, "name", name), "creator", creator)){
-		nexthurt = current_frame + 6;
+	if(creator != noone){
+		with(instance_exists(other) ? other : self){
+			projectile_hit(other.creator, min(_damage, max(0, _armHealth)), _force, _direction);
+		}
+		with(instances_matching(instances_matching(object_index, "name", name), "creator", creator)){
+			nexthurt = current_frame + 6;
+		}
 	}
 	
 	 // Sound:
@@ -2935,15 +2937,12 @@
 	 // Effects:
 	//repeat(3) with(scrFX(x, y, 1, Smoke)) depth = 2;
 	if(spr_dead != spr_disappear){
-		sleep(35);
-		var n = 3;
-		for(var i = 0; i < 360; i += (360 / n)){
-			var d = direction + i;
-			
-			with(scrFX(x, y, [d + orandom(10), 3], BloodStreak)){
+		for(var _dir = direction; _dir < direction + 360; _dir += (360 / 3)){
+			with(scrFX(x, y, [_dir + orandom(10), 3], BloodStreak)){
 				sprite_index = spr.SquidBloodStreak;
 			}
 		}
+		sleep(35);
 	}
 	
 	

@@ -155,28 +155,32 @@
 #define BuriedCar_create(_x, _y)
 	with(instance_create(_x, _y, CustomProp)){
 		 // Visual:
-		spr_idle = spr.BuriedCarIdle;
-		spr_hurt = spr.BuriedCarHurt;
-		spr_dead = mskNone;
+		spr_idle   = spr.BuriedCarIdle;
+		spr_hurt   = spr.BuriedCarHurt;
+		spr_dead   = mskNone;
 		spr_shadow = mskNone;
 		
 		 // Sound:
 		snd_hurt = sndHitMetal;
 		
 		 // Vars:
-		size = 2;
 		maxhealth = 20;
-		my_floor = instance_nearest_bbox(x, y, Floor);
+		size      = 2;
+		target    = instance_nearest_bbox(x, y, Floor);
 		
 		return self;
 	}
 	
 #define BuriedCar_step
-	if(instance_exists(my_floor)){
-		x = my_floor.x + 16;
-		y = my_floor.y + 16;
+	if(instance_exists(target)){
+		with(target){
+			other.x = bbox_center_x;
+			other.y = bbox_center_y;
+		}
 	}
-	else instance_destroy();
+	else if(my_health > 0){
+		my_health = 0;
+	}
 	
 #define BuriedCar_death
 	 // Explosion:
@@ -185,7 +189,7 @@
 	sound_play(sndExplosionCar);
 	
 	 // Break Floor:
-	with(my_floor){
+	with(target){
 		with(instances_meeting(x, y, Detail)){
 			if(place_meeting(x, y, other)){
 				instance_destroy();
