@@ -583,10 +583,34 @@
 	
 	 // Warp In:
 	else if(enemy_target(x, y)){
-		var _floor  = noone;
+		var _found = false;
+		
+		 // Teleport Near Enemy:
+		with(array_shuffle(enemy)){
+			with(other){
+				with(instance_nearest_bbox(other.x, other.y, FloorNormal)){
+					var	_x = bbox_center_x,
+						_y = bbox_center_y;
+						
+					with(other){
+						if(point_distance(_x, _y, target.x, target.y) >= teleport_dis_min){
+							if(!place_meeting(_x, _y, Wall)){
+								_found = true;
+								teleport_x = _x;
+								teleport_y = _y;
+							}
+						}
+					}
+				}
+			}
+			if(_found){
+				break;
+			}
+		}
 		
 		 // Teleport Near Target:
-		if(my_health < maxhealth || !instance_exists(enemy)){
+		if(my_health < maxhealth || !_found){
+			_found = false;
 			with(array_shuffle(FloorNormal)){
 				var _x = bbox_center_x,
 					_y = bbox_center_y;
@@ -595,57 +619,26 @@
 					var _targetDis = point_distance(_x, _y, target.x, target.y);
 					if(_targetDis >= teleport_dis_min && _targetDis <= teleport_dis_max){
 						if(!place_meeting(_x, _y, Wall)){
-							_floor = other;
+							_found = true;
+							teleport_x = _x;
+							teleport_y = _y;
 						}
 					}
 				}
-				if(instance_exists(_floor)){
-					break;
-				}
-			}
-		}
-		
-		 // Teleport Near Enemy:
-		if(!instance_exists(_floor)){
-			with(array_shuffle(enemy)){
-				with(other){
-					with(instance_nearest_bbox(other.x, other.y, FloorNormal)){
-						var	_x = bbox_center_x,
-							_y = bbox_center_y;
-							
-						with(other){
-							if(point_distance(_x, _y, target.x, target.y) >= teleport_dis_min){
-								if(!place_meeting(_x, _y, Wall)){
-									_floor = other;
-								}
-							}
-						}
-					}
-				}
-				if(instance_exists(_floor)){
+				if(_found){
 					break;
 				}
 			}
 		}
 		
 		 // Rematerialize:
-		if(instance_exists(_floor)){
-			teleport = false;
-			canfly   = false;
-			
-			 // Move:
-			with(_floor){
-				other.x = bbox_center_x;
-				other.y = bbox_center_y;
-			}
-			
-			 // Visual:
-			sprite_index = spr_appear;
-			image_index  = 0;
-			
-			 // Sound:
-			sound_play_hit_ext(sndHyperCrystalSpawn, 2.1 + random(0.3), 0.8);
-		}
+		teleport     = false;
+		canfly       = false;
+		x            = teleport_x;
+		y            = teleport_y;
+		sprite_index = spr_appear;
+		image_index  = 0;
+		sound_play_hit_ext(sndHyperCrystalSpawn, 2.1 + random(0.3), 0.8);
 	}
 	
 #define CrystalBrain_death
