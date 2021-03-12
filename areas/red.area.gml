@@ -16,7 +16,7 @@
 #macro area_active variable_instance_get(GameCont, "ntte_active_" + mod_current, false) && (GameCont.area == mod_current || GameCont.lastarea == mod_current)
 #macro area_visits variable_instance_get(GameCont, "ntte_visits_" + mod_current, 0)
 
-#define area_subarea           return 3;
+#define area_subarea           return 1;
 #define area_goal              return 60;
 #define area_next              return [mod_current, 1]; // CAN'T LEAVE
 #define area_music             return mus.Red;

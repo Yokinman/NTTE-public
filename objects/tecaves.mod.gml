@@ -1549,7 +1549,11 @@
 	 // Boss:
 	if(!big){
 		var _subMax = area_get_subarea(area);
-		if(subarea == _subMax && (_subMax > 1 || loops > 0) && (!area_get_secret(area) || area == "red" || area == area_hq)){
+		if(
+			(area == "red")
+			? (subarea == 3)
+			: (subarea == _subMax && (_subMax > 1 || (loops > 0 && !area_get_secret(area))))
+		){
 			 // Vars:
 			friction *= 4/3;
 			maxspeed *= 2/3;
