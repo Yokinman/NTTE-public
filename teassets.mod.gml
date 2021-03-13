@@ -1,5 +1,5 @@
 #define init
-	ntte_version = 2.048;
+	ntte_version = 2.049;
 	
 	 // Debug Lag:
 	lag = false;

@@ -4675,7 +4675,7 @@
 		 // Interact:
 		else if(instance_exists(prompt) && player_is_active(prompt.pick)){
 			 // Reroll:
-			mod_variable_set("skill", "reroll", "skill", skill);
+			GameCont.ntte_reroll = skill;
 			skill_set("reroll", true);
 			
 			 // Orchid Plant Skin Unlock:
