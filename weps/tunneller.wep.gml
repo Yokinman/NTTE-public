@@ -25,21 +25,21 @@
 #macro spr global.spr
 
 #define weapon_name(_wep)     return (weapon_avail(_wep) ? ((weapon_gold(_wep) != 0) ? "GOLDEN " : "") + "TUNNELLER" : "LOCKED");
-#define weapon_text(_wep)     return ((weapon_get_gold(_wep) != 0) ? choose("GOLDEN GOD", `@(color:${area_get_back_color("red")})KEY @sTO THE @wMULTIVERSE`) : choose(`@wUNLOCK @sTHE @(color:${area_get_back_color("red")})CONTINUUM`, "FULL CIRCLE", `YET ANOTHER @(color:${area_get_back_color("red")})RED KEY`));
-#define weapon_sprt(_wep)     return (weapon_avail() ? ((weapon_get_gold(_wep) == 0) ? global.sprWep : global.sprWepGold) : global.sprWepLocked);
-#define weapon_loadout(_wep)  return ((argument_count > 0 && weapon_get_gold(_wep) != 0) ? global.sprWepGoldLoadout : global.sprWepLoadout);
-#define weapon_area(_wep)     return ((argument_count > 0 && weapon_avail(_wep) && weapon_get_gold(_wep) == 0) ? 22 : -1); // L1 3-1
+#define weapon_text(_wep)     return ((weapon_gold(_wep) != 0) ? choose("GOLDEN GOD", `@(color:${call(scr.area_get_back_color, "red")})KEY @sTO THE @wMULTIVERSE`) : choose(`@wUNLOCK @sTHE @(color:${call(scr.area_get_back_color, "red")})CONTINUUM`, "FULL CIRCLE", `YET ANOTHER @(color:${call(scr.area_get_back_color, "red")})RED KEY`));
+#define weapon_sprt(_wep)     return (weapon_avail() ? ((weapon_gold(_wep) == 0) ? global.sprWep : global.sprWepGold) : global.sprWepLocked);
+#define weapon_loadout(_wep)  return ((argument_count > 0 && weapon_gold(_wep) != 0) ? global.sprWepGoldLoadout : global.sprWepLoadout);
+#define weapon_area(_wep)     return ((argument_count > 0 && weapon_avail(_wep) && weapon_gold(_wep) == 0) ? 22 : -1); // L1 3-1
 #define weapon_gold(_wep)     return ((argument_count > 0 && lq_defget(_wep, "gold", false)) ? -1 : 0);
 #define weapon_load           return 24; // 0.8 Seconds
 #define weapon_burst(_wep)    return ((lq_defget(_wep, "chrg", false) || lq_defget(_wep, "chrg_num", 0) >= lq_defget(_wep, "chrg_max", 1)) ? 1 : 3);
 #define weapon_burst_time     return 4; // 0.13 Seconds
 #define weapon_auto           return true;
 #define weapon_melee          return false;
-#define weapon_avail          return unlock_get("pack:" + weapon_ntte_pack());
+#define weapon_avail          return call(scr.unlock_get, "pack:" + weapon_ntte_pack());
 #define weapon_ntte_pack      return "red";
 #define weapon_shrine         return [mut_long_arms, mut_laser_brain];
 #define weapon_red            return 1;
-#define weapon_chrg(_wep)     return (argument_count > 0 && "red_ammo" in self && red_ammo >= weapon_get("red", _wep));
+#define weapon_chrg(_wep)     return (argument_count > 0 && "red_ammo" in self && red_ammo >= call(scr.weapon_get, "red", _wep));
 
 #define weapon_type
 	 // Weapon Pickup Ammo Outline:
@@ -75,7 +75,7 @@
 	return sndSwapSword;
 	
 #define weapon_fire(_wep)
-	var _fire = weapon_fire_init(_wep);
+	var _fire = call(scr.weapon_fire_init, _wep);
 	_wep = _fire.wep;
 	
 	var _charge = (_wep.chrg_num / _wep.chrg_max);
@@ -93,7 +93,7 @@
 			var	_l = random(16) - wkick,
 				_d = gunangle + (wepangle * (1 - (wkick / 20)));
 				
-			obj_create(x + lengthdir_x(_l, _d), y + lengthdir_y(_l, _d), "CrystalBrainEffect");
+			call(scr.obj_create, x + lengthdir_x(_l, _d), y + lengthdir_y(_l, _d), "CrystalBrainEffect");
 		}
 		if(_wep.chrg == 1){
 			 // Sound:
@@ -117,7 +117,7 @@
 					sprite_index = sprThrowHit;
 					image_speed  = 0.4;
 					image_angle  = random(360);
-					image_blend  = area_get_back_color("red");
+					image_blend  = call(scr.area_get_back_color, "red");
 					depth        = other.depth - 1;
 					with(instance_create(x, y, PlasmaTrail)){
 						sprite_index = other.sprite_index;
@@ -135,31 +135,43 @@
 	 // Fire:
 	else{
 		 // Red:
-		var _cost = weapon_get("red", _wep);
+		var _cost = call(scr.weapon_get, "red", _wep);
 		if(_charge >= 1 && "red_ammo" in _fire.creator && _fire.creator.red_ammo >= _cost && _fire.burst == 1){
 			_fire.creator.red_ammo -= _cost;
 			
 			var _skill = skill_get(mut_laser_brain);
 			
 			 // Chaos Ball:
-			with(projectile_create(x, y, "CrystalHeartBullet", gunangle + orandom(4 * accuracy), 4)){
-				damage = lerp(35, 50, _skill);
+			with(call(scr.projectile_create, x, y, "CrystalHeartBullet", gunangle + orandom(4 * accuracy), 4)){
 				image_xscale += 0.15 * _skill;
 				image_yscale += 0.15 * _skill;
 				
 				 // Area:
-				area_goal  = irandom_range(8, 12)/* + (4 * _skill)*/ + (4 * (weapon_get_gold(_wep) != 0));
+				area_goal  = irandom_range(8, 12)/* + (4 * _skill)*/ + (4 * (weapon_gold(_wep) != 0));
 				area_chaos = chance(1, 2);
 				area_chest = [];
 				
 				 // No Guarantees:
 				if(chance(3, 5)){
-					switch(pool({
-						"normal" : 90,
-						"orchid" : 5 * save_get("orchid:seen", false),
-						"lair"   : 5 * unlock_get("crown:crime")
-					})){
+					var _type = "normal";
+					if(chance(1, 10)){
+						_type = call(scr.pool, {
+							"mutation" : 1,
+							"orchid"   : call(scr.save_get, "orchid:seen", false),
+							"lair"     : call(scr.unlock_get, "crown:crime")
+						});
+					}
+					switch(_type){
 						
+						case "mutation":
+							
+							area_chest = [call(scr.pool, [
+								["SpiritChest",     1],
+								["HammerHeadChest", 1]
+							])];
+							
+							break;
+							
 						case "orchid":
 							
 							area_chest_pos = "random";
@@ -169,18 +181,22 @@
 							
 						case "lair":
 							
-							area_chest = ["CatChest", "BatChest"]; //, "RatChest"]; one day...
+							area_chest = call(scr.pool, [
+								[["CatChest", "BatChest"], 2],
+								[["CatChest", "RatChest"], 1],
+								[["BatChest", "RatChest"], 1]
+							]);
 							
 							break;
 							
 						default:
 							
-							area_chest = [pool([
+							area_chest = [call(scr.pool, [
 								[AmmoChest,          5],
 								[WeaponChest,        5],
 								["Backpack",         3],
 								["BonusAmmoChest",   2],
-								["BonusHealthChest", 2],
+								["BonusHealthChest", 2]
 							])];
 							
 					}
@@ -196,16 +212,32 @@
 					array_push(area_chest, RadChest);
 				}
 				
+				 // Open Mind:
+				var _mind = round(skill_get(mut_open_mind));
+				if(_mind != 0){
+					var _chestNum = array_length(area_chest);
+					repeat(abs(_mind)){
+						if(_mind > 0){
+							array_push(area_chest, area_chest[irandom(_chestNum - 1)]);
+						}
+						else if(_chestNum > 0){
+							area_chest = call(scr.array_delete, area_chest, irandom(_chestNum - 1));
+							_chestNum--;
+						}
+						else break;
+					}
+				}
+				
 				 // Effect:
 				with(instance_create(x, y, ThrowHit)){
-					image_blend = area_get_back_color(other.area);
+					image_blend = call(scr.area_get_back_color, other.area);
 				}
 			}
 			
 			 // Sounds:
 			var _pitch = random_range(0.8, 1.2);
 			sound_play_pitch(sndHyperCrystalSearch, ((_skill > 0) ? 1.2 : 1.4) * _pitch);
-			sound_play_pitch(((weapon_get_gold(_wep) == 0) ? sndUltraGrenade : sndGoldPlasmaUpg), 1.0 * _pitch);
+			sound_play_pitch(((weapon_gold(_wep) == 0) ? sndUltraGrenade : sndGoldPlasmaUpg), 1.0 * _pitch);
 			sound_play_pitch(sndGammaGutsKill, 1.4 * _pitch);
 			sound_set_track_position(
 				sound_play_pitch(((_skill > 0) ? sndDevastatorUpg : sndDevastator), 0.8 * _pitch),
@@ -233,20 +265,20 @@
 				_dir   = gunangle;
 				
 			 // Shank:
-			with(projectile_create(
+			with(call(scr.projectile_create,
 				x + lengthdir_x(_dis, _dir),
 				y + lengthdir_y(_dis, _dir),
 				"RedShank",
 				_dir + orandom(10 * accuracy),
 				lerp(3, 6, _skill)
 			)){
-				if(weapon_get_gold(_wep) != 0){
+				if(weapon_gold(_wep) != 0){
 					sprite_index = spr.RedShankGold; // it's awesome
 				}
 			}
 			
 			 // Sounds:
-			sound_play_gun(((weapon_get_gold(_wep) == 0) ? sndScrewdriver : sndGoldScrewdriver), 0.2, 0.6);
+			sound_play_gun(((weapon_gold(_wep) == 0) ? sndScrewdriver : sndGoldScrewdriver), 0.2, 0.6);
 			sound_set_track_position(
 				sound_play_pitchvol(sndHyperCrystalChargeExplo, 1 + random(0.5), 0.4),
 				1.5
@@ -260,26 +292,24 @@
 	
 	
 /// SCRIPTS
+#macro  call                                                                                    script_ref_call
+#macro  obj                                                                                     global.obj
+#macro  scr                                                                                     global.scr
+#macro  spr                                                                                     global.spr
+#macro  snd                                                                                     global.snd
+#macro  msk                                                                                     spr.msk
+#macro  mus                                                                                     snd.mus
+#macro  lag                                                                                     global.debug_lag
+#macro  ntte                                                                                    global.ntte_vars
 #macro  type_melee                                                                              0
 #macro  type_bullet                                                                             1
 #macro  type_shell                                                                              2
 #macro  type_bolt                                                                               3
 #macro  type_explosive                                                                          4
 #macro  type_energy                                                                             5
-#macro  current_frame_active                                                                    (current_frame % 1) < current_time_scale
+#macro  current_frame_active                                                                    ((current_frame + global.epsilon) % 1) < current_time_scale
 #define orandom(_num)                                                                   return  random_range(-_num, _num);
 #define chance(_numer, _denom)                                                          return  random(_denom) < _numer;
 #define chance_ct(_numer, _denom)                                                       return  random(_denom) < (_numer * current_time_scale);
-#define unlock_get(_unlock)                                                             return  mod_script_call_nc('mod', 'teassets', 'unlock_get', _unlock);
-#define obj_create(_x, _y, _obj)                                                        return  (is_undefined(_obj) ? [] : mod_script_call_nc('mod', 'telib', 'obj_create', _x, _y, _obj));
-#define projectile_create(_x, _y, _obj, _dir, _spd)                                     return  mod_script_call_self('mod', 'telib', 'projectile_create', _x, _y, _obj, _dir, _spd);
-#define weapon_fire_init(_wep)                                                          return  mod_script_call     ('mod', 'telib', 'weapon_fire_init', _wep);
-#define weapon_ammo_fire(_wep)                                                          return  mod_script_call     ('mod', 'telib', 'weapon_ammo_fire', _wep);
-#define weapon_ammo_hud(_wep)                                                           return  mod_script_call     ('mod', 'telib', 'weapon_ammo_hud', _wep);
-#define weapon_get(_name, _wep)                                                         return  mod_script_call     ('mod', 'telib', 'weapon_get', _name, _wep);
-#define wep_raw(_wep)                                                                   return  mod_script_call_nc  ('mod', 'telib', 'wep_raw', _wep);
 #define wep_get(_primary, _name, _default)                                              return  variable_instance_get(self, (_primary ? '' : 'b') + _name, _default);
-#define wep_set(_primary, _name, _value)                                                        variable_instance_set(self, (_primary ? '' : 'b') + _name, _value);
-#define save_get(_name, _default)                                                       return  mod_script_call_nc  ('mod', 'teassets', 'save_get', _name, _default);
-#define area_get_back_color(_area)                                                      return  mod_script_call_nc('mod', 'telib', 'area_get_back_color', _area);
-#define pool(_pool)                                                                     return  mod_script_call_nc('mod', 'telib', 'pool', _pool);
+#define wep_set(_primary, _name, _value)                                                        if(((_primary ? '' : 'b') + _name) in self) variable_instance_set(self, (_primary ? '' : 'b') + _name, _value);

@@ -37,7 +37,7 @@
 #define weapon_ntte_eat
 	 // Unleash da Portal:
 	if(!instance_is(self, Portal)){
-		with(projectile_create(x, y, "PortalBullet", random(360), 20)){
+		with(call(scr.projectile_create, x, y, "PortalBullet", random(360), 20)){
 			event_perform(ev_other, ev_animation_end);
 			move_contact_solid(direction, random_range(32, 160));
 			instance_destroy();
@@ -49,13 +49,13 @@
 	}
 	
 #define weapon_fire(_wep)
-	var _fire = weapon_fire_init(_wep);
+	var _fire = call(scr.weapon_fire_init, _wep);
 	_wep = _fire.wep;
 	
 	 // Portal Bullets:
 	var _num = 4;
 	for(var _off = -1; _off <= 1; _off += 2 / (_num - 1)){
-		with(projectile_create(x, y, "PortalBullet", gunangle + (15 * _off * accuracy), random_range(11, 13))){
+		with(call(scr.projectile_create, x, y, "PortalBullet", gunangle + (15 * _off * accuracy), random_range(11, 13))){
 			mask    = mskPlasma;
 			damage  = 25;
 			spec    = _fire.spec;
@@ -63,7 +63,7 @@
 			offset  = 20 - (2 * abs(_off));
 			
 			 // Remember Me:
-			array_push(_wep.inst, id);
+			array_push(_wep.inst, self);
 		}
 	}
 	_wep.gunangle = gunangle;
@@ -82,22 +82,10 @@
 	
 	
 #define step(_primary)
-	var _wep = wep_get(_primary, "wep", mod_current);
-	
-	 // LWO Setup:
-	if(!is_object(_wep)){
-		_wep = { "wep" : _wep };
-		wep_set(_primary, "wep", _wep);
-	}
-	for(var i = lq_size(global.lwoWep) - 1; i >= 0; i--){
-		var _key = lq_get_key(global.lwoWep, i);
-		if(_key not in _wep){
-			lq_set(_wep, _key, lq_get_value(global.lwoWep, i));
-		}
-	}
+	var _wep = call(scr.weapon_step_init, _primary);
 	
 	 // Portal Bullet Control:
-	_wep.inst = instances_matching_ne(_wep.inst, "id", null);
+	_wep.inst = instances_matching_ne(_wep.inst, "id");
 	if(array_length(_wep.inst)){
 		 // Dynamic Reload:
 		wep_set(_primary, "reload",    max(wep_get(_primary, "reload", 0), weapon_get_load(_wep)));
@@ -118,23 +106,24 @@
 	
 	
 /// SCRIPTS
+#macro  call                                                                                    script_ref_call
+#macro  obj                                                                                     global.obj
+#macro  scr                                                                                     global.scr
+#macro  spr                                                                                     global.spr
+#macro  snd                                                                                     global.snd
+#macro  msk                                                                                     spr.msk
+#macro  mus                                                                                     snd.mus
+#macro  lag                                                                                     global.debug_lag
+#macro  ntte                                                                                    global.ntte_vars
 #macro  type_melee                                                                              0
 #macro  type_bullet                                                                             1
 #macro  type_shell                                                                              2
 #macro  type_bolt                                                                               3
 #macro  type_explosive                                                                          4
 #macro  type_energy                                                                             5
-#macro  current_frame_active                                                                    (current_frame % 1) < current_time_scale
+#macro  current_frame_active                                                                    ((current_frame + global.epsilon) % 1) < current_time_scale
 #define orandom(_num)                                                                   return  random_range(-_num, _num);
 #define chance(_numer, _denom)                                                          return  random(_denom) < _numer;
 #define chance_ct(_numer, _denom)                                                       return  random(_denom) < (_numer * current_time_scale);
-#define unlock_get(_unlock)                                                             return  mod_script_call_nc('mod', 'teassets', 'unlock_get', _unlock);
-#define obj_create(_x, _y, _obj)                                                        return  (is_undefined(_obj) ? [] : mod_script_call_nc('mod', 'telib', 'obj_create', _x, _y, _obj));
-#define projectile_create(_x, _y, _obj, _dir, _spd)                                     return  mod_script_call_self('mod', 'telib', 'projectile_create', _x, _y, _obj, _dir, _spd);
-#define weapon_fire_init(_wep)                                                          return  mod_script_call     ('mod', 'telib', 'weapon_fire_init', _wep);
-#define weapon_ammo_fire(_wep)                                                          return  mod_script_call     ('mod', 'telib', 'weapon_ammo_fire', _wep);
-#define weapon_ammo_hud(_wep)                                                           return  mod_script_call     ('mod', 'telib', 'weapon_ammo_hud', _wep);
-#define weapon_get(_name, _wep)                                                         return  mod_script_call     ('mod', 'telib', 'weapon_get', _name, _wep);
-#define wep_raw(_wep)                                                                   return  mod_script_call_nc  ('mod', 'telib', 'wep_raw', _wep);
 #define wep_get(_primary, _name, _default)                                              return  variable_instance_get(self, (_primary ? '' : 'b') + _name, _default);
-#define wep_set(_primary, _name, _value)                                                        variable_instance_set(self, (_primary ? '' : 'b') + _name, _value);
+#define wep_set(_primary, _name, _value)                                                        if(((_primary ? '' : 'b') + _name) in self) variable_instance_set(self, (_primary ? '' : 'b') + _name, _value);

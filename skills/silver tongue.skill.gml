@@ -15,18 +15,31 @@
 #define skill_button  sprite_index = global.sprSkillIcon;
 #define skill_avail   return (skill_get(mod_current) != 0);
 
+#define skill_sound
+	audio_sound_pitch(
+		sound_play_gun(sndFishUltraA, 0, 0.3),
+		1.2
+	);
+	return sndMut;
+	
 #define skill_take(_num)
 	 // Sound:
 	if(_num > 0 && instance_exists(LevCont)){
-		sound_play(sndMut);
-		sound_play_pitch(sndFishUltraA, 1.2);
+		sound_play_gun(skill_sound(), 0, 0.3);
 	}
 	
 	
 /// SCRIPTS
-#macro  current_frame_active                                                                    (current_frame % 1) < current_time_scale
+#macro  call                                                                                    script_ref_call
+#macro  obj                                                                                     global.obj
+#macro  scr                                                                                     global.scr
+#macro  spr                                                                                     global.spr
+#macro  snd                                                                                     global.snd
+#macro  msk                                                                                     spr.msk
+#macro  mus                                                                                     snd.mus
+#macro  lag                                                                                     global.debug_lag
+#macro  ntte                                                                                    global.ntte_vars
+#macro  current_frame_active                                                                    ((current_frame + global.epsilon) % 1) < current_time_scale
 #define orandom(_num)                                                                   return  random_range(-_num, _num);
 #define chance(_numer, _denom)                                                          return  random(_denom) < _numer;
 #define chance_ct(_numer, _denom)                                                       return  random(_denom) < (_numer * current_time_scale);
-#define unlock_get(_unlock)                                                             return  mod_script_call_nc('mod', 'teassets', 'unlock_get', _unlock);
-#define obj_create(_x, _y, _obj)                                                        return  (is_undefined(_obj) ? [] : mod_script_call_nc('mod', 'telib', 'obj_create', _x, _y, _obj));

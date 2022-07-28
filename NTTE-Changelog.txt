@@ -1,3 +1,83 @@
+2.05 ~ Final Provisions
+	
+	       @(sprite:menu/banners/sprFinalMain.png:1)
+	GENERAL
+	+ New character @d(visit the Crown Vault)
+	+ New pet for @bI.D.P.D. H.Q.
+	+ New @bCOOL @sskin for @yFrog
+	+ New weapon: @gUltra Quasar Rifle
+	+ New loop weapon for @bRogue @d(stick with Rogue Rifle)
+	+ New backpack, with merged weapon-wielding allies
+	+ New @gConfiscate @sStrong Spirit & Hammerhead chests
+	+ New @r@(sprite:areas/Crystal/sprRedText.png:12:-0.8) Chest@s, found in loop @r@(sprite:areas/Crystal/sprRedText.png:12:-0.8) Area @schunks
+	+ New @gRat Chest@s, the rad canister of @wBat @s& @wCat Chests
+	+ New mini-mutations, only obtained at in-level sources
+	+ @wMerged Weapons @ssupport @wModded Weapons @sand have redesigned projectile effects @(sprite:chests/sprBackpackDebris.png:30:-0.4) @(sprite:chests/sprBackpackDebris.png:30:-0.5) @(sprite:chests/sprBackpackDebris.png:30:-0.3)
+	+ @wBat Chests @sprovide options for merging your current weapon with a new stock or front
+	+ Overhauled the @wCrown of Crime @swith a bounty system
+	+ @bOcto @spet chains lightning through player projectiles
+	+ @yGolden Teleport Gun @(sprite:weps/sprGoldTeleportGun.png:1:0:-1:12)
+	+ @pPortal Guardians @simplode if hit by their own orb @(sprite:projectiles/sprPortalBullet.png:4:-0.4:12:12)
+	+ @wOpen Mind @sduplicates backpacks
+	+ Backpacks drop @r@(sprite:areas/Crystal/sprRedText.png:12:-0.8) Ammo @sfor @r@(sprite:areas/Crystal/sprRedText.png:12:-0.8) Weapons
+	+ @yOrchid @smutation orbs can travel through portals
+	+ Thrown bones support @wChicken Throne Butt @s& @wUltra B
+	+ The @rAnnihilation @smutation indicates how many levels it has left on the HUD @(sprite:skills/Annihilation/sprSkillAnnihilationHUD.png:1:0:-1:12)
+	+ @wClam Shield @shas an interaction with Y.V.'s active
+	+ NT:TE character corpses appear at loop campfire
+	+ Added a toggle option for footprints
+	
+	            @(sprite:menu/banners/sprFinalChanges.png:1)
+	CHANGES
+	~ Players riding @wSalamander @spet get a minor speed buff
+	~ @rTwins @spet has a smaller hitbox & freezes for twice as long after diverting projectiles @(sprite:pets/Red/sprPetTwinsIcon.png:1)
+	~ @rTwins @spet is named "Twin" if its partner is missing
+	~ @wSawblade Discs @sslow down slightly when hitting enemies and bounce off of walls more intuitively
+	~ Improved the damage of @rTunneller's @sorb projectiles
+	~ @wScythe @sreverts to melee if double-clicked while empty
+	~ @yOrchid @smutations now support the @gPatience @smutation
+	~ @gGreen @smutations are portal-based, not time-based
+	~ Palace shrines give you their mutation if destroyed
+	~ HUD for @bBonus Ammo @s& @bHP @snow displays their time
+	~ Mutations have underwater selection sounds @(sprite:sprBubble)
+	~ @wChaos Hearts @sexplode on touch & deal less damage
+	~ @rCrystal Brains @sno longer clone enemy Horrors
+	~ Steroids heavy chests give @rParrot @sextra feathers
+	~ Feathers target the nearest enemy if their charmed enemy dies, instead of dissipating @(sprite:races/Parrot/sprParrotFeather.png:1)
+	~ @gStalker @sis supported by various NT:TE rad-drops
+	~ Desert's wall-top weapons have a higher drop area
+	~ Tents have less HP & can be trampled if over chests
+	~ Spinning quad-flame traps pause at right angles
+	~ @gLast Wish @sno longer increases backpack spawns
+	~ The big crystal prop in @yCursed Caves @sis blue & all blue crystal enemies turn orange on death
+	~ Runs can't be started while NT:TE is loading
+	
+	                    @(sprite:menu/banners/sprFinalFixes.png:2:-0.01)
+	FIXES
+	* Fairly heavy optimizations to a variety of systems
+	* Going to @gJungle @snow removes @gLast Wish @slike normal
+	* @yCrown of Haste @snow supports @r@(sprite:areas/Crystal/sprRedText.png:12:-0.8) Ammo @spickups
+	* @rAnnihilator @sresets its charge's angle if cancelled early
+	* @yVault Flower@s rerolls work better with @gPatience
+	* @yOrchid Chests @sno longer replace @bRogue @scanisters
+	* Fixed @yOrchid @wRhino Skin @sletting you go over max HP
+	* Fixed @yOrchid @wCompassion @sletting you keep pets
+	* Fixed @yOrchid @wHeavy Heart @sappearing in mutation sets
+	* Fixed @wSalamander @spet being unrideable on @w7-3 @s& @wHQ3
+	* Fixed rare errors from @wSalamander @spet hitting ravens
+	* Fixed @bPit Squid's @sintro music not matching the volume
+	* Fixed @gFish Freaks @snot setting a death cause sprite
+	* Fixed wall @yGrand Scorpion @snot setting a death cause
+	* Fixed @wFrozen City @swalls not touching their shadows
+	* Fixed @gBig Cat @sbeing able to hurt players in portals
+	* Fixed @wBats @snot taking damage from toxic gas
+	* Fixed @yFrog @sbeing unable to enter illusory walls
+	* Fixed some @rCrystal Heart @schunk enemies being stuck
+	* Fixed some issues with local co-op HUD order
+	* Fixed a few potential online co-op desyncs
+	
+	@dGOOD LUCK!!! @(sprite:sprHealFX:0:-0.4:-1:12)
+	
 2.04 ~ Interdimensional Terror
 	
 	   @(sprite:menu/banners/sprTerrorMain.png:1)

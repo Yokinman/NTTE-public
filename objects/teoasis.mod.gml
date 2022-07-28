@@ -1,12 +1,17 @@
 #define init
 	mod_script_call("mod", "teassets", "ntte_init", script_ref_create(init));
 	
-	 // Mod Lists:
-	ntte_mods = mod_variable_get("mod", "teassets", "mods");
+	 // Gather Objects:
+	for(var i = 1; true; i++){
+		var _scrName = script_get_name(i);
+		if(_scrName != undefined){
+			call(scr.obj_add, script_ref_create(i));
+		}
+		else break;
+	}
 	
 	 // Underwater Stuff:
 	global.underwater_bind_draw    = script_bind(CustomDraw, underwater_draw, -3, false);
-	global.underwater_bubble_pop   = [];
 	global.underwater_sound_active = false;
 	global.underwater_sound        = {
 		"sndOasisShoot" : [
@@ -173,7 +178,39 @@
 			sndRocketFly,
 			sndLaserCannonCharge,
 			sndPlasmaReload,
-			sndPlasmaReloadUpg
+			sndPlasmaReloadUpg,
+			sndBasicUltra,
+			sndCoopUltraA,
+			sndCoopUltraB,
+			sndFishUltraA,
+			sndFishUltraB,
+			sndCrystalUltraA,
+			sndCrystalUltraB,
+			sndEyesUltraA,
+			sndEyesUltraB,
+			sndMeltingUltraA,
+			sndMeltingUltraB,
+			sndPlantUltraA,
+			sndPlantUltraB,
+			sndYVUltraA,
+			sndYVUltraB,
+			sndSteroidsUltraA,
+			sndSteroidsUltraB,
+			sndRobotUltraA,
+			sndRobotUltraB,
+			sndChickenUltraA,
+			sndChickenUltraB,
+			sndRebelUltraA,
+			sndRebelUltraB,
+			sndHorrorUltraA,
+			sndHorrorUltraB,
+			sndHorrorUltraC,
+			sndRogueUltraA,
+			sndRogueUltraB,
+			sndSkeletonUltraA,
+			sndSkeletonUltraB,
+			sndFrogUltraA,
+			sndFrogUltraB
 		],
 		"sndOasisChest" : [
 			sndAmmoChest,
@@ -207,7 +244,37 @@
 			sndMutant13Hurt,
 			sndMutant14Hurt,
 			sndMutant15Hurt,
-			sndMutant16Hurt
+			sndMutant16Hurt,
+			sndMut,
+			sndMutRhinoSkin,
+			sndMutExtraFeet,
+			sndMutPlutoniumHunger,
+			sndMutRabbitPaw,
+			sndMutThroneButt,
+			sndMutLuckyShot,
+			sndMutBloodLust,
+			sndMutGammaGuts,
+			sndMutSecondStomach,
+			sndMutBackMuscle,
+			sndMutScarierFace,
+			sndMutEuphoria,
+			sndMutLongArms,
+			sndMutBoilingVeins,
+			sndMutShotgunFingers,
+			sndMutRecycleGland,
+			sndMutLaserBrain,
+			sndMutLastWish,
+			sndMutEagleEyes,
+			sndMutImpactWrists,
+			sndMutBoltMarrow,
+			sndMutStress,
+			sndMutTriggerFingers,
+			sndMutSharpTeeth,
+			sndMutPatience,
+			sndMutHammerhead,
+			sndMutStrongSpirit,
+			sndMutOpenMind,
+			sndMutHeavyHeart
 		],
 		"sndOasisDeath" : [
 			sndEliteShielderFire,
@@ -231,7 +298,21 @@
 			sndSuperSlugger
 		],
 		"sndOasisHorn" : [
-			sndVenuz
+			sndVenuz,
+			sndCrownRandom,
+			sndCrownNo,
+			sndCrownDeath,
+			sndCrownLife,
+			sndCrownHaste,
+			sndCrownGuns,
+			sndCrownHatred,
+			sndCrownBlood,
+			sndCrownDestiny,
+			sndCrownLove,
+			sndCrownLuck,
+			sndCrownCurses,
+			sndCrownRisk,
+			sndCrownProtection
 		]
 	};
 	
@@ -241,16 +322,8 @@
 	 // Reset Water Sounds:
 	underwater_sound(false);
 	
-#macro spr global.spr
-#macro msk spr.msk
-#macro snd global.snd
-#macro mus snd.mus
-#macro lag global.debug_lag
-
-#macro ntte_mods global.mods
-
 #macro underwater_area   ((GameCont.area == area_vault) ? GameCont.lastarea : GameCont.area)
-#macro underwater_active (!instance_exists(GenCont) && !instance_exists(LevCont) && array_find_index(ntte_mods.area, underwater_area) >= 0 && area_get_underwater(underwater_area))
+#macro underwater_active (!instance_exists(GenCont) && !instance_exists(LevCont) && array_find_index(ntte.mods.area, underwater_area) >= 0 && call(scr.area_get_underwater, underwater_area))
 
 #define BubbleBomb_create(_x, _y)
 	with(instance_create(_x, _y, CustomProjectile)){
@@ -262,7 +335,7 @@
 		 // Vars:
 		mask_index = mskSuperFlakBullet;
 		friction   = 0.4;
-		damage     = 0;
+		damage     = 3;
 		force      = 2;
 		typ        = 1;
 		z          = 0;
@@ -271,6 +344,10 @@
 		big        = 0;
 		held       = [];
 		setup      = true;
+		
+		 // Merged Weapon Support:
+		temerge_on_fire  = script_ref_create(BubbleBomb_temerge_fire);
+		temerge_on_setup = script_ref_create(BubbleBomb_temerge_setup);
 		
 		return self;
 	}
@@ -313,7 +390,7 @@
 	
 	 // Bubble Excrete:
 	if(big > 0 && z < 24 && image_index >= 6 && chance_ct(big, 5 + max(z, 0))){
-		with(projectile_create(x + orandom(8), y - z - 8 + orandom(8), "BubbleBomb", 0, 0)){
+		with(call(scr.projectile_create, x + orandom(8), y - z - 8 + orandom(8), "BubbleBomb")){
 			image_speed *= random_range(0.8, 1);
 		}
 	}
@@ -324,7 +401,7 @@
 			_y   = y - z,
 			_num = 0;
 			
-		held = instances_matching_ne(held, "id", null);
+		held = instances_matching_ne(held, "id");
 		
 		with(held){
 			 // Push Bubble:
@@ -347,30 +424,32 @@
 				y += (_y + (_dis * sin(_dir)) - y) * _spd;
 				_num++;
 			}
-			motion_step(-1);
+			call(scr.motion_step, self, -1);
 		}
 	}
 	
 #define BubbleBomb_end_step
 	if(setup) BubbleBomb_setup();
 	
+	y -= z;
+	
 	 // Push:
-	if(place_meeting(x, y - z, Player)){
-		with(instances_meeting(x, y - z, Player)){
-			if(place_meeting(x, y + other.z, other)) with(other){
+	if(place_meeting(x, y, Player)){
+		with(call(scr.instances_meeting_instance, self, Player)){
+			if(place_meeting(x, y, other)) with(other){
 				motion_add_ct(point_direction(other.x, other.y, x, y), 1.5);
 			}
 		}
 	}
 	
-	 // Grab Projectile:
-	if(place_meeting(x, y - z, projectile) || place_meeting(x, y - z, enemy)){
-		var _meeting = instances_meeting(x, y - z, [enemy, projectile]);
+	 // Projectile / Enemy Collision:
+	if(place_meeting(x, y, projectile) || place_meeting(x, y, enemy)){
+		var _meeting = call(scr.instances_meeting_instance, self, [enemy, projectile]);
 		
 		 // Baseball:
 		var _inst = instances_matching(_meeting, "object_index", Slash, GuitarSlash, BloodSlash, EnergySlash, EnergyHammerSlash, LightningSlash, CustomSlash);
 		if(array_length(_inst)) with(_inst){
-			if(place_meeting(x, y + other.z, other)){
+			if(place_meeting(x, y, other)){
 				with(other){
 					var	_lastAlrm = alarm1,
 						_lastFric = friction,
@@ -378,10 +457,12 @@
 						
 					with(other){
 						event_perform(ev_collision, Grenade);
-						if(!instance_exists(other)) exit;
+						if(!instance_exists(other)){
+							exit;
+						}
 					}
 					
-					alarm1 = _lastAlrm;
+					alarm1   = _lastAlrm;
 					friction = _lastFric;
 					if(speed != _lastSpd){
 						speed = _lastSpd;
@@ -394,20 +475,14 @@
 			}
 		}
 		
-		 // Bubble Collision:
-		var _inst = instances_matching_ge(instances_matching(_meeting, "name", name), "big", big);
-		if(array_length(_inst)) with(_inst){
-			if(place_meeting(x, y, other)){
-				with(other) motion_add_ct(point_direction(other.x, other.y, x, y) + orandom(4), 0.5);
-			}
-		}
-		
 		 // Poppable:
 		var _inst = instances_matching(instances_matching_ne(_meeting, "team", team), "object_index", Flame, Bolt, Splinter, HeavyBolt, UltraBolt);
 		if(array_length(_inst)) with(_inst){
-			if(place_meeting(x, y + other.z, other)){
-				with(other) instance_destroy();
-				exit;
+			if(place_meeting(x, y, other)){
+				with(other){
+					instance_destroy();
+					exit;
+				}
 			}
 		}
 		
@@ -419,17 +494,17 @@
 					_inst = instances_matching_ne(_inst, "team", team);
 				}
 				if(array_length(_inst)) with(_inst){
-					if(place_meeting(x, y + other.z, other)){
+					if(place_meeting(x, y, other)){
 						if("size" not in self || size - (object_index == DogGuardian) <= (3 * other.big)){
-							if(!instance_is(self, projectile) || (typ != 0 && ("name" not in self || name != other.name))){
+							if(!instance_is(self, projectile) || (typ != 0 && array_find_index(obj.BubbleBomb, self) < 0)){
 								bubble_bombed = true;
 								
 								array_push(other.held, self);
 								
 								with(other){
 									if(big <= 0){
-										x = lerp(x, other.x,	 0.5);
-										y = lerp(y, other.y + z, 0.5);
+										x = lerp(x, other.x, 0.5);
+										y = lerp(y, other.y, 0.5);
 										friction = max(0.3, friction);
 										motion_add(other.direction, other.speed / 2);
 									}
@@ -438,8 +513,8 @@
 									}
 									
 									 // Effects:
-									instance_create(x, y - z, Dust);
-									repeat(4) instance_create(x, y - z, Bubble);
+									instance_create(x, y, Dust);
+									repeat(4) instance_create(x, y, Bubble);
 									sound_play(sndOasisHurt);
 								}
 								
@@ -450,25 +525,52 @@
 				}
 			}
 		}
+		
+		y += z;
+		
+		 // Bubble Collision:
+		var _inst = instances_matching_ge(_meeting, "big", big);
+		if(array_length(_inst)){
+			with(_inst){
+				if(array_find_index(obj.BubbleBomb, self) >= 0 && place_meeting(x, y, other)){
+					with(other){
+						motion_add_ct(point_direction(other.x, other.y, x, y) + orandom(4), 0.5);
+					}
+				}
+			}
+		}
 	}
+	else y += z;
 	
 #define BubbleBomb_draw
-	var _col = image_blend;
+	var _blink = chance_ct(1, 8 + (image_number - image_index));
 	
-	 // Flash:
-	if(chance_ct(1, 8 + (image_number - image_index))){
-		_col = c_black;
+	 // Blink:
+	if(_blink){
+		var _lastCol = image_blend;
+		image_blend = c_black;;
 	}
 	
 	 // Draw:
-	draw_sprite_ext(sprite_index, image_index, x, y - z, image_xscale, image_yscale, image_angle, _col, image_alpha);
+	y -= z;
+	draw_self();
+	y += z;
+	
+	 // Unblink:
+	if(_blink){
+		image_blend = _lastCol;
+	}
 	
 #define BubbleBomb_hit
 	if(z < 24 && !instance_is(other, prop) && other.team != 0){
 		 // Knockback:
-		if(chance(1, 2) && ("bubble_bombed" not in other || other.bubble_bombed == false)){
-			speed *= 0.9;
-			with(other) motion_add(other.direction, other.force);
+		if(instance_is(other, enemy)){
+			if(chance(1, 2) && ("bubble_bombed" not in other || other.bubble_bombed == false)){
+				speed *= 0.9;
+				with(other){
+					motion_add(other.direction, other.force);
+				}
+			}
 		}
 		
 		 // Speed Up:
@@ -497,7 +599,9 @@
 		_num = lerp(1, 3, big);
 		
 	for(var _dir = _ang; _dir < _ang + 360; _dir += (360 / _num)){
-		projectile_create(x + lengthdir_x(_dis, _dir), y - z + lengthdir_y(_dis, _dir), "BubbleExplosion", 0, 0);
+		with(call(scr.projectile_create, x + lengthdir_x(_dis, _dir), y - z + lengthdir_y(_dis, _dir), "BubbleExplosion")){
+			damage = other.damage;
+		}
 	}
 	
 	 // Big Bombage Effects:
@@ -530,6 +634,13 @@
 		image_yscale = image_xscale;
 	}
 	
+#define BubbleBomb_temerge_fire(_at, _setupInfo)
+	_setupInfo.is_big = big;
+	
+#define BubbleBomb_temerge_setup(_instanceList, _setupInfo)
+	 // Bubble Explosion:
+	call(scr.projectile_add_temerge_effect, _instanceList, "explosion", [{ "is_bubble" : true }, (_setupInfo.is_big ? 3 : 1)]);
+	
 	
 #define BubbleExplosion_create(_x, _y)
 	with(instance_create(_x, _y, PopoExplosion)){
@@ -560,7 +671,7 @@
 #define BubbleExplosion_death(_inst)
 	with(_inst){
 		repeat(choose(2, 3)){
-			with(obj_create(x + orandom(9), y + orandom(9), "BubbleExplosionSmall")){
+			with(call(scr.obj_create, x + orandom(9), y + orandom(9), "BubbleExplosionSmall")){
 				team = other.team;
 			}
 		}
@@ -589,8 +700,10 @@
 #define BubbleExplosionSmall_step
 	 // Projectile Kill:
 	if(place_meeting(x, y, projectile)){
-		with(instances_meeting(x, y, instances_matching_ne(instances_matching_ne(projectile, "team", team), "typ", 0))){
-			if(place_meeting(x, y, other)) instance_destroy();
+		with(call(scr.instances_meeting_instance, self, instances_matching_ne(instances_matching_ne(projectile, "team", team), "typ", 0))){
+			if(place_meeting(x, y, other)){
+				instance_destroy();
+			}
 		}
 	}
 	
@@ -629,11 +742,8 @@
 						bubble_bombed = true;
 						
 						 // Bubble Bomb:
-						var _inst = self;
 						with(other){
-							with(projectile_create(other.x, other.y, "BubbleBomb", 0, 0)){
-								array_push(held, _inst);
-							}
+							array_push(call(scr.projectile_create, other.x, other.y, "BubbleBomb").held, other);
 						}
 						
 						 // Effects:
@@ -655,7 +765,7 @@
 				 // Destroy:
 				else{
 					with(other){
-						projectile_create(other.x, other.y, ((other.damage < 6) ? "BubbleExplosionSmall" : "BubbleExplosion"), 0, 0);
+						call(scr.projectile_create, other.x, other.y, ((other.damage < 6) ? "BubbleExplosionSmall" : "BubbleExplosion"));
 					}
 					instance_destroy();
 				}
@@ -704,16 +814,26 @@
 	if(!walled){
 		walled = true;
 		
+		x += hspeed_raw;
+		y += vspeed_raw;
+		
 		 // Hit Wall FX:
-		var	_x = bbox_center_x + hspeed_raw,
-			_y = bbox_center_y + vspeed_raw;
+		var	_x = bbox_center_x,
+			_y = bbox_center_y;
 			
-		with(instance_is(other, Wall) ? instance_nearest_bbox(_x, _y, instances_meeting(_x, _y, Wall)) : other){
+		with(
+			instance_is(other, Wall)
+			? call(scr.instance_nearest_bbox, _x, _y, call(scr.instances_meeting_instance, self, Wall))
+			: other
+		){
 			with(instance_create(bbox_center_x, bbox_center_y, MeleeHitWall)){
 				image_angle = point_direction(_x, _y, x, y);
-				sound_play_hit_ext(sndMeleeWall, 1.6 + random(0.3), 0.8);
+				call(scr.sound_play_at, x, y, sndMeleeWall, 1.6 + random(0.3), 0.8);
 			}
 		}
+		
+		x -= hspeed_raw;
+		y -= vspeed_raw;
 	}
 	
 	
@@ -730,9 +850,9 @@
 		spr_walk     = spr.CrabTankWalk;
 		spr_hurt     = spr.CrabTankHurt;
 		spr_dead     = spr.CrabTankDead;
-		sprite_index = spr_idle;
 		spr_shadow   = shd32;
 		hitid        = [spr_idle, "CRAB TANK"];
+		sprite_index = spr_idle;
 		depth        = -2;
 		
 		 // Yeehaw:
@@ -747,11 +867,32 @@
 		
 		 // Vars:
 		mask_index  = mskScorpion;
-		maxhealth   = boss_hp(300);
+		maxhealth   = call(scr.boss_hp, 300);
 		raddrop     = 100;
 		size        = 3;
 		meleedamage = 3;
 		canmelee    = true;
+		
+		return self;
+	}
+	
+	
+#define FakeDust_create(_x, _y)
+	/*
+		Fake Dust, useful in underwater areas
+	*/
+	
+	with(instance_create(_x, _y, Smoke)){
+		 // Visual:
+		sprite_index = sprDust;
+		image_index  = random(image_number);
+		
+		 // Vars:
+		motion_set(random(360), random(2));
+		friction     = 0.3;
+		image_xscale = 0.8;
+		image_yscale = image_xscale;
+		growspeed    = random(0.005) - 0.025;
 		
 		return self;
 	}
@@ -853,9 +994,9 @@
 		enemy_look(direction);
 		
 		 // Break Walls:
-		motion_step(1);
+		call(scr.motion_step, self, 1);
 		if(place_meeting(x, y, Wall)){
-			with(instances_meeting(x, y, Wall)){
+			with(call(scr.instances_meeting_instance, self, Wall)){
 				if(place_meeting(x, y, other)){
 					 // Effects:
 					if(chance(1, 2)){
@@ -872,13 +1013,11 @@
 				}
 			}
 		}
-		motion_step(-1);
+		call(scr.motion_step, self, -1);
 		
 		 // Effects:
 		if(current_frame_active){
-			with(instance_create(x + orandom(8), y + 8, Dust)){
-				motion_add(random(360), 1)
-			}
+			call(scr.fx, [x, 8], y + 8, 1, Dust);
 		}
 		if((charge % 5) < current_time_scale){
 			view_shake_at(x, y, 10);
@@ -953,6 +1092,9 @@
 		damage     = 12;
 		force      = 12;
 		
+		 // Merged Weapon Support:
+		temerge_on_setup = script_ref_create(HyperBubble_temerge_setup);
+		
 		return self;
 	}
 	
@@ -968,7 +1110,7 @@
 		_targets = instances_matching_ne(hitme, "team", team);
 		
 	 // Muzzle Explosion:
-	projectile_create(x, y, "BubbleExplosionSmall", 0, 0);
+	call(scr.projectile_create, x, y, "BubbleExplosionSmall");
 	
 	 // Hitscan:
 	while(_dist-- > 0 && hits > 0 && !place_meeting(x, y, Wall)){
@@ -976,38 +1118,53 @@
 		y += _my;
 		
 		 // Effects:
-		if(chance(1, 3)) scrFX([x, 4], [y, 4], [_dir + orandom(4), 6 + random(4)], Bubble).friction = 0.2;
-		if(chance(2, 3)) scrFX([x, 2], [y, 2], [_dir + orandom(4), 2 + random(2)], Smoke);
+		if(chance(1, 3)){
+			with(call(scr.fx, [x, 4], [y, 4], [_dir + orandom(4), 6 + random(4)], Bubble)){
+				friction = 0.2;
+			}
+		}
+		if(chance(2, 3)){
+			call(scr.fx, [x, 2], [y, 2], [_dir + orandom(4), 2 + random(2)], Smoke);
+		}
 		
 		 // Explosion:
 		if(place_meeting(x, y, hitme)){
-			var e = instances_meeting(x, y, instances_matching_gt(_targets, "my_health", 0));
-			if(array_length(e) > 0){
+			var _inst = call(scr.instances_meeting_instance, self, instances_matching_gt(_targets, "my_health", 0));
+			if(array_length(_inst)){
 				var _hit = false;
-				with(e) if(place_meeting(x, y, other)){
-					if(!_hit){
-						_hit = true;
-						with(other){
-							hits--;
-							projectile_create(x, y, "BubbleExplosionSmall", 0, 0);
+				with(_inst){
+					if(place_meeting(x, y, other)){
+						if(!_hit){
+							_hit = true;
+							with(other){
+								hits--;
+								call(scr.projectile_create, x, y, "BubbleExplosionSmall");
+							}
 						}
+						
+						 // Impact Damage:
+						projectile_hit(self, other.damage, other.force, _dir);
 					}
-					
-					 // Impact Damage:
-					projectile_hit(self, other.damage, other.force, _dir);
 				}
 			}
 		}
 	}
 	
 	 // End Explosion:
-	projectile_create(x, y, "BubbleExplosion", 0, 0);
+	call(scr.projectile_create, x, y, "BubbleExplosion");
 	if(hits > 0) repeat(hits){
-		projectile_create(x, y, "BubbleExplosionSmall", 0, 0);
+		call(scr.projectile_create, x, y, "BubbleExplosionSmall");
 	}
 	
 	 // Goodbye:
 	instance_destroy();
+	
+#define HyperBubble_temerge_setup(_instanceList)
+	 // Hyper:
+	call(scr.projectile_add_temerge_effect, _instanceList, "hyper");
+	
+	 // Bubble Explosion:
+	call(scr.projectile_add_temerge_effect, _instanceList, "explosion", [{ "is_bubble" : true }]);
 	
 	
 #define OasisPetBecome_create(_x, _y)
@@ -1032,7 +1189,7 @@
 		raddrop      = 0;
 		size         = 1;
 		team         = 0;
-		prompt       = prompt_create("SHARE");
+		prompt       = call(scr.prompt_create, self, "SHARE");
 		
 		return self;
 	}
@@ -1046,19 +1203,19 @@
 		
 		with(player_find(prompt.pick)){
 			GameCont.rad -= _cost;
-			var r = instance_create(x, y, BigRad);
-			with(r){
-				sound_play_hit_ext(sndHitFlesh, 2.5, 0.5);
+			var _rad = instance_create(x, y, BigRad);
+			with(_rad){
+				call(scr.sound_play_at, x, y, sndHitFlesh, 2.5, 0.5);
 				motion_add(random(360), 4);
 				depth = -2;
 			}
-			rad_path(r, other);
+			call(scr.rad_path, _rad, other);
 		}
 	}
 	
 	 // Eye Recieved:
 	if(raddrop > 0){
-		sound_play_hit_ext(sndRadPickup, 0.5 + orandom(0.1), 6);
+		call(scr.sound_play_at, x, y, sndRadPickup, 0.5 + orandom(0.1), 6);
 		with(instance_nearest(x, y, EatRad)){
 			x = other.x;
 			y = other.y;
@@ -1066,7 +1223,7 @@
 		}
 		
 		 // Boy:
-		with(pet_spawn(x, y, "Slaughter")){
+		with(call(scr.pet_create, x, y, "Slaughter")){
 			right = other.image_xscale;
 		}
 		
@@ -1074,10 +1231,12 @@
 	}
 	
 #define OasisPetBecome_death
-	repeat(3) scrFX(x, y, 3, Dust);
+	repeat(3){
+		call(scr.fx, x, y, 3, Dust);
+	}
 	
 	 // Bro come back:
-	with(obj_create(x, y, "OasisPetBecomeCorpse")){
+	with(call(scr.obj_create, x, y, "OasisPetBecomeCorpse")){
 		inst = id + 1;
 	}
 	
@@ -1098,22 +1257,22 @@
 			
 			 // Effects:
 			if(chance_ct(1, 1 + (time / 5))){
-				with(inst) scrFX([x, 4], [y, 4], 0, Dust);
+				with(inst) call(scr.fx, [x, 4], [y, 4], 0, Dust);
 			}
 		}
 		
 		 // Respawn:
 		else with(inst){
-			with(obj_create(x, y, "OasisPetBecome")){
+			with(call(scr.obj_create, x, y, "OasisPetBecome")){
 				image_xscale = other.image_xscale;
 				sprite_index = spr_hurt;
 				
 				 // Effects:
 				sound_play_hit(sndOasisMelee, 0.4);
-				with(obj_create(x, y, "WaterStreak")){
+				with(call(scr.obj_create, x, y, "WaterStreak")){
 					motion_set(random(360), 2);
 					image_angle = direction + 180;
-					scrFX(x, y, [direction, 2], Smoke);
+					call(scr.fx, x, y, [direction, 2], Smoke);
 				}
 			}
 			instance_destroy();
@@ -1292,6 +1451,178 @@
 	}
 	
 	
+#define SunkenChest_create(_x, _y)
+	with(call(scr.obj_create, _x, _y, "CustomChest")){
+		 // Visual:
+		sprite_index = spr.SunkenChest;
+		spr_dead     = spr.SunkenChestOpen;
+		spr_shadow_y = 0;
+		
+		 // Sounds:
+		snd_open = sndGoldChest;
+		
+		 // Vars:
+		num   = 2;
+		wep   = wep_none;
+		skeal = false;
+		if(GameCont.area == "coast"){
+			wep = { wep: "trident", gold: true };
+		}
+		
+		 // Events:
+		on_step = script_ref_create(SunkenChest_step);
+		on_open = script_ref_create(SunkenChest_open);
+		
+		return self;
+	}
+	
+#define SunkenChest_step
+	 // Shiny:
+	if(chance_ct(1, 90)){
+		with(instance_create(x + orandom(16), y + orandom(8), CaveSparkle)){
+			depth = other.depth - 1;
+		}
+	}
+	
+	 // Ancient Treasure Guards:
+	var _num = 3 * skeal;
+	if(_num > 0){
+		var _spawn = false;
+		with(Player){
+			if(point_distance(x, y, other.x, other.y) < 192){
+				if(!collision_line(x, y, other.x, other.y, Wall, false, false)){
+					_spawn = true;
+					break;
+				}
+			}
+		}
+		if(_spawn){
+			skeal = 0;
+			
+			 // Skeals:
+			var _ang = random(360);
+			for(var _d = _ang; _d < _ang + 360; _d += 360 / _num){
+				var	_dis = 32,
+					_dir = _d + orandom(30);
+					
+				call(scr.obj_create, x + lengthdir_x(_dis, _dir), y + lengthdir_y(_dis, _dir), "SunkenSealSpawn");
+			}
+			
+			 // Clear Area:
+			with(instance_create(x, y, PortalClear)){
+				image_xscale = 1.2;
+				image_yscale = image_xscale;
+			}
+			
+			 // Alert:
+			with(call(scr.alert_create, self, spr.SkealAlert)){
+				flash = 10;
+			}
+			
+			 // Sound:
+			sound_play_pitchvol(sndMutant14Turn, 0.2 + random(0.1), 1);
+		}
+	}
+	
+#define SunkenChest_open
+	instance_create(x, y, PortalClear);
+	
+	 // Sunken Chest Count:
+	with(GameCont){
+		if("sunkenchests" not in self){
+			sunkenchests = 0;
+		}
+		sunkenchests = max(sunkenchests, GameCont.loops + 1);
+	}
+	
+	 // Important:
+	if(instance_is(other, Player)){
+		sound_play(other.snd_chst);
+	}
+	
+	 // Trident Unlock:
+	var _wepRaw = call(scr.wep_raw, wep);
+	if(_wepRaw == "trident" && !call(scr.weapon_get, "avail", wep)){
+		call(scr.unlock_set, `wep:${_wepRaw}`, true);
+	}
+	
+	 // Weapon:
+	var _num = 1 + ultra_get("steroids", 1);
+	if(_num > 0){
+		var _wep = wep;
+		
+		 // Golden Merged Weapon:
+		if(_wep == wep_none){
+			_wep = call(scr.temerge_decide_weapon, 0, max(1, GameCont.hard - 1), true);
+		}
+		
+		 // Create:
+		repeat(_num){
+			with(instance_create(x, y, WepPickup)){
+				wep  = _wep;
+				ammo = true;
+			}
+		}
+	}
+	
+	 // Real Loot:
+	if(num > 0){
+		repeat(num * 10){
+			with(call(scr.obj_create, x, y, "SunkenCoin")){
+				motion_add(random(360), 2 + random(2.5));
+			}
+		}
+		
+		 // Ammo:
+		var _ang = random(360);
+		for(var _dir = _ang; _dir < _ang + 360; _dir += (360 / num)){
+			with(call(scr.obj_create, x, y, "BackpackPickup")){
+				target    = instance_create(x, y, AmmoPickup);
+				direction = _dir;
+				speed     = random_range(2, 3);
+				with(self){
+					event_perform(ev_step, ev_step_end);
+				}
+			}
+		}
+	}
+	
+	
+#define SunkenCoin_create(_x, _y)
+	with(call(scr.obj_create, _x, _y, "CustomPickup")){
+		 // Visual:
+		sprite_index = (chance(1, 3) ? spr.SunkenCoinBig : spr.SunkenCoin);
+		image_angle  = random(360);
+		spr_open     = sprCaveSparkle;
+		spr_fade     = sprCaveSparkle;
+		shine        = 0.075;
+		
+		 // Sound:
+		snd_open = sndRadPickup;
+		snd_fade = -1;
+		
+		 // Vars:
+		mask_index = mskRad;
+		alarm0     = call(scr.pickup_alarm, 200 + random(30), 1/4);
+		pull_dis   = 18 + (12 * skill_get(mut_plutonium_hunger));
+		
+		 // Events:
+		on_pull = script_ref_create(SunkenCoin_pull);
+		on_open = script_ref_create(SunkenCoin_open);
+		
+		return self;
+	}
+	
+#define SunkenCoin_pull
+	return (speed <= 0);
+	
+#define SunkenCoin_open
+	 // Can't Grab While Moving:
+	if(speed > 0){
+		return true;
+	}
+	
+	
 #define SunkenRoom_create(_x, _y)
 	with(instance_create(_x, _y, CustomObject)){
 		 // Vars:
@@ -1314,7 +1645,7 @@
 			var _tunnel = false;
 			
 			 // Player/Enemy Check:
-			with(instances_matching_ne(floors, "id", null)){
+			with(instances_matching_ne(floors, "id")){
 				if(
 					place_meeting(x, y, Player) ||
 					place_meeting(x, y, Portal) ||
@@ -1350,9 +1681,9 @@
 					with(self[0]){
 						for(var	_fx = bbox_left; _fx < bbox_right + 1; _fx += 16){
 							for(var	_fy = bbox_top; _fy < bbox_bottom + 1; _fy += 16){
-								if(path_reaches(path_create(_fx + 8, _fy + 8, _spawnX, _spawnY, Wall), _spawnX, _spawnY, Wall)){
-									if(!path_reaches(path_create(bbox_center_x, bbox_center_y, _x, _y, Wall), _x, _y, Wall)){
-										with(floor_tunnel(bbox_center_x, bbox_center_y, _x, _y)){
+								if(call(scr.path_reaches, call(scr.path_create, _fx + 8, _fy + 8, _spawnX, _spawnY, Wall), _spawnX, _spawnY, Wall)){
+									if(!call(scr.path_reaches, call(scr.path_create, bbox_center_x, bbox_center_y, _x, _y, Wall), _x, _y, Wall)){
+										with(call(scr.floor_tunnel, bbox_center_x, bbox_center_y, _x, _y)){
 											image_yscale *= _tunnelSize;
 										}
 									}
@@ -1378,11 +1709,11 @@
 		
 		 // Vars:
 		mask_index = mskBandit;
-		type = irandom_range(1, 3);
-		skeal = true;//!_inCoast;
+		type       = irandom_range(1, 3);
+		skeal      = true; //!_inCoast;
 		
 		 // Alarms:
-		alarm0 = 30 + (10 * array_length(instances_matching(CustomObject, "name", "SunkenSealSpawn")));
+		alarm0 = 30 + (10 * array_length(instances_matching_ne(obj.SunkenSealSpawn, "id")));
 		
 		 // FX:
 		repeat(3){
@@ -1397,11 +1728,11 @@
 	if(alarm0_run) exit;
 	
 	 // No Portal:
-	portal_poof();
+	call(scr.portal_poof);
 	
 	 // Make Room:
 	if(place_meeting(x, y, Wall)){
-		with(instances_meeting(x, y, Wall)){
+		with(call(scr.instances_meeting_instance, self, Wall)){
 			if(place_meeting(x, y, other)){
 				instance_create(x, y, FloorExplo);
 				instance_destroy();
@@ -1409,26 +1740,15 @@
 		}
 	}
 	
-	 /*
-	 // Unburrowing FX:
-	if(chance_ct(1, 2)){
-		with(scrFX(x, y + random(4), 1.5, Dust)){
-			image_blend = merge_color(c_aqua, c_white, 0.6);
-			depth = -4;
-			waterbubble = false;
-		}
-	}
-	*/
-	
 #define SunkenSealSpawn_alrm0
-	with(obj_create(x, y, "Seal")){
+	with(call(scr.obj_create, x, y, "Seal")){
 		skeal = other.skeal;
 		type = other.type;
 		
 		 // Effects:
 		instance_create(x, y, AssassinNotice);
 		if(skeal){
-			sound_play_hit_ext(sndBloodGamble, 1.6 + random(0.2), 1.8);
+			call(scr.sound_play_at, x, y, sndBloodGamble, 1.6 + random(0.2), 1.8);
 		}
 		sound_play_hit(sndChickenRegenHead, 0.1);
 		sound_play_pitchvol(sndSharpTeeth, 0.6 + random(0.4), 0.4);
@@ -1509,8 +1829,8 @@
 	enemy_target(x, y);
 	
 	if(is_king = 0) { // Is a follower:
-		if(instance_exists(instance_nearest_array(x, y, instances_matching(CustomEnemy, "is_king", 1)))) { // Track king:
-			var nearest_king = instance_nearest_array(x, y, instances_matching(CustomEnemy, "is_king", 1));
+		if(instance_exists(call(scr.instance_nearest_array, x, y, instances_matching(CustomEnemy, "is_king", 1)))) { // Track king:
+			var nearest_king = call(scr.instance_nearest_array, x, y, instances_matching(CustomEnemy, "is_king", 1));
 			var king_dir = point_direction(x, y, nearest_king.x, nearest_king.y);
 			if(point_distance(x, y, nearest_king.x, nearest_king.y) > 16 and target_distance < point_distance(x, y, nearest_king.x, nearest_king.y)) { // Check distance from king:
 				 // Follow king in a jittery manner:
@@ -1554,154 +1874,113 @@
 	
 	
 /// GENERAL
-#define ntte_update(_newID)
-	 // Underwater Code:
-	if(underwater_active){
-		 // Effects:
-		if(instance_exists(Effect)){
-			 // Extinguish Flames:
-			if(
-				(instance_exists(GroundFlame) && GroundFlame.id > _newID) ||
-				(instance_exists(BlueFlame)   && BlueFlame.id   > _newID)
-			){
-				with(instances_matching_gt([GroundFlame, BlueFlame], "id", _newID)){
-				    instance_create(x, y, Smoke);
-				    instance_destroy();
-				}
-			}
+#define ntte_setup_hitme(_inst)
+	 // Air Bubble Setup:
+	with(_inst){
+		if("spr_bubble" not in self){
+			spr_bubble     = -1;
+			spr_bubble_pop = -1;
+			spr_bubble_x   = 0;
+			spr_bubble_y   = 0;
 			
-			 // Bubbles:
-			if(instance_exists(Dust) && Dust.id > _newID){
-				with(instances_matching_gt(Dust, "id", _newID)){
-					instance_create(x, y, Bubble);
-					instance_destroy();
-				}
-			}
-			if(instance_exists(Smoke) || instance_exists(BulletHit) || instance_exists(EBulletHit) || instance_exists(ScorpionBulletHit)){
-				var _inst = instances_matching_gt([Smoke, BulletHit, EBulletHit, ScorpionBulletHit], "id", _newID);
-				if(array_length(_inst)){
-					with(_inst){
-						instance_create(x, y, Bubble);
-						
-						 // Go Away Ugly Smoke:
-						if(object_index == Smoke && (distance_to_object(Flame) < 8 || distance_to_object(TrapFire) < 8)){
-							sprite_index = sprBubble;
-						}
-					}
-				}
-			}
-			if(instance_exists(BoltTrail) && BoltTrail.id > _newID){
-				with(instances_matching_ne(instances_matching_gt(BoltTrail, "id", _newID), "image_xscale", 0)){
-					if(chance(1, 4)){
-						instance_create(x, y, Bubble);
-					}
-				}
-			}
-			if(instance_exists(ChestOpen) && ChestOpen.id > _newID){
-				with(instances_matching_gt(ChestOpen, "id", _newID)){
-					repeat(3){
-						instance_create(x, y, Bubble);
-					}
+			 // Auto-Setup:
+			if(
+				team != 0
+				&& !instance_is(self, prop)
+				&& !instance_is(self, Freak)
+				&& snd_dead != sndOasisDeath
+				&& snd_hurt != sndOasisHurt
+				&& snd_hurt != sndOasisBossHurt
+				&& snd_hurt != sndMutant1Hurt
+				&& snd_hurt != sndMutant14Hurt
+				&& snd_hurt != sndSpiderHurt
+				&& snd_hurt != sndLaserCrystalHit
+				&& snd_hurt != sndLightningCrystalHit
+				&& snd_hurt != sndHyperCrystalHurt
+				&& snd_hurt != sndTechnomancerHurt
+				&& snd_hurt != sndNothingHurtHigh
+				&& snd_hurt != sndNothingHurtMid
+				&& snd_hurt != sndNothingHurtLow
+				&& snd_hurt != sndNothing2Hurt
+				&& snd_hurt != sndVanHurt
+			){
+				var	_left   = sprite_get_bbox_left(spr_hurt),
+					_top    = sprite_get_bbox_top(spr_hurt),
+					_right  = sprite_get_bbox_right(spr_hurt)  + 1,
+					_bottom = sprite_get_bbox_bottom(spr_hurt) + 1;
 					
-					 // Clam Chests:
-					if(sprite_index == sprWeaponChestOpen){
-						sprite_index = sprClamChestOpen;
-					}
+				 // Big:
+				if(_right - _left < 28 && _bottom - _top < 28){
+					spr_bubble     = sprPlayerBubble;
+					spr_bubble_pop = sprPlayerBubblePop;
 				}
+				
+				 // Normal:
+				else{
+					spr_bubble     = spr.BigBubble;
+					spr_bubble_pop = spr.BigBubblePop;
+				}
+				
+				 // Vertical Offset:
+				spr_bubble_y = floor(((_bottom + _top) / 2) - sprite_get_yoffset(spr_hurt));
 			}
 		}
 		
-		 // Clam Chests:
-		if(instance_exists(WeaponChest) && WeaponChest.id > _newID){
-			with(instances_matching(instances_matching_gt(WeaponChest, "id", _newID), "sprite_index", sprWeaponChest)){
-				sprite_index = sprClamChest;
+		 // Death Pop Setup:
+		if(spr_bubble != -1){
+			if("ntte_bubble_pop" not in GameCont){
+				GameCont.ntte_bubble_pop = [];
 			}
-		}
-		
-		 // Watery Enemy Sounds:
-		if(instance_exists(enemy) && enemy.id > _newID){
-			with(instances_matching_ne(instances_matching_gt(enemy, "id", _newID), "object_index", CustomEnemy)){
-				if(snd_hurt != -1) snd_hurt = sndOasisHurt;
-				if(snd_dead != -1) snd_dead = sndOasisDeath;
-				if(snd_mele != -1) snd_mele = sndOasisMelee;
-			}
+			array_push(
+				GameCont.ntte_bubble_pop,
+				[self, x + spr_bubble_x, y + spr_bubble_y, spr_bubble_pop, true]
+			);
 		}
 	}
 	
-	 // Air Bubble Setup:
-	if(instance_exists(hitme) && hitme.id > _newID){
-		with(instances_matching_gt(hitme, "id", _newID)){
-			if("spr_bubble" not in self){
-				spr_bubble     = -1;
-				spr_bubble_pop = -1;
-				spr_bubble_x   = 0;
-				spr_bubble_y   = 0;
-				
-				switch(object_index){
-					case Player:
-						switch(race){
-							case "fish":
-							case "robot":
-								spr_bubble     = -1;
-								spr_bubble_pop = -1;
-								break;
-								
-							case "bigdog":
-								spr_bubble     = spr.BigBubble;
-								spr_bubble_pop = spr.BigBubblePop;
-								spr_bubble_y   = 8;
-								break;
-								
-							default:
-								spr_bubble     = sprPlayerBubble;
-								spr_bubble_pop = sprPlayerBubblePop;
-						}
-						break;
-						
-					case Ally:
-					case Sapling:
-					case Bandit:
-					case Grunt:
-					case Inspector:
-					case Shielder:
-					case EliteGrunt:
-					case EliteInspector:
-					case EliteShielder:
-					case PopoFreak:
-					case Necromancer:
-					case FastRat:
-					case Rat:
-						spr_bubble     = sprPlayerBubble;
-						spr_bubble_pop = sprPlayerBubblePop;
-						break;
-						
-					case Salamander:
-						spr_bubble     = spr.BigBubble;
-						spr_bubble_pop = spr.BigBubblePop;
-						break;
-						
-					case Ratking:
-					case RatkingRage:
-						spr_bubble     = spr.BigBubble;
-						spr_bubble_pop = spr.BigBubblePop;
-						spr_bubble_y   = 2;
-						break;
-						
-					case FireBaller:
-					case SuperFireBaller:
-						spr_bubble     = spr.BigBubble;
-						spr_bubble_pop = spr.BigBubblePop;
-						spr_bubble_y   = -6;
-						break;
-				}
-			}
-			if(spr_bubble != -1){
-				array_push(
-					global.underwater_bubble_pop,
-					[self, x + spr_bubble_x, y + spr_bubble_y, spr_bubble_pop]
-				);
+#define ntte_setup_underwater_sprite(_sprNormal, _sprWater, _inst)
+	 // Clam Chests:
+	with(instances_matching(_inst, "sprite_index", _sprNormal)){
+		sprite_index = _sprWater;
+	}
+	
+#define ntte_setup_underwater_sound(_inst)
+	 // Watery Enemy Sounds:
+	with(instances_matching_ne(_inst, "object_index", CustomEnemy)){
+		if(snd_hurt != -1) snd_hurt = sndOasisHurt;
+		if(snd_dead != -1) snd_dead = sndOasisDeath;
+		if(snd_mele != -1) snd_mele = sndOasisMelee;
+	}
+	
+#define ntte_setup_underwater_bubble(_num, _destroy, _inst)
+	 // Bubbles:
+	with(instances_matching_ne(_inst, "image_xscale", 0)){
+		if(_num >= 1 || chance(_num, 1)){
+			repeat(max(1, _num)){
+				instance_create(x, y, Bubble);
 			}
 		}
+		
+		 // Replace:
+		if(_destroy){
+			instance_destroy();
+		}
+		
+		 // Go Away Ugly Flame Smoke:
+		else switch(object_index){
+			case Smoke:
+				if(distance_to_object(Flame) < 8 || distance_to_object(TrapFire) < 8){
+					sprite_index = sprBubble;
+				}
+				break;
+		}
+	}
+	
+#define ntte_setup_underwater_flame(_inst)
+	 // Extinguish Flames:
+	with(_inst){
+	    instance_create(x, y, Smoke);
+	    instance_destroy();
 	}
 	
 #define ntte_begin_step
@@ -1709,36 +1988,39 @@
 	if(underwater_active){
 		 // Lightning:
 		if(instance_exists(Lightning)){
-			with(Lightning){
-				image_index -= image_speed_raw * 0.75;
-				
-				 // Zap:
-				if(anim_end){
-					with(instance_create(x, y, EnemyLightning)){
-						image_speed  = 0.3;
-						image_xscale = other.image_xscale;
-						image_angle  = other.image_angle;
-						hitid        = 88;
-						
-						 // FX:
-						if(chance(1, 8)){
-							sound_play_hit(sndLightningHit,0.2);
-							with(instance_create(x, y, GunWarrantEmpty)){
-								image_angle = other.direction;
+			var _inst = instances_matching_gt(Lightning, "image_alpha", 0);
+			if(array_length(_inst)){
+				with(_inst){
+					image_index -= image_speed_raw * 0.75;
+					
+					 // Zap:
+					if(anim_end){
+						with(instance_create(x, y, EnemyLightning)){
+							image_speed  = 0.3;
+							image_xscale = other.image_xscale;
+							image_angle  = other.image_angle;
+							hitid        = 88;
+							
+							 // FX:
+							if(chance(1, 8)){
+								sound_play_hit(sndLightningHit,0.2);
+								with(instance_create(x, y, GunWarrantEmpty)){
+									image_angle = other.direction;
+								}
+							}
+							else if(chance(1, 3)){
+								instance_create(x + orandom(18), y + orandom(18), PortalL);
 							}
 						}
-						else if(chance(1, 3)){
-							instance_create(x + orandom(18), y + orandom(18), PortalL);
-						}
+						instance_destroy();
 					}
-					instance_destroy();
 				}
 			}
 		}
 		
 		 // Flames Boil Water:
 		if(instance_exists(Flame) || instance_exists(TrapFire)){
-			with(instances_matching_ne([Flame, TrapFire], "id", null)){
+			with(instances_matching_ne([Flame, TrapFire], "id")){
 				if(sprite_index != sprFishBoost){
 					if(image_index > 2){
 						sprite_index = sprFishBoost;
@@ -1780,18 +2062,40 @@
 		if(instance_exists(MineExplosion)){
 			var _inst = instances_matching_gt(instances_matching_le(MineExplosion, "alarm0", ceil(current_time_scale)), "alarm0", 0);
 			if(array_length(_inst)) with(_inst){
-				with(obj_create(x, y - 12, "SealMine")){
+				with(call(scr.obj_create, x, y - 12, "SealMine")){
 					my_health = 0;
 				}
 				instance_destroy();
 			}
 		}
+		
+		 // Bind Underwater Object Setup Scripts:
+		if(lq_get(ntte, "bind_setup_underwater_list") == undefined){
+			ntte.bind_setup_underwater_list = [
+				call(scr.ntte_bind_setup, script_ref_create(ntte_setup_underwater_flame), [GroundFlame, BlueFlame]),
+				call(scr.ntte_bind_setup, script_ref_create(ntte_setup_underwater_bubble, 1,   true),  Dust),
+				call(scr.ntte_bind_setup, script_ref_create(ntte_setup_underwater_bubble, 1,   false), [Smoke, BulletHit, EBulletHit, ScorpionBulletHit]),
+				call(scr.ntte_bind_setup, script_ref_create(ntte_setup_underwater_bubble, 1/4, false), BoltTrail),
+				call(scr.ntte_bind_setup, script_ref_create(ntte_setup_underwater_bubble, 3,   false), ChestOpen),
+				call(scr.ntte_bind_setup, script_ref_create(ntte_setup_underwater_sprite, sprWeaponChest,     sprClamChest),     WeaponChest),
+				call(scr.ntte_bind_setup, script_ref_create(ntte_setup_underwater_sprite, sprWeaponChestOpen, sprClamChestOpen), ChestOpen),
+				call(scr.ntte_bind_setup, script_ref_create(ntte_setup_underwater_sound), enemy)
+			];
+		}
+	}
+	
+	 // Unbind Underwater Object Setup Scripts:
+	else if(lq_get(ntte, "bind_setup_underwater_list") != undefined){
+		with(ntte.bind_setup_underwater_list){
+			call(scr.ntte_unbind, self);
+		}
+		ntte.bind_setup_underwater_list = undefined;
 	}
 	
 #define ntte_step
 	 // Underwater Sounds:
-	if(global.underwater_sound_active || array_find_index(ntte_mods.area, underwater_area) >= 0){
-		underwater_sound(area_get_underwater(underwater_area));
+	if(global.underwater_sound_active || array_find_index(ntte.mods.area, underwater_area) >= 0){
+		underwater_sound(call(scr.area_get_underwater, underwater_area));
 	}
 	
 #define ntte_end_step
@@ -1799,23 +2103,29 @@
 	var _active = underwater_active;
 	if(_active){
 		 // Air Bubble Pop:
-		if(array_length(global.underwater_bubble_pop)){
-			with(global.underwater_bubble_pop){
+		if("ntte_bubble_pop" in GameCont && array_length(GameCont.ntte_bubble_pop)){
+			with(GameCont.ntte_bubble_pop){
 				var _inst = self[0];
 				
 				 // Follow Papa:
-				if(instance_exists(_inst)){
+				if(instance_exists(_inst) && _inst.visible){
 					self[@1] = _inst.x + _inst.spr_bubble_x;
 					self[@2] = _inst.y + _inst.spr_bubble_y;
 					self[@3] = _inst.spr_bubble_pop;
+					self[@4] = true;
 				}
 				
 				 // Pop:
 				else{
-					with(instance_create(self[1], self[2], BubblePop)){
-						sprite_index = other[3];
+					if(self[4]){
+						self[@4] = false;
+						with(instance_create(self[1], self[2], BubblePop)){
+							sprite_index = other[3];
+						}
 					}
-					global.underwater_bubble_pop = array_delete_value(global.underwater_bubble_pop, self);
+					if(!instance_exists(_inst)){
+						GameCont.ntte_bubble_pop = call(scr.array_delete_value, GameCont.ntte_bubble_pop, self);
+					}
 				}
 			}
 		}
@@ -1825,17 +2135,19 @@
 	}
 	
 #define ntte_draw_shadows
-	 // Bubble Bombs:
-	if(instance_exists(CustomProjectile)){
-		var _inst = instances_matching(instances_matching(instances_matching(CustomProjectile, "name", "BubbleBomb"), "big", true), "visible", true);
-		if(array_length(_inst)) with(_inst){
-			var	_f = min((z / 6) - 4, 6),
-				_w = max(6 + _f, 0) + sin((x + y + z) / 8),
-				_h = max(4 + _f, 0) + cos((x + y + z) / 8),
-				_x = x,
-				_y = y + 6;
-				
-			draw_ellipse(_x - _w, _y - _h, _x + _w, _y + _h, false);
+	 // Big Bubble Bombs:
+	if(array_length(obj.BubbleBomb)){
+		var _inst = instances_matching(instances_matching_gt(obj.BubbleBomb, "big", 0), "visible", true);
+		if(array_length(_inst)){
+			with(_inst){
+				var	_f = min((z / 6) - 4, 6),
+					_w = max(6 + _f, 0) + sin((x + y + z) / 8),
+					_h = max(4 + _f, 0) + cos((x + y + z) / 8),
+					_x = x,
+					_y = y + 6;
+					
+				draw_ellipse(_x - _w, _y - _h, _x + _w, _y + _h, false);
+			}
 		}
 	}
 	
@@ -1844,9 +2156,11 @@
 	
 	 // Air Bubbles:
 	if(instance_exists(hitme)){
-		var _inst = instances_matching(instances_seen_nonsync(instances_matching_ne(hitme, "spr_bubble", -1, null), 16, 16), "visible", true);
-		if(array_length(_inst)) with(_inst){
-			draw_sprite(spr_bubble, -1, x + spr_bubble_x, y + spr_bubble_y);
+		var _inst = instances_matching(call(scr.instances_seen_nonsync, instances_matching_ne(hitme, "spr_bubble", -1, null), 16, 16), "visible", true);
+		if(array_length(_inst)){
+			with(_inst){
+				draw_sprite(spr_bubble, -1, x + spr_bubble_x, y + spr_bubble_y);
+			}
 		}
 	}
 	
@@ -1884,6 +2198,17 @@
 	
 	
 /// SCRIPTS
+#macro  call                                                                                    script_ref_call
+#macro  scr                                                                                     global.scr
+#macro  obj                                                                                     global.obj
+#macro  spr                                                                                     global.spr
+#macro  snd                                                                                     global.snd
+#macro  msk                                                                                     spr.msk
+#macro  mus                                                                                     snd.mus
+#macro  lag                                                                                     global.debug_lag
+#macro  ntte                                                                                    global.ntte_vars
+#macro  epsilon                                                                                 global.epsilon
+#macro  mod_current_type                                                                        global.mod_type
 #macro  type_melee                                                                              0
 #macro  type_bullet                                                                             1
 #macro  type_shell                                                                              2
@@ -1908,10 +2233,10 @@
 #macro  area_crib                                                                               107
 #macro  infinity                                                                                1/0
 #macro  instance_max                                                                            instance_create(0, 0, DramaCamera)
-#macro  current_frame_active                                                                    (current_frame % 1) < current_time_scale
+#macro  current_frame_active                                                                    ((current_frame + epsilon) % 1) < current_time_scale
 #macro  game_scale_nonsync                                                                      game_screen_get_width_nonsync() / game_width
-#macro  anim_end                                                                                (image_index + image_speed_raw >= image_number || image_index + image_speed_raw < 0)
-#macro  enemy_sprite                                                                            (sprite_index != spr_hurt || anim_end) ? ((speed <= 0) ? spr_idle : spr_walk) : sprite_index
+#macro  anim_end                                                                                (image_index + image_speed_raw >= image_number) || (image_index + image_speed_raw < 0)
+#macro  enemy_sprite                                                                            (sprite_index != spr_hurt || anim_end) ? ((speed == 0) ? spr_idle : spr_walk) : sprite_index
 #macro  enemy_boss                                                                              ('boss' in self) ? boss : ('intro' in self || array_find_index([Nothing, Nothing2, BigFish, OasisBoss], object_index) >= 0)
 #macro  player_active                                                                           visible && !instance_exists(GenCont) && !instance_exists(LevCont) && !instance_exists(SitDown) && !instance_exists(PlayerSit)
 #macro  target_visible                                                                          !collision_line(x, y, target.x, target.y, Wall, false, false)
@@ -1935,10 +2260,10 @@
 #define orandom(_num)                                                                   return  random_range(-_num, _num);
 #define chance(_numer, _denom)                                                          return  random(_denom) < _numer;
 #define chance_ct(_numer, _denom)                                                       return  random(_denom) < _numer * current_time_scale;
-#define pround(_num, _precision)                                                        return  (_num == 0) ? _num : round(_num / _precision) * _precision;
-#define pfloor(_num, _precision)                                                        return  (_num == 0) ? _num : floor(_num / _precision) * _precision;
-#define pceil(_num, _precision)                                                         return  (_num == 0) ? _num :  ceil(_num / _precision) * _precision;
-#define frame_active(_interval)                                                         return  (current_frame % _interval) < current_time_scale;
+#define pround(_num, _precision)                                                        return  (_precision == 0) ? _num : round(_num / _precision) * _precision;
+#define pfloor(_num, _precision)                                                        return  (_precision == 0) ? _num : floor(_num / _precision) * _precision;
+#define pceil(_num, _precision)                                                         return  (_precision == 0) ? _num :  ceil(_num / _precision) * _precision;
+#define frame_active(_interval)                                                         return  ((current_frame + epsilon) % _interval) < current_time_scale;
 #define lerp_ct(_val1, _val2, _amount)                                                  return  lerp(_val2, _val1, power(1 - _amount, current_time_scale));
 #define angle_lerp(_ang1, _ang2, _num)                                                  return  _ang1 + (angle_difference(_ang2, _ang1) * _num);
 #define angle_lerp_ct(_ang1, _ang2, _num)                                               return  _ang2 + (angle_difference(_ang1, _ang2) * power(1 - _num, current_time_scale));
@@ -1947,112 +2272,4 @@
 #define enemy_face(_dir)                                                                        _dir = ((_dir % 360) + 360) % 360; if(_dir < 90 || _dir > 270) right = 1; else if(_dir > 90 && _dir < 270) right = -1;
 #define enemy_look(_dir)                                                                        _dir = ((_dir % 360) + 360) % 360; if(_dir < 90 || _dir > 270) right = 1; else if(_dir > 90 && _dir < 270) right = -1; if('gunangle' in self) gunangle = _dir;
 #define enemy_target(_x, _y)                                                                    target = (instance_exists(Player) ? instance_nearest(_x, _y, Player) : ((instance_exists(target) && target >= 0) ? target : noone)); return (target != noone);
-#define save_get(_name, _default)                                                       return  mod_script_call_nc  ('mod', 'teassets', 'save_get', _name, _default);
-#define save_set(_name, _value)                                                                 mod_script_call_nc  ('mod', 'teassets', 'save_set', _name, _value);
-#define option_get(_name)                                                               return  mod_script_call_nc  ('mod', 'teassets', 'option_get', _name);
-#define option_set(_name, _value)                                                               mod_script_call_nc  ('mod', 'teassets', 'option_set', _name, _value);
-#define stat_get(_name)                                                                 return  mod_script_call_nc  ('mod', 'teassets', 'stat_get', _name);
-#define stat_set(_name, _value)                                                                 mod_script_call_nc  ('mod', 'teassets', 'stat_set', _name, _value);
-#define unlock_get(_name)                                                               return  mod_script_call_nc  ('mod', 'teassets', 'unlock_get', _name);
-#define unlock_set(_name, _value)                                                       return  mod_script_call_nc  ('mod', 'teassets', 'unlock_set', _name, _value);
-#define surface_setup(_name, _w, _h, _scale)                                            return  mod_script_call_nc  ('mod', 'teassets', 'surface_setup', _name, _w, _h, _scale);
-#define shader_setup(_name, _texture, _args)                                            return  mod_script_call_nc  ('mod', 'teassets', 'shader_setup', _name, _texture, _args);
-#define shader_add(_name, _vertex, _fragment)                                           return  mod_script_call_nc  ('mod', 'teassets', 'shader_add', _name, _vertex, _fragment);
-#define script_bind(_scriptObj, _scriptRef, _depth, _visible)                           return  mod_script_call_nc  ('mod', 'teassets', 'script_bind', script_ref_create(script_bind), _scriptObj, (is_real(_scriptRef) ? script_ref_create(_scriptRef) : _scriptRef), _depth, _visible);
-#define obj_create(_x, _y, _obj)                                                        return  (is_undefined(_obj) ? [] : mod_script_call_nc('mod', 'telib', 'obj_create', _x, _y, _obj));
-#define top_create(_x, _y, _obj, _spawnDir, _spawnDis)                                  return  mod_script_call_nc  ('mod', 'telib', 'top_create', _x, _y, _obj, _spawnDir, _spawnDis);
-#define projectile_create(_x, _y, _obj, _dir, _spd)                                     return  mod_script_call_self('mod', 'telib', 'projectile_create', _x, _y, _obj, _dir, _spd);
-#define chest_create(_x, _y, _obj, _levelStart)                                         return  mod_script_call_nc  ('mod', 'telib', 'chest_create', _x, _y, _obj, _levelStart);
-#define prompt_create(_text)                                                            return  mod_script_call_self('mod', 'telib', 'prompt_create', _text);
-#define alert_create(_inst, _sprite)                                                    return  mod_script_call_self('mod', 'telib', 'alert_create', _inst, _sprite);
-#define door_create(_x, _y, _dir)                                                       return  mod_script_call_nc  ('mod', 'telib', 'door_create', _x, _y, _dir);
-#define trace_error(_error)                                                                     mod_script_call_nc  ('mod', 'telib', 'trace_error', _error);
-#define view_shift(_index, _dir, _pan)                                                          mod_script_call_nc  ('mod', 'telib', 'view_shift', _index, _dir, _pan);
-#define sleep_max(_milliseconds)                                                                mod_script_call_nc  ('mod', 'telib', 'sleep_max', _milliseconds);
-#define instance_budge(_objAvoid, _disMax)                                              return  mod_script_call_self('mod', 'telib', 'instance_budge', _objAvoid, _disMax);
-#define instance_random(_obj)                                                           return  mod_script_call_nc  ('mod', 'telib', 'instance_random', _obj);
-#define instance_clone()                                                                return  mod_script_call_self('mod', 'telib', 'instance_clone');
-#define instance_nearest_array(_x, _y, _inst)                                           return  mod_script_call_nc  ('mod', 'telib', 'instance_nearest_array', _x, _y, _inst);
-#define instance_nearest_bbox(_x, _y, _inst)                                            return  mod_script_call_nc  ('mod', 'telib', 'instance_nearest_bbox', _x, _y, _inst);
-#define instance_nearest_rectangle(_x1, _y1, _x2, _y2, _inst)                           return  mod_script_call_nc  ('mod', 'telib', 'instance_nearest_rectangle', _x1, _y1, _x2, _y2, _inst);
-#define instance_rectangle(_x1, _y1, _x2, _y2, _obj)                                    return  mod_script_call_nc  ('mod', 'telib', 'instance_rectangle', _x1, _y1, _x2, _y2, _obj);
-#define instance_rectangle_bbox(_x1, _y1, _x2, _y2, _obj)                               return  mod_script_call_nc  ('mod', 'telib', 'instance_rectangle_bbox', _x1, _y1, _x2, _y2, _obj);
-#define instances_at(_x, _y, _obj)                                                      return  mod_script_call_nc  ('mod', 'telib', 'instances_at', _x, _y, _obj);
-#define instances_seen(_obj, _bx, _by, _index)                                          return  mod_script_call_nc  ('mod', 'telib', 'instances_seen', _obj, _bx, _by, _index);
-#define instances_seen_nonsync(_obj, _bx, _by)                                          return  mod_script_call_nc  ('mod', 'telib', 'instances_seen_nonsync', _obj, _bx, _by);
-#define instances_meeting(_x, _y, _obj)                                                 return  mod_script_call_self('mod', 'telib', 'instances_meeting', _x, _y, _obj);
-#define instance_get_name(_inst)                                                        return  mod_script_call_nc  ('mod', 'telib', 'instance_get_name', _inst);
-#define variable_instance_get_list(_inst)                                               return  mod_script_call_nc  ('mod', 'telib', 'variable_instance_get_list', _inst);
-#define variable_instance_set_list(_inst, _list)                                                mod_script_call_nc  ('mod', 'telib', 'variable_instance_set_list', _inst, _list);
-#define draw_weapon(_spr, _img, _x, _y, _ang, _angMelee, _kick, _flip, _blend, _alpha)          mod_script_call_nc  ('mod', 'telib', 'draw_weapon', _spr, _img, _x, _y, _ang, _angMelee, _kick, _flip, _blend, _alpha);
-#define draw_lasersight(_x, _y, _dir, _maxDistance, _width)                             return  mod_script_call_nc  ('mod', 'telib', 'draw_lasersight', _x, _y, _dir, _maxDistance, _width);
-#define draw_surface_scale(_surf, _x, _y, _scale)                                               mod_script_call_nc  ('mod', 'telib', 'draw_surface_scale', _surf, _x, _y, _scale);
-#define array_count(_array, _value)                                                     return  mod_script_call_nc  ('mod', 'telib', 'array_count', _array, _value);
-#define array_combine(_array1, _array2)                                                 return  mod_script_call_nc  ('mod', 'telib', 'array_combine', _array1, _array2);
-#define array_delete(_array, _index)                                                    return  mod_script_call_nc  ('mod', 'telib', 'array_delete', _array, _index);
-#define array_delete_value(_array, _value)                                              return  mod_script_call_nc  ('mod', 'telib', 'array_delete_value', _array, _value);
-#define array_flip(_array)                                                              return  mod_script_call_nc  ('mod', 'telib', 'array_flip', _array);
-#define array_shuffle(_array)                                                           return  mod_script_call_nc  ('mod', 'telib', 'array_shuffle', _array);
-#define data_clone(_value, _depth)                                                      return  mod_script_call_nc  ('mod', 'telib', 'data_clone', _value, _depth);
-#define scrFX(_x, _y, _motion, _obj)                                                    return  mod_script_call_nc  ('mod', 'telib', 'scrFX', _x, _y, _motion, _obj);
-#define enemy_hurt(_damage, _force, _direction)                                                 mod_script_call_self('mod', 'telib', 'enemy_hurt', _damage, _force, _direction);
-#define boss_hp(_hp)                                                                    return  mod_script_call_nc  ('mod', 'telib', 'boss_hp', _hp);
-#define boss_intro(_name)                                                               return  mod_script_call_nc  ('mod', 'telib', 'boss_intro', _name);
-#define corpse_drop(_dir, _spd)                                                         return  mod_script_call_self('mod', 'telib', 'corpse_drop', _dir, _spd);
-#define rad_drop(_x, _y, _raddrop, _dir, _spd)                                          return  mod_script_call_nc  ('mod', 'telib', 'rad_drop', _x, _y, _raddrop, _dir, _spd);
-#define rad_path(_inst, _target)                                                        return  mod_script_call_nc  ('mod', 'telib', 'rad_path', _inst, _target);
-#define area_set(_area, _subarea, _loops)                                               return  mod_script_call_nc  ('mod', 'telib', 'area_set', _area, _subarea, _loops);
-#define area_get_name(_area, _subarea, _loops)                                          return  mod_script_call_nc  ('mod', 'telib', 'area_get_name', _area, _subarea, _loops);
-#define area_get_sprite(_area, _spr)                                                    return  mod_script_call     ('mod', 'telib', 'area_get_sprite', _area, _spr);
-#define area_get_subarea(_area)                                                         return  mod_script_call_nc  ('mod', 'telib', 'area_get_subarea', _area);
-#define area_get_secret(_area)                                                          return  mod_script_call_nc  ('mod', 'telib', 'area_get_secret', _area);
-#define area_get_underwater(_area)                                                      return  mod_script_call_nc  ('mod', 'telib', 'area_get_underwater', _area);
-#define area_get_back_color(_area)                                                      return  mod_script_call_nc  ('mod', 'telib', 'area_get_back_color', _area);
-#define area_generate(_area, _sub, _loops, _x, _y, _setArea, _overlapFloor, _scrSetup)  return  mod_script_call_nc  ('mod', 'telib', 'area_generate', _area, _sub, _loops, _x, _y, _setArea, _overlapFloor, _scrSetup);
-#define floor_set(_x, _y, _state)                                                       return  mod_script_call_nc  ('mod', 'telib', 'floor_set', _x, _y, _state);
-#define floor_set_style(_style, _area)                                                  return  mod_script_call_nc  ('mod', 'telib', 'floor_set_style', _style, _area);
-#define floor_set_align(_alignX, _alignY, _alignW, _alignH)                             return  mod_script_call_nc  ('mod', 'telib', 'floor_set_align', _alignX, _alignY, _alignW, _alignH);
-#define floor_reset_style()                                                             return  mod_script_call_nc  ('mod', 'telib', 'floor_reset_style');
-#define floor_reset_align()                                                             return  mod_script_call_nc  ('mod', 'telib', 'floor_reset_align');
-#define floor_fill(_x, _y, _w, _h, _type)                                               return  mod_script_call_nc  ('mod', 'telib', 'floor_fill', _x, _y, _w, _h, _type);
-#define floor_room_start(_spawnX, _spawnY, _spawnDis, _spawnFloor)                      return  mod_script_call_nc  ('mod', 'telib', 'floor_room_start', _spawnX, _spawnY, _spawnDis, _spawnFloor);
-#define floor_room_create(_x, _y, _w, _h, _type, _dirStart, _dirOff, _floorDis)         return  mod_script_call_nc  ('mod', 'telib', 'floor_room_create', _x, _y, _w, _h, _type, _dirStart, _dirOff, _floorDis);
-#define floor_room(_spaX, _spaY, _spaDis, _spaFloor, _w, _h, _type, _dirOff, _floorDis) return  mod_script_call_nc  ('mod', 'telib', 'floor_room', _spaX, _spaY, _spaDis, _spaFloor, _w, _h, _type, _dirOff, _floorDis);
-#define floor_reveal(_x1, _y1, _x2, _y2, _time)                                         return  mod_script_call_nc  ('mod', 'telib', 'floor_reveal', _x1, _y1, _x2, _y2, _time);
-#define floor_tunnel(_x1, _y1, _x2, _y2)                                                return  mod_script_call_nc  ('mod', 'telib', 'floor_tunnel', _x1, _y1, _x2, _y2);
-#define floor_bones(_num, _chance, _linked)                                             return  mod_script_call_self('mod', 'telib', 'floor_bones', _num, _chance, _linked);
-#define floor_walls()                                                                   return  mod_script_call_self('mod', 'telib', 'floor_walls');
-#define wall_tops()                                                                     return  mod_script_call_self('mod', 'telib', 'wall_tops');
-#define wall_clear(_x, _y)                                                              return  mod_script_call_self('mod', 'telib', 'wall_clear', _x, _y);
-#define wall_delete(_x1, _y1, _x2, _y2)                                                         mod_script_call_nc  ('mod', 'telib', 'wall_delete', _x1, _y1, _x2, _y2);
-#define sound_play_hit_ext(_snd, _pit, _vol)                                            return  mod_script_call_self('mod', 'telib', 'sound_play_hit_ext', _snd, _pit, _vol);
-#define race_get_sprite(_race, _sprite)                                                 return  mod_script_call     ('mod', 'telib', 'race_get_sprite', _race, _sprite);
-#define race_get_title(_race)                                                           return  mod_script_call_self('mod', 'telib', 'race_get_title', _race);
-#define player_swap()                                                                   return  mod_script_call_self('mod', 'telib', 'player_swap');
-#define wep_raw(_wep)                                                                   return  mod_script_call_nc  ('mod', 'telib', 'wep_raw', _wep);
-#define wep_wrap(_wep, _scrName, _scrRef)                                               return  mod_script_call_nc  ('mod', 'telib', 'wep_wrap', _wep, _scrName, _scrRef);
-#define wep_skin(_wep, _race, _skin)                                                    return  mod_script_call_nc  ('mod', 'telib', 'wep_skin', _wep, _race, _skin);
-#define wep_merge(_stock, _front)                                                       return  mod_script_call_nc  ('mod', 'telib', 'wep_merge', _stock, _front);
-#define wep_merge_decide(_hardMin, _hardMax)                                            return  mod_script_call_nc  ('mod', 'telib', 'wep_merge_decide', _hardMin, _hardMax);
-#define weapon_decide(_hardMin, _hardMax, _gold, _noWep)                                return  mod_script_call_self('mod', 'telib', 'weapon_decide', _hardMin, _hardMax, _gold, _noWep);
-#define weapon_get(_name, _wep)                                                         return  mod_script_call     ('mod', 'telib', 'weapon_get', _name, _wep);
-#define skill_get_icon(_skill)                                                          return  mod_script_call_self('mod', 'telib', 'skill_get_icon', _skill);
-#define skill_get_avail(_skill)                                                         return  mod_script_call_self('mod', 'telib', 'skill_get_avail', _skill);
-#define string_delete_nt(_string)                                                       return  mod_script_call_nc  ('mod', 'telib', 'string_delete_nt', _string);
-#define path_create(_xstart, _ystart, _xtarget, _ytarget, _wall)                        return  mod_script_call_nc  ('mod', 'telib', 'path_create', _xstart, _ystart, _xtarget, _ytarget, _wall);
-#define path_shrink(_path, _wall, _skipMax)                                             return  mod_script_call_nc  ('mod', 'telib', 'path_shrink', _path, _wall, _skipMax);
-#define path_reaches(_path, _xtarget, _ytarget, _wall)                                  return  mod_script_call_nc  ('mod', 'telib', 'path_reaches', _path, _xtarget, _ytarget, _wall);
-#define path_direction(_path, _x, _y, _wall)                                            return  mod_script_call_nc  ('mod', 'telib', 'path_direction', _path, _x, _y, _wall);
-#define portal_poof()                                                                   return  mod_script_call_nc  ('mod', 'telib', 'portal_poof');
-#define portal_pickups()                                                                return  mod_script_call_nc  ('mod', 'telib', 'portal_pickups');
-#define pet_spawn(_x, _y, _name)                                                        return  mod_script_call_nc  ('mod', 'telib', 'pet_spawn', _x, _y, _name);
-#define pet_get_name(_name, _modType, _modName, _skin)                                  return  mod_script_call_self('mod', 'telib', 'pet_get_name', _name, _modType, _modName, _skin);
-#define pet_get_sprite(_name, _modType, _modName, _skin, _sprName)                      return  mod_script_call_self('mod', 'telib', 'pet_get_sprite', _name, _modType, _modName, _skin, _sprName);
-#define pet_set_skin(_skin)                                                             return  mod_script_call_self('mod', 'telib', 'pet_set_skin', _skin);
-#define team_get_sprite(_team, _sprite)                                                 return  mod_script_call_nc  ('mod', 'telib', 'team_get_sprite', _team, _sprite);
-#define team_instance_sprite(_team, _inst)                                              return  mod_script_call_nc  ('mod', 'telib', 'team_instance_sprite', _team, _inst);
-#define sprite_get_team(_sprite)                                                        return  mod_script_call_nc  ('mod', 'telib', 'sprite_get_team', _sprite);
-#define lightning_connect(_x1, _y1, _x2, _y2, _arc, _enemy)                             return  mod_script_call_self('mod', 'telib', 'lightning_connect', _x1, _y1, _x2, _y2, _arc, _enemy);
-#define charm_instance(_inst, _charm)                                                   return  mod_script_call_nc  ('mod', 'telib', 'charm_instance', _inst, _charm);
-#define motion_step(_mult)                                                              return  mod_script_call_self('mod', 'telib', 'motion_step', _mult);
-#define pool(_pool)                                                                     return  mod_script_call_nc  ('mod', 'telib', 'pool', _pool);
+#define script_bind(_scriptObj, _scriptRef, _depth, _visible)                           return  call(scr.script_bind, script_ref_create(script_bind), _scriptObj, (is_real(_scriptRef) ? script_ref_create(_scriptRef) : _scriptRef), _depth, _visible);

@@ -218,5 +218,5 @@
 	}
 	
 #define pet_create(_x, _y, _pet)
-	return mod_script_call_nc("mod", "telib", "pet_create", _x, _y, _pet, "mod", mod_current);
+	return script_ref_call(mod_variable_get("mod", "teassets", "scr").pet_create, _x, _y, _pet, "mod", mod_current);
 	

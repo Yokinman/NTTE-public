@@ -4,11 +4,23 @@
 	 // Sprites:
 	global.sprWep = spr.Bone;
 	
+	 // Type Stats:
+	global.wep_info_list = [
+		{ "name": "DROP",                   "text": "",                          "sprt": mskNone,              "swap": sndSwapCursed,  "shrine": mut_none,                         "quest_part_index": -1 },
+		{ "name": loc("NTTE:Bone", "BONE"), "text": "BONE THE FISH"/*yokin no*/, "sprt": global.sprWep,        "swap": sndBloodGamble, "shrine": mut_long_arms,                    "quest_part_index": -1 },
+		{ "name": "ANCIENT ARTIFACT",       "text": "SECRETS LIE WITHIN",        "sprt": spr.QuestArtifact[0], "swap": sndSwapHammer,  "shrine": [mut_long_arms, mut_laser_brain], "quest_part_index": 0 },
+		{ "name": "GUARDED ARTIFACT",       "text": "UNCONVENTIONAL WEAPONRY",   "sprt": spr.QuestArtifact[1], "swap": sndSwapHammer,  "shrine": [mut_long_arms, mut_laser_brain], "quest_part_index": 1 },
+		{ "name": "STOLEN ARTIFACT",        "text": "BRING IT BACK",             "sprt": spr.QuestArtifact[2], "swap": sndSwapHammer,  "shrine": [mut_long_arms, mut_laser_brain], "quest_part_index": 2 },
+		{ "name": "MISSING ARTIFACT",       "text": "HARDLY FOUND, EASILY LOST", "sprt": spr.QuestArtifact[3], "swap": sndSwapHammer,  "shrine": [mut_long_arms, mut_laser_brain], "quest_part_index": 3 }
+	];
+	
 	 // LWO:
 	global.lwoWep = {
-		"wep"   : mod_current,
-		"ammo"  : 1,
-		"combo" : 0
+		"wep"        : mod_current,
+		"ammo"       : 1,
+		"ammo_wep"   : wep_none,
+		"type_index" : 0,
+		"combo"      : 0
 	};
 	
 #define cleanup
@@ -16,17 +28,35 @@
 	
 #macro spr global.spr
 
-#define weapon_name  return "BONE";
-#define weapon_text  return "BONE THE FISH"; // yokin no
-#define weapon_swap  return sndBloodGamble;
-#define weapon_sprt  return global.sprWep;
-#define weapon_load  return ((wep_get(true, "curse", 0) > 0) ? 30 : 6); // 0.2 Seconds (Cursed ~ 1 Second)
+#macro _wepXinfo
+	/*
+		Bone stats
+	*/
+	
+	global.wep_info_list[
+		(lq_defget(_wep, "ammo", 1) > 0)
+		? (lq_defget(_wep, "type_index", 0) + 1)
+		: 0
+	]
+	
+#define weapon_name(_wep)    return _wepXinfo.name;
+#define weapon_text(_wep)    return _wepXinfo.text;
+#define weapon_sprt(_wep)    return _wepXinfo.sprt;
+#define weapon_swap(_wep)    return _wepXinfo.swap;
+#define weapon_shrine(_wep)  return _wepXinfo.shrine;
+#define weapon_load          return ((wep_get(true, "curse", 0) > 0) ? 30 : 6); // 0.2 Seconds (Cursed ~ 1 Second)
 
 #define weapon_area
 	 // Drops naturally if a player is already carrying bones:
 	with(Player){
-		if(wep_raw(wep) == mod_current || wep_raw(bwep) == mod_current){
-			return 4; // 1-3
+		if(
+			call(scr.wep_raw, wep)  == mod_current ||
+			call(scr.wep_raw, bwep) == mod_current
+		){
+			var _wep = wep;
+			if(!_wepXinfo.quest_part_index < 0){
+				return 4; // 1-3
+			}
 		}
 	}
 	
@@ -35,9 +65,9 @@
 	
 #define weapon_type(_wep)
 	 // Return Other Weapon's Ammo Type:
-	if(instance_is(self, AmmoPickup) && instance_is(other, Player)){
+	if(instance_is(self, AmmoPickup) && instance_is(other, Player) && other.wep == _wep){
 		with(other){
-			return weapon_get_type((_wep == wep) ? bwep : wep);
+			return weapon_get_type(bwep);
 		}
 	}
 	
@@ -47,7 +77,7 @@
 #define weapon_sprt_hud(_wep)
 	 // Custom Ammo Drawing:
 	if(lq_defget(_wep, "ammo", 0) > 1){
-		return weapon_ammo_hud(_wep);
+		return call(scr.weapon_ammo_hud, _wep);
 	}
 	
 	 // Normal:
@@ -84,8 +114,10 @@
 	}
 	
 #define weapon_fire(_wep)
-	var _fire = weapon_fire_init(_wep);
+	var _fire = call(scr.weapon_fire_init, _wep);
 	_wep = _fire.wep;
+	
+	var _wepIsPart = (_wepXinfo.quest_part_index >= 0);
 	
 	 // Cursed:
 	var _curse = 0;
@@ -100,30 +132,56 @@
 		
 		 // Slash:
 		var	_skill = skill_get(mut_long_arms),
-			_heavy = ((++_wep.combo % 2) == 0),
+			_heavy = ((++_wep.combo % 2) == 0 && !_wepIsPart),
 			_flip  = sign(wepangle),
-			_dis   = lerp(10, 20, _skill),
+			_dis   = lerp(10, 20, _skill) + (_wepIsPart ? -16 : 0),
 			_dir   = gunangle;
 			
-		with(projectile_create(
+		with(call(scr.projectile_create,
 			x + hspeed + lengthdir_x(_dis, _dir),
 			y + vspeed + lengthdir_y(_dis, _dir),
-			"BoneSlash",
+			(_wepIsPart ? EnergySlash : "BoneSlash"),
 			_dir + orandom(5 * accuracy),
 			lerp(2, 4, _skill)
 		)){
 			image_xscale *= 3/4;
 			image_yscale *= 3/4 * _flip;
-			rotspeed      = 2 * _flip;
-			heavy         = _heavy;
+			if(_wepIsPart){
+				damage = 25;
+				force  = 10;
+				switch(_wepXinfo.quest_part_index){
+					case 0: sprite_index = spr.EnergyBatSlash;       break;
+					case 1: sprite_index = spr.PurpleEnergyBatSlash; break;
+					case 2: sprite_index = spr.PopoEnergyBatSlash;   break;
+					case 3: sprite_index = spr.EnemyEnergyBatSlash;  break;
+				}
+			}
+			else{
+				rotspeed = 2 * _flip;
+			}
+			if(_heavy){
+				heavy = _heavy;
+			}
 		}
 		
 		 // Sounds:
-		sound_play_gun(sndWrench, 0.3, 0.5);
-		sound_play_hit(sndCursedReminder, 0.1);
-		sound_play_pitchvol(sndBloodGamble, (_heavy ? 0.5 : 0.7) + random(0.2), (_heavy ? 0.7 : 0.5));
-		if(_heavy){
-			sound_play_pitch(sndHammer, 1 + random(0.2));
+		if(_wepIsPart){
+			if(skill_get(mut_laser_brain) > 0){
+				sound_play_gun(sndEnergySwordUpg, 0.3, 0.3);
+				sound_play_pitchvol(sndBlackSword, random_range(0.5, 0.7), 2/3);
+			}
+			else{
+				sound_play_gun(sndEnergySword, 0.3, 0.3);
+				sound_play_pitchvol(sndBlackSword, random_range(0.5, 0.7), 2/3);
+			}
+		}
+		else{
+			sound_play_gun(sndWrench, 0.3, 0.5);
+			sound_play_hit(sndCursedReminder, 0.1);
+			sound_play_pitchvol(sndBloodGamble, (_heavy ? 0.5 : 0.7) + random(0.2), (_heavy ? 0.7 : 0.5));
+			if(_heavy){
+				sound_play_pitch(sndHammer, 1 + random(0.2));
+			}
 		}
 		
 		 // Effects:
@@ -134,62 +192,82 @@
 	}
 	
 	 // Fire:
-	else if(weapon_ammo_fire(_wep)){
-		 // Throw Bone:
-		with(projectile_create(x, y, "Bone", gunangle, lerp(16, 20, skill_get(mut_long_arms)))){
-			wep          = lq_clone(_wep);
-			wep.ammo     = 1;
-			curse        = _curse;
-			sprite_index = weapon_get_sprt(wep);
+	else{
+		var _lastInfAmmo = infammo;
+		if(_wepIsPart){
+			infammo = 0;
+		}
+		if(call(scr.weapon_ammo_fire, _wep)){
+			 // Effects:
+			weapon_post(-10, -4, 4);
+			with(instance_create(x, y, MeleeHitWall)){
+				motion_add(other.gunangle, 1);
+				image_angle = direction + 180;
+			}
 			
-			 // Death to Free Bones:
-			if(other.infammo != 0){
-				broken = true;
+			 // Sound:
+			sound_play(sndChickenThrow);
+			if(_wepIsPart){
+				sound_play_pitch(sndPlasmaReload, 2 + orandom(0.1));
+			}
+			else{
+				sound_play_pitch(sndBloodGamble, 0.7 + random(0.2));
+			}
+			
+			 // Throw Bone:
+			if(_fire.wepheld){
+				if("ammo_wep" in _wep && infammo == 0){
+					wep   = _wep.ammo_wep;
+					wkick = 0;
+					
+					 // Auto Swap to Secondary:
+					if(wep == wep_none && _fire.primary){
+						call(scr.player_swap, self);
+						clicked   = false;
+						swapmove  = true;
+						drawempty = 30;
+						
+						 // Prevent Shooting Until Trigger Released:
+						if(wep != wep_none && !_fire.spec && fork()){
+							while(instance_exists(self) && canfire && button_check(index, "fire")){
+								reload    = max(2 * reloadspeed * current_time_scale, reload);
+								can_shoot = false;
+								clicked   = false;
+								wait 0;
+							}
+							exit;
+						}
+					}
+				}
+			}
+			else{
+				_wep = lq_clone(_wep)
+			}
+			with(call(scr.projectile_create, x, y, "Bone", gunangle, lerp(16, 20, skill_get(mut_long_arms)))){
+				wep          = _wep;
+				wep.ammo     = 1;
+				wep.ammo_wep = wep_none;
+				curse        = _curse;
+				sprite_index = weapon_get_sprt(wep);
+				
+				 // Death to Free Bones:
+				if(other.infammo != 0){
+					broken = true;
+				}
 			}
 		}
-		
-		 // Sound:
-		sound_play(sndChickenThrow);
-		sound_play_pitch(sndBloodGamble, 0.7 + random(0.2));
-		
-		 // Effects:
-		weapon_post(-10, -4, 4);
-		with(instance_create(x, y, MeleeHitWall)){
-			motion_add(other.gunangle, 1);
-			image_angle = direction + 180;
-		}
-	}
-	
-	 // Gone:
-	if(_wep.ammo <= 0 && _fire.wepheld){
-		with(_fire.creator){
-			if(!_fire.primary){
-				player_swap();
-			}
-			step(_fire.primary);
-			if(!_fire.primary){
-				player_swap();
-			}
+		if(_wepIsPart){
+			infammo = _lastInfAmmo;
 		}
 	}
 	
 #define step(_primary)
-	var _wep = wep_get(_primary, "wep", mod_current);
-	
-	 // LWO Setup:
-	if(!is_object(_wep)){
-		_wep = { "wep" : _wep };
-		wep_set(_primary, "wep", _wep);
-	}
-	for(var i = lq_size(global.lwoWep) - 1; i >= 0; i--){
-		var _key = lq_get_key(global.lwoWep, i);
-		if(_key not in _wep){
-			lq_set(_wep, _key, lq_get_value(global.lwoWep, i));
-		}
-	}
+	var _wep = call(scr.weapon_step_init, _primary);
 	
 	 // Holdin Bone:
 	if(_wep.ammo > 0){
+		var _wepQuestPartIndex = _wepXinfo.quest_part_index;
+		
 		 // Extend Bone:
 		var	_goal = -5,
 			_kick = wep_get(_primary, "wkick", 0);
@@ -201,54 +279,98 @@
 		
 		 // Pickup Bones:
 		if(instance_exists(WepPickup) && place_meeting(x, y, WepPickup)){
-			var _inst = instances_meeting(x, y, instances_matching_le(instances_matching(WepPickup, "visible", true), "curse", wep_get(_primary, "curse", 0)));
+			var _inst = call(scr.instances_meeting_instance, self, instances_matching_le(instances_matching(WepPickup, "visible", true), "curse", wep_get(_primary, "curse", 0)));
 			if(array_length(_inst)) with(_inst){
 				if(place_meeting(x, y, other)){
-					if(wep_raw(wep) == mod_current){
-						var _num = lq_defget(wep, "ammo", 1);
-						_wep.ammo += _num;
-						
-						 // Pickuped:
-						with(other){
-							if(_primary || race == "steroids"){
-								wep_set(_primary, "wkick", 0);
+					if(call(scr.wep_raw, wep) == mod_current){
+						var	_newWep               = wep,
+							_newWepAmmo           = lq_defget(_newWep, "ammo", 1),
+							_newWepQuestPartIndex = global.wep_info_list[(_newWepAmmo > 0) ? (lq_defget(_newWep, "type_index", 0) + 1) : 0].quest_part_index;
+							
+						if(
+							(_wepQuestPartIndex >= 0) == (_newWepQuestPartIndex >= 0)
+							&& ((_newWepQuestPartIndex < 0) || instance_exists(enemy) || !array_length(call(scr.instances_meeting_instance, self, obj.QuestFloorCont)))
+						){
+							if(!is_object(_newWep)){
+								_newWep = { "wep" : _newWep };
+							}
+							_newWep.ammo     = _newWepAmmo + lq_defget(_wep, "ammo", 1);
+							_newWep.ammo_wep = _wep;
+							_wep             = _newWep;
+							if(_primary){
+								other.wep = _wep;
 							}
 							else{
-								mod_script_call("mod", "tepickups", "pickup_text", "% BONE", _num);
+								other.bwep = _wep;
 							}
+							
+							 // Pickuped:
+							with(other){
+								var _isHeld = (_primary || race == "steroids");
+								if(_isHeld){
+									wep_set(_primary, "wkick", 0);
+									if(_newWepQuestPartIndex >= 0){
+										gunshine = max(gunshine, 2);
+									}
+								}
+								if(!_isHeld || _newWepQuestPartIndex >= 0){
+									call(scr.pickup_text, weapon_get_name(_newWep), "got", _newWepAmmo);
+								}
+							}
+							
+							 // Epic Time:
+							if(_newWepQuestPartIndex < 0 && _wep.ammo > call(scr.stat_get, "bone")){
+								call(scr.stat_set, "bone", _wep.ammo);
+							}
+							
+							 // Effects:
+							with(instance_create(x, y, DiscDisappear)){
+								image_angle = other.rotation;
+							}
+							with(other){
+								sound_play_pitch(sndHPPickup, 4);
+								sound_play_pitch(sndPickupDisappear, 1.2);
+								sound_play_pitchvol(sndBloodGamble, 0.4 + random(0.2), 0.9);
+							}
+							
+							instance_destroy();
 						}
-						
-						 // Epic Time:
-						if(_wep.ammo > stat_get("bone")){
-							stat_set("bone", _wep.ammo);
-						}
-						
-						 // Effects:
-						with(instance_create(x, y, DiscDisappear)){
-							image_angle = other.rotation;
-						}
-						with(other){
-							sound_play_pitch(sndHPPickup, 4);
-							sound_play_pitch(sndPickupDisappear, 1.2);
-							sound_play_pitchvol(sndBloodGamble, 0.4 + random(0.2), 0.9);
-						}
-						
-						instance_destroy();
+					}
+				}
+			}
+		}
+		
+		 // Sparkly:
+		if(_wepQuestPartIndex >= 0){
+			if(_primary && chance_ct(1, 20)){
+				var	_len = random_range(4, 12) - _kick,
+					_dir = gunangle + ((_primary ? wepangle : bwepangle) * (1 - (_kick / 20)));
+					
+				with(call(scr.obj_create,
+					x + lengthdir_x(_len, _dir) + orandom(4),
+					y + lengthdir_y(_len, _dir) + orandom(4),
+					"VaultFlowerSparkle"
+				)){
+					sprite_index = spr.QuestSparkle;
+					depth		 = other.depth + (_primary ? -1 : 1);
+					switch(_wepQuestPartIndex){
+						case 0 : sprite_index = spr.AllyLaserCharge;    break;
+						case 1 : sprite_index = spr.ElectroPlasmaTrail; break;
+						case 2 : sprite_index = sprIDPDPortalCharge;    break;
+						case 3 : sprite_index = sprLaserCharge;         break;
 					}
 				}
 			}
 		}
 		
 		 // Bro don't look here:
-		if(_wep.ammo >= 10){
+		else if(_wep.ammo >= 10){
 			 // E Indicator:
-			if(!instance_exists(variable_instance_get(id, "prompt_scythe", noone))){
-				prompt_scythe = obj_create(x, y, "Prompt");
+			if(!instance_exists(variable_instance_get(self, "prompt_scythe", noone))){
+				prompt_scythe = call(scr.prompt_create, self, loc("NTTE:Bone:Prompt", "SCYTHE"));
 				with(prompt_scythe){
-					text    = "SCYTHE";
-					creator = other;
-					index   = other.index;
 					depth   = 1000000;
+					index   = other.index;
 					on_meet = script_ref_create(scythe_prompt_meet);
 				}
 			}
@@ -261,17 +383,32 @@
 				}
 				
 				 // Give Scythe:
-				mod_script_call("weapon", "scythe", "scythe_swap", _primary);
+				call(scr.scythe_swap, _primary);
 				
 				 // Unlock:
-				unlock_set("wep:scythe", true);
+				call(scr.unlock_set, "wep:scythe", true);
 				
 				 // Drop Spare Bones:
-				_wep.ammo -= 10;
-				if(_wep.ammo > 0) repeat(_wep.ammo){
-					with(instance_create(x, y, WepPickup)){
-						wep = mod_current;
+				repeat(10){
+					if("ammo_wep" in _wep){
+						_wep = _wep.ammo_wep;
 					}
+					else break;
+				}
+				while("ammo" in _wep && _wep.ammo > 0){
+					var _ammoWep = lq_defget(_wep, "ammo_wep", wep_none);
+					if(_ammoWep != wep_none){
+						with(instance_create(x, y, WepPickup)){
+							wep = _wep;
+						}
+					}
+					_wep = _ammoWep;
+				}
+				if(_primary){
+					wep = _wep;
+				}
+				else{
+					bwep = _wep;
 				}
 			}
 		}
@@ -284,59 +421,42 @@
 	
 	 // No Bones Left:
 	else{
-		wep_set(_primary, "wep", wep_none);
+		_wep = lq_defget(_wep, "ammo_wep", wep_none);
+		wep_set(_primary, "wep",   _wep);
 		wep_set(_primary, "wkick", 0);
 		
 		 // Auto Swap to Secondary:
-		if(_primary && instance_is(self, Player)){
-			player_swap();
+		if(_wep == wep_none && _primary && instance_is(self, Player)){
+			call(scr.player_swap, self);
+			clicked   = false;
 			swapmove  = true;
 			drawempty = 30;
-			
-			 // Prevent Shooting Until Trigger Released:
-			if(wep != wep_none && fork()){
-				while(instance_exists(self) && canfire && button_check(index, "fire")){
-					reload    = max(2 * reloadspeed * current_time_scale, reload);
-					can_shoot = false;
-					clicked   = false;
-					wait 0;
-				}
-				exit;
-			}
 		}
 	}
 	
 #define scythe_prompt_meet
-	if(other.index == index && wep_raw(other.wep) == mod_current){
-		return true;
-	}
-	return false;
+	return (other.index == index && call(scr.wep_raw, other.wep) == mod_current);
 	
 	
 /// SCRIPTS
+#macro  call                                                                                    script_ref_call
+#macro  obj                                                                                     global.obj
+#macro  scr                                                                                     global.scr
+#macro  spr                                                                                     global.spr
+#macro  snd                                                                                     global.snd
+#macro  msk                                                                                     spr.msk
+#macro  mus                                                                                     snd.mus
+#macro  lag                                                                                     global.debug_lag
+#macro  ntte                                                                                    global.ntte_vars
 #macro  type_melee                                                                              0
 #macro  type_bullet                                                                             1
 #macro  type_shell                                                                              2
 #macro  type_bolt                                                                               3
 #macro  type_explosive                                                                          4
 #macro  type_energy                                                                             5
-#macro  current_frame_active                                                                    (current_frame % 1) < current_time_scale
+#macro  current_frame_active                                                                    ((current_frame + global.epsilon) % 1) < current_time_scale
 #define orandom(_num)                                                                   return  random_range(-_num, _num);
 #define chance(_numer, _denom)                                                          return  random(_denom) < _numer;
 #define chance_ct(_numer, _denom)                                                       return  random(_denom) < (_numer * current_time_scale);
-#define unlock_get(_unlock)                                                             return  mod_script_call_nc('mod', 'teassets', 'unlock_get', _unlock);
-#define obj_create(_x, _y, _obj)                                                        return  (is_undefined(_obj) ? [] : mod_script_call_nc('mod', 'telib', 'obj_create', _x, _y, _obj));
-#define projectile_create(_x, _y, _obj, _dir, _spd)                                     return  mod_script_call_self('mod', 'telib', 'projectile_create', _x, _y, _obj, _dir, _spd);
-#define weapon_fire_init(_wep)                                                          return  mod_script_call     ('mod', 'telib', 'weapon_fire_init', _wep);
-#define weapon_ammo_fire(_wep)                                                          return  mod_script_call     ('mod', 'telib', 'weapon_ammo_fire', _wep);
-#define weapon_ammo_hud(_wep)                                                           return  mod_script_call     ('mod', 'telib', 'weapon_ammo_hud', _wep);
-#define weapon_get(_name, _wep)                                                         return  mod_script_call     ('mod', 'telib', 'weapon_get', _name, _wep);
-#define wep_raw(_wep)                                                                   return  mod_script_call_nc  ('mod', 'telib', 'wep_raw', _wep);
 #define wep_get(_primary, _name, _default)                                              return  variable_instance_get(self, (_primary ? '' : 'b') + _name, _default);
-#define wep_set(_primary, _name, _value)                                                        variable_instance_set(self, (_primary ? '' : 'b') + _name, _value);
-#define unlock_set(_name, _value)                                                       return  mod_script_call_nc  ('mod', 'teassets', 'unlock_set', _name, _value);
-#define stat_get(_name)                                                                 return  mod_script_call_nc  ('mod', 'teassets', 'stat_get', _name);
-#define stat_set(_name, _value)                                                                 mod_script_call_nc  ('mod', 'teassets', 'stat_set', _name, _value);
-#define instances_meeting(_x, _y, _obj)                                                 return  mod_script_call_self('mod', 'telib', 'instances_meeting', _x, _y, _obj);
-#define scrFX(_x, _y, _motion, _obj)                                                    return  mod_script_call_nc  ('mod', 'telib', 'scrFX', _x, _y, _motion, _obj);
-#define player_swap()                                                                   return  mod_script_call_self('mod', 'telib', 'player_swap');
+#define wep_set(_primary, _name, _value)                                                        if(((_primary ? '' : 'b') + _name) in self) variable_instance_set(self, (_primary ? '' : 'b') + _name, _value);

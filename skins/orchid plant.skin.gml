@@ -14,7 +14,7 @@
 #define skin_lock      return "REROLL ???";
 #define skin_unlock    return "FOR REROLLING HEAVY HEART";
 #define skin_ttip      return choose("YOU LOOK SO GOOD", "MILLION DOLLAR SMILE", "SHINY LIKE A LIMOUSINE", "ALL THAT TWINKLES IS GOLD", "PUMP YOUR VEINS WITH GUSHING GOLD");
-#define skin_avail     return unlock_get("skin:" + mod_current);
+#define skin_avail     return call(scr.unlock_get, "skin:" + mod_current);
 #define skin_portrait  return skin_sprite(sprBigPortrait);
 #define skin_mapicon   return skin_sprite(sprMapIcon);
 
@@ -37,7 +37,7 @@
 		case sprTangleSeed   : return spr.PlantOrchidTangleSeed;
 	}
 	
-#define skin_weapon_sprite(_spr, _wep)
+#define skin_weapon_sprite(_wep, _spr)
 	switch(_spr){
 		case sprGoldARifle       : return spr.OrchidAssaultRifle;
 		case sprGoldBazooka      : return spr.OrchidBazooka;
@@ -66,21 +66,28 @@
 		
 		 // Modded:
 		default:
-			if(_spr == spr.GoldTrident  ) return spr.OrchidTrident;
-			if(_spr == spr.GoldTunneller) return spr.OrchidTunneller;
+			if(_spr == spr.GoldTeleportGun) return spr.OrchidTeleportGun;
+			if(_spr == spr.GoldTrident    ) return spr.OrchidTrident;
+			if(_spr == spr.GoldTunneller  ) return spr.OrchidTunneller;
 	}
 	return _spr;
 	
-#define skin_weapon_sprite_hud(_spr, _wep)
+#define skin_weapon_sprite_hud(_wep, _spr)
 	if(_spr == spr.TunnellerHUD) return spr.OrchidTunnellerHUD;
-	return _spr;
+	return skin_weapon_sprite(_wep, _spr);
 	
 	
 /// SCRIPTS
-#macro  current_frame_active                                                                    (current_frame % 1) < current_time_scale
+#macro  call                                                                                    script_ref_call
+#macro  obj                                                                                     global.obj
+#macro  scr                                                                                     global.scr
+#macro  spr                                                                                     global.spr
+#macro  snd                                                                                     global.snd
+#macro  msk                                                                                     spr.msk
+#macro  mus                                                                                     snd.mus
+#macro  lag                                                                                     global.debug_lag
+#macro  ntte                                                                                    global.ntte_vars
+#macro  current_frame_active                                                                    ((current_frame + global.epsilon) % 1) < current_time_scale
 #define orandom(_num)                                                                   return  random_range(-_num, _num);
 #define chance(_numer, _denom)                                                          return  random(_denom) < _numer;
 #define chance_ct(_numer, _denom)                                                       return  random(_denom) < (_numer * current_time_scale);
-#define unlock_get(_unlock)                                                             return  mod_script_call_nc('mod', 'teassets', 'unlock_get', _unlock);
-#define obj_create(_x, _y, _obj)                                                        return  (is_undefined(_obj) ? [] : mod_script_call_nc('mod', 'telib', 'obj_create', _x, _y, _obj));
-#define area_get_name(_area, _subarea, _loop)                                           return  mod_script_call_nc('mod', 'telib', 'area_get_name', _area, _subarea, _loop);

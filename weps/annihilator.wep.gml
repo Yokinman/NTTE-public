@@ -19,16 +19,16 @@
 	mod_script_call("mod", "teassets", "ntte_cleanup", script_ref_create(cleanup));
 	
 #define weapon_name        return (weapon_avail() ? "ANNIHILATOR" : "LOCKED");
-#define weapon_text        return `@wBEND @sTHE @(color:${area_get_back_color("red")})CONTINUUM`;
+#define weapon_text        return `@wBEND @sTHE @(color:${call(scr.area_get_back_color, "red")})CONTINUUM`;
 #define weapon_sprt        return (weapon_avail() ? global.sprWep : global.sprWepLocked);
 #define weapon_area        return (weapon_avail() ? 22 : -1); // L1 3-1
 #define weapon_load        return 18; // 0.6 Seconds
-#define weapon_auto(_wep)  return weapon_get("chrg", _wep);
-#define weapon_avail       return unlock_get("pack:" + weapon_ntte_pack());
+#define weapon_auto(_wep)  return call(scr.weapon_get, "chrg", _wep);
+#define weapon_avail       return call(scr.unlock_get, "pack:" + weapon_ntte_pack());
 #define weapon_ntte_pack   return "red";
 #define weapon_shrine      return [mut_long_arms, mut_shotgun_shoulders];
 #define weapon_red         return 2;
-#define weapon_chrg(_wep)  return (argument_count > 0 && "red_ammo" in self && red_ammo >= weapon_get("red", _wep));
+#define weapon_chrg(_wep)  return (argument_count > 0 && "red_ammo" in self && red_ammo >= call(scr.weapon_get, "red", _wep));
 
 #define weapon_type
 	 // Weapon Pickup Ammo Outline:
@@ -73,10 +73,15 @@
 	}
 	
 #define weapon_fire(_wep)
-	var _fire = weapon_fire_init(_wep);
+	var _fire = call(scr.weapon_fire_init, _wep);
 	_wep = _fire.wep;
 	
 	var _charge = (_wep.chrg_num / _wep.chrg_max);
+	
+	 // Reset Melee Offset:
+	if(!_wep.chrg || (_wep.chrg_num <= current_time_scale && abs(wepangle) < 30)){
+		wepangle = 120 * sign(wepangle);
+	}
 	
 	 // Charging:
 	if(_wep.chrg){
@@ -98,7 +103,7 @@
 			var	_l = random_range(8, 32) - wkick,
 				_d = gunangle + (wepangle * (1 - (wkick / 20)));
 				
-			obj_create(x + lengthdir_x(_l, _d), y + lengthdir_y(_l, _d), "CrystalBrainEffect");
+			call(scr.obj_create, x + lengthdir_x(_l, _d), y + lengthdir_y(_l, _d), "CrystalBrainEffect");
 		}
 		if(_wep.chrg == 1){
 			 // Sound:
@@ -122,7 +127,7 @@
 					sprite_index = sprThrowHit;
 					image_speed  = 0.4;
 					image_angle  = random(360);
-					image_blend  = area_get_back_color("red");
+					image_blend  = call(scr.area_get_back_color, "red");
 					depth        = other.depth - 1;
 					with(instance_create(x, y, PlasmaTrail)){
 						sprite_index = other.sprite_index;
@@ -139,15 +144,13 @@
 	
 	 // Fire:
 	else{
-		wepangle = 120 * sign(wepangle);
-		
 		 // Red:
-		var _cost = weapon_get("red", _wep);
+		var _cost = call(scr.weapon_get, "red", _wep);
 		if(_charge >= 1 && "red_ammo" in _fire.creator && _fire.creator.red_ammo >= _cost){
 			_fire.creator.red_ammo -= _cost;
 			
 			 // Annihilator:
-			projectile_create(x, y, "RedBullet", gunangle, 16);
+			call(scr.projectile_create, x, y, "RedBullet", gunangle, 16);
 			
 			 // Sounds:
 			sound_play_gun(sndShotgun,           0.2, 0.3);
@@ -168,7 +171,7 @@
 				_dir   = gunangle; // + orandom(10 * accuracy);
 				
 			 // Slash:
-			projectile_create(
+			call(scr.projectile_create,
 				x + lengthdir_x(_dis, _dir),
 				y + lengthdir_y(_dis, _dir),
 				"RedSlash",
@@ -193,24 +196,24 @@
 	
 	
 /// SCRIPTS
+#macro  call                                                                                    script_ref_call
+#macro  obj                                                                                     global.obj
+#macro  scr                                                                                     global.scr
+#macro  spr                                                                                     global.spr
+#macro  snd                                                                                     global.snd
+#macro  msk                                                                                     spr.msk
+#macro  mus                                                                                     snd.mus
+#macro  lag                                                                                     global.debug_lag
+#macro  ntte                                                                                    global.ntte_vars
 #macro  type_melee                                                                              0
 #macro  type_bullet                                                                             1
 #macro  type_shell                                                                              2
 #macro  type_bolt                                                                               3
 #macro  type_explosive                                                                          4
 #macro  type_energy                                                                             5
-#macro  current_frame_active                                                                    (current_frame % 1) < current_time_scale
+#macro  current_frame_active                                                                    ((current_frame + global.epsilon) % 1) < current_time_scale
 #define orandom(_num)                                                                   return  random_range(-_num, _num);
 #define chance(_numer, _denom)                                                          return  random(_denom) < _numer;
 #define chance_ct(_numer, _denom)                                                       return  random(_denom) < (_numer * current_time_scale);
-#define unlock_get(_unlock)                                                             return  mod_script_call_nc('mod', 'teassets', 'unlock_get', _unlock);
-#define obj_create(_x, _y, _obj)                                                        return  (is_undefined(_obj) ? [] : mod_script_call_nc('mod', 'telib', 'obj_create', _x, _y, _obj));
-#define projectile_create(_x, _y, _obj, _dir, _spd)                                     return  mod_script_call_self('mod', 'telib', 'projectile_create', _x, _y, _obj, _dir, _spd);
-#define weapon_fire_init(_wep)                                                          return  mod_script_call     ('mod', 'telib', 'weapon_fire_init', _wep);
-#define weapon_ammo_fire(_wep)                                                          return  mod_script_call     ('mod', 'telib', 'weapon_ammo_fire', _wep);
-#define weapon_ammo_hud(_wep)                                                           return  mod_script_call     ('mod', 'telib', 'weapon_ammo_hud', _wep);
-#define weapon_get(_name, _wep)                                                         return  mod_script_call     ('mod', 'telib', 'weapon_get', _name, _wep);
-#define wep_raw(_wep)                                                                   return  mod_script_call_nc  ('mod', 'telib', 'wep_raw', _wep);
 #define wep_get(_primary, _name, _default)                                              return  variable_instance_get(self, (_primary ? '' : 'b') + _name, _default);
-#define wep_set(_primary, _name, _value)                                                        variable_instance_set(self, (_primary ? '' : 'b') + _name, _value);
-#define area_get_back_color(_area)                                                      return  mod_script_call_nc('mod', 'telib', 'area_get_back_color', _area);
+#define wep_set(_primary, _name, _value)                                                        if(((_primary ? '' : 'b') + _name) in self) variable_instance_set(self, (_primary ? '' : 'b') + _name, _value);

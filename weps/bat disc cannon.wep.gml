@@ -24,13 +24,13 @@
 #define weapon_name            return (weapon_avail() ? "SAWBLADE CANNON" : "LOCKED");
 #define weapon_text            return "THEY STAND NO CHANCE";
 #define weapon_swap            return sndSwapMotorized;
-#define weapon_sprt_hud(_wep)  return weapon_ammo_hud(_wep);
+#define weapon_sprt_hud(_wep)  return call(scr.weapon_ammo_hud, _wep);
 #define weapon_area            return (weapon_avail() ? 11 : -1); // 5-2
 #define weapon_type            return type_melee;
 #define weapon_load            return 20; // 0.66 Seconds
 #define weapon_auto            return true;
 #define weapon_melee           return false;
-#define weapon_avail           return unlock_get("pack:" + weapon_ntte_pack());
+#define weapon_avail           return call(scr.unlock_get, "pack:" + weapon_ntte_pack());
 #define weapon_ntte_pack       return "lair";
 #define weapon_shrine          return mut_bolt_marrow;
 
@@ -43,8 +43,8 @@
 				_cost = lq_defget(_wep, "cost", 1);
 				
 			 // Homing:
-			if(_ammo < _cost && instance_exists(CustomObject)){
-				if(array_length(instances_matching(instances_matching(instances_matching(CustomProjectile, "name", "BatDisc"), "wep", _wep), "image_index", 1))){
+			if(_ammo < _cost && array_length(obj.BatDisc)){
+				if(array_length(instances_matching(instances_matching(obj.BatDisc, "wep", _wep), "image_index", 1))){
 					return global.sprWepHoming;
 				}
 			}
@@ -61,13 +61,13 @@
 	return global.sprWepLocked;
 	
 #define weapon_fire(_wep)
-	var _fire = weapon_fire_init(_wep);
+	var _fire = call(scr.weapon_fire_init, _wep);
 	_wep = _fire.wep;
 	
 	 // Fire:
-	if(weapon_ammo_fire(_wep)){
+	if(call(scr.weapon_ammo_fire, _wep)){
 		 // Disc:
-		with(projectile_create(x, y, "BatDisc", gunangle + orandom(4 * accuracy), 0)){
+		with(call(scr.projectile_create, x, y, "BatDisc", gunangle + orandom(4 * accuracy))){
 			ammo = _wep.cost;
 			wep  = _wep;
 			big  = true;
@@ -89,42 +89,31 @@
 	}
 	
 #define step(_primary)
-	var _wep = wep_get(_primary, "wep", mod_current);
-	
-	 // LWO Setup:
-	if(!is_object(_wep)){
-		_wep = { "wep" : _wep };
-		wep_set(_primary, "wep", _wep);
-	}
-	for(var i = lq_size(global.lwoWep) - 1; i >= 0; i--){
-		var _key = lq_get_key(global.lwoWep, i);
-		if(_key not in _wep){
-			lq_set(_wep, _key, lq_get_value(global.lwoWep, i));
-		}
-	}
+	var _wep = call(scr.weapon_step_init, _primary);
 	
 	 // Inherit:
 	mod_script_call("weapon", "bat disc launcher", "step", _primary);
 	
 	
 /// SCRIPTS
+#macro  call                                                                                    script_ref_call
+#macro  obj                                                                                     global.obj
+#macro  scr                                                                                     global.scr
+#macro  spr                                                                                     global.spr
+#macro  snd                                                                                     global.snd
+#macro  msk                                                                                     spr.msk
+#macro  mus                                                                                     snd.mus
+#macro  lag                                                                                     global.debug_lag
+#macro  ntte                                                                                    global.ntte_vars
 #macro  type_melee                                                                              0
 #macro  type_bullet                                                                             1
 #macro  type_shell                                                                              2
 #macro  type_bolt                                                                               3
 #macro  type_explosive                                                                          4
 #macro  type_energy                                                                             5
-#macro  current_frame_active                                                                    (current_frame % 1) < current_time_scale
+#macro  current_frame_active                                                                    ((current_frame + global.epsilon) % 1) < current_time_scale
 #define orandom(_num)                                                                   return  random_range(-_num, _num);
 #define chance(_numer, _denom)                                                          return  random(_denom) < _numer;
 #define chance_ct(_numer, _denom)                                                       return  random(_denom) < (_numer * current_time_scale);
-#define unlock_get(_unlock)                                                             return  mod_script_call_nc('mod', 'teassets', 'unlock_get', _unlock);
-#define obj_create(_x, _y, _obj)                                                        return  (is_undefined(_obj) ? [] : mod_script_call_nc('mod', 'telib', 'obj_create', _x, _y, _obj));
-#define projectile_create(_x, _y, _obj, _dir, _spd)                                     return  mod_script_call_self('mod', 'telib', 'projectile_create', _x, _y, _obj, _dir, _spd);
-#define weapon_fire_init(_wep)                                                          return  mod_script_call     ('mod', 'telib', 'weapon_fire_init', _wep);
-#define weapon_ammo_fire(_wep)                                                          return  mod_script_call     ('mod', 'telib', 'weapon_ammo_fire', _wep);
-#define weapon_ammo_hud(_wep)                                                           return  mod_script_call     ('mod', 'telib', 'weapon_ammo_hud', _wep);
-#define weapon_get(_name, _wep)                                                         return  mod_script_call     ('mod', 'telib', 'weapon_get', _name, _wep);
-#define wep_raw(_wep)                                                                   return  mod_script_call_nc  ('mod', 'telib', 'wep_raw', _wep);
 #define wep_get(_primary, _name, _default)                                              return  variable_instance_get(self, (_primary ? '' : 'b') + _name, _default);
-#define wep_set(_primary, _name, _value)                                                        variable_instance_set(self, (_primary ? '' : 'b') + _name, _value);
+#define wep_set(_primary, _name, _value)                                                        if(((_primary ? '' : 'b') + _name) in self) variable_instance_set(self, (_primary ? '' : 'b') + _name, _value);
