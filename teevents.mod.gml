@@ -1127,7 +1127,7 @@
 	
 	
 #define GatorAmbush_text    return choose(`${event_tip}THE WASTELAND WEAPON TRADE`, `THESE PIPES RUN ${event_tip}EVERYWHERE`);
-#define GatorAmbush_chance  return ("ntte_crime_bounty" in GameCont && GameCont.ntte_crime_bounty >= 3);
+#define GatorAmbush_chance  return ("ntte_crime_bounty" in GameCont && GameCont.ntte_crime_bounty >= 3 && variable_instance_get(GenCont, "safespawn", 1) > 0);
 
 #define GatorAmbush_setup
 	 // Smaller Level:
