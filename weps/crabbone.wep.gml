@@ -390,25 +390,15 @@
 				
 				 // Drop Spare Bones:
 				repeat(10){
-					if("ammo_wep" in _wep){
+					if(is_object(_wep) && "ammo_wep" in _wep){
 						_wep = _wep.ammo_wep;
 					}
 					else break;
 				}
-				while("ammo" in _wep && _wep.ammo > 0){
-					var _ammoWep = lq_defget(_wep, "ammo_wep", wep_none);
-					if(_ammoWep != wep_none){
-						with(instance_create(x, y, WepPickup)){
-							wep = _wep;
-						}
+				if(_wep != wep_none){
+					with(instance_create(x, y, WepPickup)){
+						wep = _wep;
 					}
-					_wep = _ammoWep;
-				}
-				if(_primary){
-					wep = _wep;
-				}
-				else{
-					bwep = _wep;
 				}
 			}
 		}
