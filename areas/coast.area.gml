@@ -90,34 +90,35 @@
 	 // Enable Area:
 	variable_instance_set(GameCont, "ntte_active_" + mod_current, true);
 	
-	 // Active Sea Drawing:
-	with(ds_map_values(global.sea_bind)){
-		if(instance_exists(id)){
-			id.visible = true;
-		}
-	}
-	with(global.sea_bind[? "main"].id){
-		flash = 0;
-	}
-	
-	 // Bind Object Setup Scripts:
-	if(lq_get(ntte, "bind_setup_coast_list") == undefined){
-		var _objList = [hitme, projectile, Corpse, ChestOpen, chestprop, Pickup, Crown, Debris];
-		ntte.bind_setup_coast_list = [
-			call(scr.ntte_bind_setup, script_ref_create(ntte_setup_coast_wading),    _objList),
-			call(scr.ntte_bind_setup, script_ref_create(ntte_setup_coast_unwall),    [Wall, TopSmall, FloorExplo]),
-			call(scr.ntte_bind_setup, script_ref_create(ntte_setup_coast_Dust),      Dust),
-			call(scr.ntte_bind_setup, script_ref_create(ntte_setup_coast_Explosion), Explosion),
-			call(scr.ntte_bind_setup, script_ref_create(ntte_setup_coast_MeltSplat), MeltSplat),
-			call(scr.ntte_bind_setup, script_ref_create(ntte_setup_coast_Portal),    Portal)
-		];
-		with(_objList){
-			ntte_setup_coast_wading(self);
-		}
-	}
-	
 	 // No Walls:
 	if(GameCont.subarea > 0){
+		 // Active Sea Drawing:
+		with(ds_map_values(global.sea_bind)){
+			if(instance_exists(id)){
+				id.visible = true;
+			}
+		}
+		with(global.sea_bind[? "main"].id){
+			flash = 0;
+		}
+		
+		 // Bind Object Setup Scripts:
+		if(lq_get(ntte, "bind_setup_coast_list") == undefined){
+			var _objList = [hitme, projectile, Corpse, ChestOpen, chestprop, Pickup, Crown, Debris];
+			ntte.bind_setup_coast_list = [
+				call(scr.ntte_bind_setup, script_ref_create(ntte_setup_coast_wading),    _objList),
+				call(scr.ntte_bind_setup, script_ref_create(ntte_setup_coast_unwall),    [Wall, TopSmall, FloorExplo]),
+				call(scr.ntte_bind_setup, script_ref_create(ntte_setup_coast_Dust),      Dust),
+				call(scr.ntte_bind_setup, script_ref_create(ntte_setup_coast_Explosion), Explosion),
+				call(scr.ntte_bind_setup, script_ref_create(ntte_setup_coast_MeltSplat), MeltSplat),
+				call(scr.ntte_bind_setup, script_ref_create(ntte_setup_coast_Portal),    Portal)
+			];
+			with(_objList){
+				ntte_setup_coast_wading(self);
+			}
+		}
+		
+		 // No Walls:
 		with(instances_matching(Wall, "area", mod_current)){
 			instance_delete(self);
 		}
@@ -129,6 +130,9 @@
 			}
 			instance_delete(self);
 		}
+		
+		 // who's that bird?
+		call(scr.unlock_set, "race:parrot", true);
 	}
 	
 	 // Subarea-Specific Spawns:
@@ -204,11 +208,6 @@
 	 // Reset Floor Surfaces:
 	with(call(scr.surface_setup, "CoastFloor", null, null, null)){
 		reset = true;
-	}
-	
-	 // who's that bird?
-	if(GameCont.subarea > 0){
-		call(scr.unlock_set, "race:parrot", true);
 	}
 	
 #define area_finish
