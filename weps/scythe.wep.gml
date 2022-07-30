@@ -330,25 +330,27 @@
 		if(array_length(_inst)) with(_inst){
 			if(place_meeting(x, y, other)){
 				if(call(scr.wep_raw, wep) == "crabbone"){
-					var _num = lq_defget(wep, "ammo", 1);
-					_wep.ammo = min(_wep.ammo + (20 * _num), _wep.amax);
-					
-					 // Pickuped:
-					with(other){
-						if(!_primary && race != "steroids"){
-							call(scr.pickup_text, loc("NTTE:Bone", "BONE"), "add", _num);
+					var _ammo = lq_defget(wep, "ammo", 1);
+					if(mod_variable_get("weapon", "crabbone", "wep_info_list")[(_ammo > 0) ? (lq_defget(wep, "type_index", 0) + 1) : 0].quest_part_index < 0){
+						_wep.ammo = min(_wep.ammo + (20 * _ammo), _wep.amax);
+						
+						 // Pickuped:
+						with(other){
+							if(!_primary && race != "steroids"){
+								call(scr.pickup_text, loc("NTTE:Bone", "BONE"), "add", _ammo);
+							}
 						}
+						
+						 // Effects:
+						with(instance_create(x, y, DiscDisappear)){
+							image_angle = other.rotation;
+						}
+						sound_play_pitchvol(sndHPPickup,        4.0,               0.6);
+						sound_play_pitchvol(sndPickupDisappear, 1.2,               0.6);
+						sound_play_pitchvol(sndBloodGamble,     0.4 + random(0.2), 0.4);
+						
+						instance_destroy();
 					}
-					
-					 // Effects:
-					with(instance_create(x, y, DiscDisappear)){
-						image_angle = other.rotation;
-					}
-					sound_play_pitchvol(sndHPPickup,        4.0,               0.6);
-					sound_play_pitchvol(sndPickupDisappear, 1.2,               0.6);
-					sound_play_pitchvol(sndBloodGamble,     0.4 + random(0.2), 0.4);
-					
-					instance_destroy();
 				}
 			}
 		}
