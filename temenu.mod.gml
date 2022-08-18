@@ -1,6 +1,9 @@
 #define init
 	mod_script_call("mod", "teassets", "ntte_init", script_ref_create(init));
 	
+	 // Store Script References:
+	scr.draw_text_bn = script_ref_create(draw_text_bn);
+	
 	 // Bind Events:
 	script_bind(CustomDraw, draw_menu, object_get_depth(Menu) - 1, true);
 	global.loadout_bind = ds_map_create();
@@ -176,8 +179,8 @@
 						link : [[cred_twitter, "Wilde_bee"], [cred_discord, "Wildebee\#6521"]]
 						},
 					{	name : "Special Thanks",
-						role : [[cred_yellow, "blaac"], "Bub", "Emffles", "minichibis"],
-						link : [[cred_twitter + cred_yellow, "blaac_"], [cred_twitter, "Bubonto"], [cred_twitter, "EmfflesTWO"], [cred_twitter, "minichibisart"]]
+						role : [[cred_yellow, "blaac"], "jordy", "Emffles", "minichibis"],
+						link : [[cred_twitter + cred_yellow, "blaac_"], [cred_twitter, "akimokawa"], [cred_twitter, "EmfflesTWO"], [cred_twitter, "minichibisart"]]
 						}
 				]
 			}
@@ -1242,7 +1245,7 @@
 					 // Perform Important Code & Cover Normal LoadoutWeps:
 					if(_real || _slct){
 						// Disable drawing
-						draw_set_blend_mode_ext(bm_zero, bm_dest_alpha);
+						draw_set_blend_mode_ext(bm_zero, bm_one);
 					}
 					else if(!_real){
 						// Cover
@@ -2173,7 +2176,7 @@
 										draw_set_halign(fa_left);
 										draw_set_valign(fa_top);
 										if(mod_script_exists("race", _raceCurrent, "race_name")){
-											call(scr.draw_text_bn, 
+											draw_text_bn(
 												_x + 6 + (_portX * 1.5),
 												_y - 80,
 												call(scr.race_get_title, _raceCurrent),
@@ -2181,7 +2184,7 @@
 											);
 										}
 										else{
-											call(scr.draw_text_bn, 
+											draw_text_bn(
 												_x + 16 + (_portX * 0.6),
 												_y - 80,
 												"NONE",
@@ -2368,7 +2371,7 @@
 										draw_set_font(fntBigName);
 										draw_set_halign(fa_left);
 										draw_set_valign(fa_top);
-										call(scr.draw_text_bn, 
+										draw_text_bn(
 											_vx + 28 + (2 * max(0, (_appear + 1) - _pop)),
 											_vy + 46,
 											((_pet != null) ? (_pet.avail ? call(scr.pet_get_name, _pet.name, _pet.mod_type, _pet.mod_name, 0) : "UNKNOWN") : "NONE"),
@@ -2935,6 +2938,26 @@
 			}
 		}
 	}
+	
+#define draw_text_bn(_x, _y, _string, _angle)
+	/*
+		Draw big portrait name text
+		Portrait names use an angle of 1.5
+		
+		Ex:
+			draw_set_font(fntBigName)
+			draw_text_bn(x, y, "FISH", 1.5);
+	*/
+	
+	_string = string_upper(_string);
+	
+	var _col = draw_get_color();
+	draw_set_color(c_black);
+	draw_text_transformed(_x + 1, _y,     _string, 1, 1, _angle);
+	draw_text_transformed(_x,     _y + 2, _string, 1, 1, _angle);
+	draw_text_transformed(_x + 1, _y + 2, _string, 1, 1, _angle);
+	draw_set_color(_col);
+	draw_text_transformed(_x,     _y,     _string, 1, 1, _angle);
 	
 	
 /// SCRIPTS

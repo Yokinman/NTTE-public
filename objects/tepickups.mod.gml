@@ -807,9 +807,18 @@
 	
 	 // Bonus Ammo:
 	if(instance_is(other, Player)){
-		with(other){
+		with(ultra_get(char_random, 2) ? Player : other){
 			bonus_ammo       = (("bonus_ammo" in self) ? bonus_ammo : 0) + (_num * 60);
 			bonus_ammo_flash = 1;
+			
+			 // Ammo:
+			var _type = weapon_get_type(wep);
+			if(_type == type_melee || ammo[_type] >= typ_amax[_type]){
+				_type = irandom_range(1, array_length(ammo) - 1);
+			}
+			if(ammo[_type] < typ_amax[_type]){
+				ammo[_type] = min(ammo[_type] + round(/*0.5 * typ_ammo[_type] * */_num), typ_amax[_type]);
+			}
 			
 			 // Text:
 			pickup_text(BonusAmmo_text, "add", _num);
@@ -901,9 +910,22 @@
 	var _num = num;
 	
 	 // Bonus Ammo:
-	with(instance_is(other, Player) ? other : Player){
+	with(
+		(!instance_is(other, Player) || ultra_get(char_random, 2))
+		? Player
+		: other
+	){
 		bonus_ammo       = (("bonus_ammo" in self) ? bonus_ammo : 0) + (_num * 60);
 		bonus_ammo_flash = 1;
+		
+		 // Ammo:
+		var _type = weapon_get_type((bwep == wep_none) ? wep : choose(wep, bwep));
+		if(_type == type_melee || ammo[_type] >= typ_amax[_type]){
+			_type = irandom_range(1, array_length(ammo) - 1);
+		}
+		if(ammo[_type] < typ_amax[_type]){
+			ammo[_type] = min(ammo[_type] + round(/*0.5 * typ_ammo[_type] * */_num), typ_amax[_type]);
+		}
 		
 		 // Text:
 		pickup_text(BonusAmmo_text, "add", _num);
@@ -972,9 +994,14 @@
 	
 	 // Bonus HP:
 	if(instance_is(other, Player)){
-		with(other){
+		with(ultra_get(char_random, 1) ? Player : other){
 			bonus_health       = (("bonus_health" in self) ? bonus_health : 0) + (_num * 30);
 			bonus_health_flash = 1;
+			
+			 // Health:
+			if(my_health < maxhealth){
+				my_health = min(my_health + _num, maxhealth);
+			}
 			
 			 // Chicken:
 			if(chickendeaths > 0){
@@ -1086,9 +1113,18 @@
 	var _num = num;
 	
 	 // Bonus Health:
-	with(instance_is(other, Player) ? other : Player){
+	with(
+		(!instance_is(other, Player) || ultra_get(char_random, 1))
+		? Player
+		: other
+	){
 		bonus_health       = (("bonus_health" in self) ? bonus_health : 0) + (_num * 30);
 		bonus_health_flash = 1;
+		
+		 // Health:
+		if(my_health < maxhealth){
+			my_health = min(my_health + _num, maxhealth);
+		}
 		
 		 // Text:
 		pickup_text(BonusHealth_text, "add", _num);
@@ -1552,6 +1588,7 @@
 			"hammerhead"   : 0.3 * (_hard >= 10),
 			"spirit"       : 0.3 * (_hard >= 12),
 			"turret"       : 0.7 * (GameCont.loops > 0),
+			"coat"         : 0,
 			"rogue"        : 0,
 			"parrot"       : 0,
 			"bone"         : 0,
@@ -1562,6 +1599,7 @@
 	with(Player){
 		 // Character-Specific:
 		switch(race){
+			case "venuz"  : if(!call(scr.unlock_get, "skin:coat venuz")) _pool.coat++; break;
 			case "rogue"  : _pool.rogue++;  break;
 			case "parrot" : _pool.parrot++; break;
 		}
@@ -1831,6 +1869,17 @@
 					 // Visual:
 					sprite_index = spr.BonusHealthChest;
 					image_blend  = make_color_rgb(200, 160, 255);
+					
+					break;
+					
+				case "coat":
+				
+					text = call(scr.loc_format, "NTTE:ChestShop:Coat:Name", "COAT");
+					desc = call(scr.loc_format, "NTTE:ChestShop:Coat:Text", "STYLISH", num);
+					
+					 // Visual:
+					sprite_index = spr.YVCoat;
+					image_blend  = make_color_rgb(230, 204, 32);
 					
 					break;
 					
@@ -2282,6 +2331,31 @@
 								
 								break;
 								
+							case "coat":
+							
+								call(scr.unlock_set, "skin:coat venuz", true);
+								with(_p){
+									if(race == "venuz"){
+										bskin = "coat venuz";
+										player_set_skin(index, bskin);
+										sprite_index = spr_hurt;
+										image_index  = 0;
+										sound_play(snd_chst);
+										repeat(2){
+											with(instance_create(x + orandom(8), y + orandom(8), CaveSparkle)){
+												depth = other.depth - 1;
+											}
+										}
+									}
+								}
+								with(instance_create(_x, _y, WepPickup)){
+									wep  = call(scr.wep_skin, wep_golden_revolver, "venuz", "coat venuz");
+									ammo = true;
+								}
+								sound_play(sndMenuASkin);
+								
+								break;
+								
 							case "rogue":
 							
 								with(instance_create(_x + orandom(2), _y + orandom(2), RoguePickup)){
@@ -2513,6 +2587,9 @@
 				}
 				if(GameCont.ntte_crime_bounty < 3){
 					GameCont.ntte_crime_bounty = min(GameCont.ntte_crime_bounty + 1, 3);
+					if(GameCont.ntte_crime_bounty >= 3 && player_count_race(char_eyes) > 0){
+						call(scr.unlock_set, "skin:bat eyes", true);
+					}
 				}
 				
 				 // Display Bounty:
@@ -4421,318 +4498,6 @@
 	sound_play_pitch(sndGunGun,          0.6 + random(0.2));
 	sound_play_pitch(sndSnowTankDead,    0.6 + random(0.2));
 	sound_play_pitch(sndEnergyHammerUpg, 0.5);
-	
-	
-#define ParrotChester_create(_x, _y)
-	/*
-		Follows a chestprop until it's opened, then sends ParrotFeathers to the nearest Player with race=="parrot"
-		
-		Ex:
-			with(GiantWeaponChest){
-				with(call(scr.obj_create, x, y, "ParrotChester")){
-					creator = other;
-					num = 96;
-				}
-			}
-	*/
-	
-	with(instance_create(_x, _y, CustomObject)){
-		 // Vars:
-		creator = noone;
-		small   = false;
-		num     = 6;
-		
-		return self;
-	}
-	
-#define ParrotChester_step
-	if(instance_exists(creator)){
-		x = creator.x;
-		y = creator.y;
-	}
-	else{
-		var _num = num;
-		
-		if(_num > 0 && position_meeting(x, y, (small ? SmallChestPickup : ChestOpen))){
-			var _target = instances_matching(Player, "race", "parrot");
-			
-			 // Pickup Feathers go to Nearest Parrot:
-			if(small && !place_meeting(x, y, Portal)){
-				_target = instance_nearest(x, y, Player);
-				if(instance_exists(_target) && _target.race != "parrot"){
-					_target = noone;
-				}
-			}
-			
-			 // Feathers:
-			with(_target){
-				for(var i = 0; i < _num; i++){
-					with(call(scr.obj_create, other.x, other.y, "ParrotFeather")){
-						bskin        = other.bskin;
-						creator      = other;
-						target       = other;
-						stick_wait   = 3;
-						speed       *= max(1, power(_num - 6, 1/5));
-						sprite_index = call(scr.race_get_sprite, other.race, bskin, sprite_index);
-					}
-					
-					 // Sound FX:
-					if(fork()){
-						wait((i * (4 / _num)) + irandom(irandom(1)));
-						sound_play_pitchvol(sndBouncerSmg, 3 + random(0.2), 0.2 + random(0.1));
-						exit;
-					}
-				}
-			}
-		}
-		
-		instance_destroy();
-	}
-	
-	
-#define ParrotFeather_create(_x, _y)
-	/*
-		A feather that homes in on its target and charms them
-		If their target is a Player then it will give them feather ammo instead of charming
-		Used for Parrot's active ability
-	*/
-	
-	with(instance_create(_x, _y, CustomObject)){
-		 // Visual:
-		sprite_index     = sprChickenFeather;
-		image_blend_fade = c_gray;
-		depth            = -1;
-		
-		 // Vars:
-		mask_index     = mskAlly;
-		creator        = noone;
-		target         = noone;
-		index          = -1;
-		bskin          = 0;
-		stick          = false;
-		stickx         = 0;
-		sticky         = 0;
-		stick_time_max = 30 * power(1.5, ultra_get("parrot", 1));
-		stick_time     = stick_time_max;
-		stick_list     = [];
-		stick_wait     = 0;
-		
-		 // Push:
-		motion_add(random(360), random_range(4, 6));
-		image_angle = direction + 135;
-		
-		return self;
-	}
-	
-#define ParrotFeather_step
-	if(stick_time > 0){
-		 // Slow:
-		speed *= power(0.9, current_time_scale);
-		
-		 // Deterioration:
-		if(stick){
-			if(!array_length(stick_list)){
-				var _list = instances_matching(instances_matching(instances_matching(obj.ParrotFeather, "target", target), "creator", creator), "stick", stick);
-				with(_list){
-					stick_list = _list;
-				}
-			}
-			if(stick_list[0] == self){
-				stick_time -= current_time_scale;
-			}
-		}
-		else stick_list = [];
-		
-		 // Targeting:
-		if(instance_exists(target)){
-			if(stick){
-				visible = target.visible;
-				depth   = target.depth - 1;
-			}
-			else{
-				 // Orbit Target:
-				if(stick_wait != 0){
-					if(stick_wait > 0){
-						stick_wait -= min(stick_wait, current_time_scale);
-					}
-					
-					var	_l = 16,
-						_d = target_direction + 180;
-						
-					_d += 5 * sign(angle_difference(direction, _d));
-					
-					var	_x = target.x + lengthdir_x(_l, _d),
-						_y = target.y + lengthdir_y(_l, _d);
-						
-					motion_add_ct(point_direction(x, y, _x, _y) + orandom(60), 1);
-				}
-				
-				 // Reach Target:
-				else{
-					var	_dis = target_distance,
-						_dir = target_direction;
-						
-					 // Fly Towards Enemy:
-					motion_add_ct(_dir + orandom(60), 1);
-					
-					 // Far Away:
-					var _disMax = 640;
-					if(_dis > _disMax){
-						var _len = ((_dis - _disMax) / 16) * current_time_scale;
-						x += lengthdir_x(_len, _dir);
-						y += lengthdir_y(_len, _dir);
-						direction = _dir;
-					}
-					
-					 // Reached Target:
-					if(
-						_dis <= speed_raw
-						|| place_meeting(x, y, target)
-						|| (target == creator && place_meeting(x, y, Portal))
-					){
-						 // Effects:
-						with(instance_create(x, y, Dust)){
-							depth = other.depth - 1;
-						}
-						sound_play_pitchvol(sndFlyFire,        2 + random(0.2),  0.25);
-						sound_play_pitchvol(sndChickenThrow,   1 + orandom(0.3), 0.25);
-						sound_play_pitchvol(sndMoneyPileBreak, 1 + random(3),    0.5);
-						
-						 // Stick to & Charm Enemy:
-						if(target != creator){
-							stick       = true;
-							stickx      = random(x - target.x) * (("right" in target) ? target.right : 1);
-							sticky      = random(y - target.y);
-							image_angle = random(360);
-							speed       = 0;
-							
-							 // Parrot's Special Stat:
-							if("ntte_charm" not in target){
-								var _race = variable_instance_get(creator, "race", char_random);
-								if(_race == "parrot"){
-									var _stat = "race:" + _race + ":spec";
-									call(scr.stat_set, _stat, call(scr.stat_get, _stat) + 1);
-								}
-							}
-							
-							 // Charm Enemy:
-							var _wasUncharmed = ("ntte_charm" not in target || !target.ntte_charm.charmed);
-							with(call(scr.charm_instance, target, true)){
-								if(_wasUncharmed || time >= 0 || feather){
-									time    = max(0, time + other.stick_time);
-									index   = other.index;
-									feather = true;
-								}
-							}
-						}
-						
-						 // Player Pickup:
-						else{
-							with(creator){
-								if("feather_ammo" in self){
-									feather_ammo++;
-									if("feather_ammo_max" in self && feather_ammo > feather_ammo_max){
-										feather_ammo = feather_ammo_max;
-									}
-								}
-							}
-							instance_delete(self);
-							exit;
-						}
-					}
-				}
-			}
-		}
-		
-		 // No Target:
-		else if(instance_exists(creator)){
-			 // Unstick:
-			if(stick){
-				stick = false;
-				motion_add(random(360), 4);
-			}
-			
-			 // Auto-Target Nearest Enemy:
-			if(button_check(index, "spec") || ("usespec" in creator && creator.usespec > 0)){
-				if(instance_exists(enemy)){
-					target = call(scr.instance_nearest_array, x, y, instances_matching_ne(instances_matching_lt(enemy, "size", 6), "mask_index", mskNone));
-				}
-			}
-			
-			 // Travel Back to Creator:
-			if(!instance_exists(target)){
-				target = creator;
-			}
-		}
-		
-		 // Nothing to Do:
-		else stick_time = 0;
-		
-		 // Facing:
-		image_angle = direction + 135;
-	}
-	
-	 // End:
-	else instance_destroy();
-	
-#define ParrotFeather_end_step
-	if(stick && instance_exists(target)){
-		x = target.x + (stickx * image_xscale * (("right" in target) ? target.right : 1));
-		y = target.y + (sticky * image_yscale);
-		
-		 // Z-Axis Support:
-		if("z" in target){
-			y -= abs(target.z);
-		}
-	}
-	else{
-		visible = true;
-		if(stick_wait == 0 || position_meeting(x, y + 8, Wall) || !position_meeting(x, y + 8, Floor)){
-			depth = -8;
-		}
-		else if(depth < -6){
-			depth = -1;
-		}
-	}
-	
-#define ParrotFeather_draw
-	if(stick && stick_time < stick_time_max){
-		var _lastCol = image_blend;
-		image_blend = merge_color(image_blend, image_blend_fade, 1 - (stick_time / stick_time_max));
-		draw_self();
-		image_blend = _lastCol;
-	}
-	else draw_self();
-	
-#define ParrotFeather_destroy
-	 // Fall to Ground:
-	with(instance_create(x, y, Feather)){
-		sprite_index = other.sprite_index;
-		image_angle  = other.image_angle;
-		image_blend  = other.image_blend_fade;
-		depth        = 0;
-		
-		 // Over Wall:
-		if(position_meeting(x, y + 8, Wall) || (other.depth < -6 && !position_meeting(x, y + 8, Floor))){
-			depth = -7;
-			fall  = random_range(20, 30);
-		}
-	}
-	
-	 // Sound:
-	sound_play_pitchvol(sndMoneyPileBreak, 1.5 + random(1.5), random(0.4));
-	if("ntte_charm" in target){
-		sound_play_pitchvol(
-			sndAssassinPretend,
-			1.5 + random(1.5),
-			stick_time_max / max(stick_time_max, target.ntte_charm.time)
-		);
-	}
-	
-#define ParrotFeather_cleanup
-	with(stick_list) if(instance_exists(self)){
-		stick_list = call(scr.array_delete_value, stick_list, other);
-	}
 	
 	
 #define Pizza_create(_x, _y)

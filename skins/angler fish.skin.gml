@@ -73,6 +73,10 @@
 	if(_spr == spr.TunnellerHUD) return spr.AnglerTunnellerHUD;
 	return skin_weapon_sprite(_wep, _spr);
 	
+#define skin_weapon_swap(_wep, _swap)
+	sound_play_pitchvol(sndOasisMelee, 0.75, 1.2);
+	return _swap;
+	
 	
 /// SCRIPTS
 #macro  call                                                                                    script_ref_call

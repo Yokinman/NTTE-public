@@ -1,6 +1,10 @@
 #define init
 	mod_script_call("mod", "teassets", "ntte_init", script_ref_create(init));
 	
+	 // Setup Objects:
+	call(scr.obj_add, script_ref_create(ParrotChester_create));
+	call(scr.obj_add, script_ref_create(ParrotFeather_create));
+	
 	 // Store Script References:
 	scr.charm_instance = script_ref_create(charm_instance);
 	
@@ -187,10 +191,10 @@
 		case sprMutant1Dead      : return race_sprite_raw("Dead",         _b);
 		case sprMutant1GoSit     : return race_sprite_raw("GoSit",        _b);
 		case sprMutant1Sit       : return race_sprite_raw("Sit",          _b);
-		case sprFishMenu         : return race_sprite_raw("Idle",         _b);
+		case sprFishMenu         : return race_sprite_raw("Menu",         _b);
 		case sprFishMenuSelected : return race_sprite_raw("MenuSelected", _b);
-		case sprFishMenuSelect   : return race_sprite_raw("Idle",         _b);
-		case sprFishMenuDeselect : return race_sprite_raw("Idle",         _b);
+		case sprFishMenuSelect   : return race_sprite_raw("MenuSelect",   _b);
+		case sprFishMenuDeselect : return race_sprite_raw("MenuDeselect", _b);
 		case sprChickenFeather   : return race_sprite_raw("Feather",      _b);
 		case sprRogueAmmoHUD     : return race_sprite_raw("FeatherHUD",   _b);
 	}
@@ -201,18 +205,18 @@
 	var _sndNone = sndFootPlaSand5; // playing a sound that doesn't exist using sound_play_pitch/sound_play_pitchvol modifies sndSwapPistol's pitch/volume
 	
 	switch(_snd){
-		case sndMutant1Wrld : return _sndNone;
-		case sndMutant1Hurt : return sndRavenHit;
-		case sndMutant1Dead : return sndAllyDead;
-		case sndMutant1LowA : return _sndNone;
-		case sndMutant1LowH : return _sndNone;
-		case sndMutant1Chst : return _sndNone;
-		case sndMutant1Valt : return _sndNone;
-		case sndMutant1Crwn : return _sndNone;
-		case sndMutant1Spch : return _sndNone;
-		case sndMutant1IDPD : return _sndNone;
-		case sndMutant1Cptn : return _sndNone;
-		case sndMutant1Thrn : return _sndNone;
+		case sndMutant1Wrld : return snd.ParrotWrld;
+		case sndMutant1Hurt : return snd.ParrotHurt;
+		case sndMutant1Dead : return snd.ParrotDead;
+		case sndMutant1LowA : return snd.ParrotLowA;
+		case sndMutant1LowH : return snd.ParrotLowH;
+		case sndMutant1Chst : return snd.ParrotChst;
+		case sndMutant1Valt : return snd.ParrotChst;
+		case sndMutant1Crwn : return snd.ParrotCrwn;
+		case sndMutant1Spch : return snd.ParrotSpch;
+		case sndMutant1IDPD : return snd.ParrotIDPD;
+		case sndMutant1Cptn : return snd.ParrotSpch;
+		case sndMutant1Thrn : return snd.ParrotIDPD;
 	}
 	
 	return -1;
@@ -229,54 +233,54 @@
 
 /// Menu
 #define race_menu_select
-	if(instance_is(self, CharSelect) || instance_is(other, CharSelect)){
-		 // Yo:
-		sound_play_pitchvol(sndMutant6Slct, 2, 0.6);
-		
-		 // Kun:
-		if(fork()){
-			wait 5 * current_time_scale;
-			
-			audio_sound_set_track_position(
-				sound_play_pitchvol(sndMutant15Hurt, 2, 0.6),
-				0.2
-			);
-			
-			 // Extra singy noise:
-			audio_sound_set_track_position(
-				sound_play_pitchvol(sndMutant15Slct, 2.5, 0.2),
-				0.2
-			);
-			
-			exit;
-		}
-		
-		return -1;
-	}
+	//if(instance_is(self, CharSelect) || instance_is(other, CharSelect)){
+	//	 // Yo:
+	//	sound_play_pitchvol(sndMutant6Slct, 2, 0.6);
+	//	
+	//	 // Kun:
+	//	if(fork()){
+	//		wait 5 * current_time_scale;
+	//		
+	//		audio_sound_set_track_position(
+	//			sound_play_pitchvol(sndMutant15Hurt, 2, 0.6),
+	//			0.2
+	//		);
+	//		
+	//		 // Extra singy noise:
+	//		audio_sound_set_track_position(
+	//			sound_play_pitchvol(sndMutant15Slct, 2.5, 0.2),
+	//			0.2
+	//		);
+	//		
+	//		exit;
+	//	}
+	//	
+	//	return -1;
+	//}
 	
-	return sndRavenLift;
+	return snd.ParrotSlct;
 
 #define race_menu_confirm
-	if(instance_is(self, Menu) || instance_is(other, Menu) || instance_is(other, UberCont)){
-		 // Wah:
-		sound_play_pitchvol(sndMutant6Slct, 2.4, 0.6);
-		
-		 // Tohohoho:
-		if(fork()){
-			wait 5 * current_time_scale;
-			
-			audio_sound_set_track_position(
-				sound_play_pitchvol(sndMutant15Cnfm, 2.5, 0.5),
-				0.4
-			);
-			
-			exit;
-		}
-		
-		return -1;
-	}
+	//if(instance_is(self, Menu) || instance_is(other, Menu) || instance_is(other, UberCont)){
+	//	 // Wah:
+	//	sound_play_pitchvol(sndMutant6Slct, 2.4, 0.6);
+	//	
+	//	 // Tohohoho:
+	//	if(fork()){
+	//		wait 5 * current_time_scale;
+	//		
+	//		audio_sound_set_track_position(
+	//			sound_play_pitchvol(sndMutant15Cnfm, 2.5, 0.5),
+	//			0.4
+	//		);
+	//		
+	//		exit;
+	//	}
+	//	
+	//	return -1;
+	//}
 	
-	return sndRavenLand;
+	return snd.ParrotCnfm;
 
 #define race_menu_button
 	sprite_index = race_sprite_raw("Select", 0);
@@ -375,56 +379,60 @@
 	
 	 // Ultra Sound:
 	if(_state != 0 && instance_exists(LevCont)){
-		sound_play(sndBasicUltra);
+		//sound_play(sndBasicUltra);
 		
 		switch(_ultra){
 			
 			case ult_feather:
 				
-				 // Feathers:
-				if(fork()){
-					for(var i = 0; i < 8; i++){
-						sound_play_pitchvol(sndSharpTeeth, 4 + sin(i / 3), 0.4);
-						wait (1 + (2 * sin(i * 1.5))) * current_time_scale;
-					}
-					
-					exit;
-				}
+				// // Feathers:
+				//if(fork()){
+				//	for(var i = 0; i < 8; i++){
+				//		sound_play_pitchvol(sndSharpTeeth, 4 + sin(i / 3), 0.4);
+				//		wait (1 + (2 * sin(i * 1.5))) * current_time_scale;
+				//	}
+				//	
+				//	exit;
+				//}
+				//
+				// // Charm:
+				//if(fork()){
+				//	wait 7 * current_time_scale;
+				//	
+				//	var _snd = [sndBigBanditIntro, sndBigDogIntro, sndLilHunterAppear];
+				//	for(var i = 0; i < array_length(_snd); i++){
+				//		sound_play_pitchvol(_snd[i], 1.2, 0.8 - (i * 0.1));
+				//		sound_play_pitch(sndBanditDie, 1.2 + (i * 0.4));
+				//		wait 4 * current_time_scale;
+				//	}
+				//	
+				//	exit;
+				//}
 				
-				 // Charm:
-				if(fork()){
-					wait 7 * current_time_scale;
-					
-					var _snd = [sndBigBanditIntro, sndBigDogIntro, sndLilHunterAppear];
-					for(var i = 0; i < array_length(_snd); i++){
-						sound_play_pitchvol(_snd[i], 1.2, 0.8 - (i * 0.1));
-						sound_play_pitch(sndBanditDie, 1.2 + (i * 0.4));
-						wait 4 * current_time_scale;
-					}
-					
-					exit;
-				}
+				sound_play_gun(snd.ParrotUltraA, 0, 0.3);
 				
 				break;
 				
 			case ult_flock:
 				
-				if(fork()){
-					sound_play_pitch(sndCoopUltraA,     2.0);
-					sound_play_pitch(sndHPPickupBig,    0.8);
-					sound_play_pitch(sndHealthChestBig, 1.5);
-					
-					wait 10 * current_time_scale;
-					
-					 // They Dyin:
-					var _snd = [sndBigMaggotDie, sndScorpionDie, sndBigBanditDie];
-					for(var i = 0; i < array_length(_snd); i++){
-						sound_play_pitchvol(_snd[i], 1.3, 1.4);
-						wait 5 * current_time_scale;
-					}
-					
-					exit;
-				}
+				//if(fork()){
+				//	sound_play_pitch(sndCoopUltraA,     2.0);
+				//	sound_play_pitch(sndHPPickupBig,    0.8);
+				//	sound_play_pitch(sndHealthChestBig, 1.5);
+				//	
+				//	wait 10 * current_time_scale;
+				//	
+				//	 // They Dyin:
+				//	var _snd = [sndBigMaggotDie, sndScorpionDie, sndBigBanditDie];
+				//	for(var i = 0; i < array_length(_snd); i++){
+				//		sound_play_pitchvol(_snd[i], 1.3, 1.4);
+				//		wait 5 * current_time_scale;
+				//	}
+				//	
+				//	exit;
+				//}
+				
+				sound_play_gun(snd.ParrotUltraB, 0, 0.3);
 				
 				break;
 				
@@ -792,18 +800,18 @@
 		}
 	}
 	
-	 // Pitched snd_hurt:
-	if(sprite_index == spr_hurt && image_index == image_speed_raw){
-		var _sndMax = sound_play_pitchvol(0, 0, 0);
-		sound_stop(_sndMax);
-		for(var i = _sndMax - 1; i >= _sndMax - 10; i--){
-			if(audio_get_name(i) == audio_get_name(snd_hurt)){
-				audio_sound_pitch(i, 1.1 + random(0.4));
-				audio_sound_gain(i, 1.2 * audio_sound_get_gain(i), 0);
-				break;
-			}
-		}
-	}
+	//  // Pitched snd_hurt:
+	// if(sprite_index == spr_hurt && image_index == image_speed_raw){
+	// 	var _sndMax = sound_play_pitchvol(0, 0, 0);
+	// 	sound_stop(_sndMax);
+	// 	for(var i = _sndMax - 1; i >= _sndMax - 10; i--){
+	// 		if(audio_get_name(i) == audio_get_name(snd_hurt)){
+	// 			audio_sound_pitch(i, 1.1 + random(0.4));
+	// 			audio_sound_gain(i, 1.2 * audio_sound_get_gain(i), 0);
+	// 			break;
+	// 		}
+	// 	}
+	// }
 	
 	 // Death Feathers:
 	if(my_health <= 0 && candie && feather_ammo > 0){
@@ -1980,6 +1988,319 @@
 		gunangle = _direction;
 	}
 	instance_destroy();
+	
+	
+/// OBJECTS
+#define ParrotChester_create(_x, _y)
+	/*
+		Follows a chestprop until it's opened, then sends ParrotFeathers to the nearest Player with race=="parrot"
+		
+		Ex:
+			with(GiantWeaponChest){
+				with(call(scr.obj_create, x, y, "ParrotChester")){
+					creator = other;
+					num = 96;
+				}
+			}
+	*/
+	
+	with(instance_create(_x, _y, CustomObject)){
+		 // Vars:
+		creator = noone;
+		small   = false;
+		num     = 6;
+		
+		return self;
+	}
+	
+#define ParrotChester_step
+	if(instance_exists(creator)){
+		x = creator.x;
+		y = creator.y;
+	}
+	else{
+		var _num = num;
+		
+		if(_num > 0 && position_meeting(x, y, (small ? SmallChestPickup : ChestOpen))){
+			var _target = instances_matching(Player, "race", "parrot");
+			
+			 // Pickup Feathers go to Nearest Parrot:
+			if(small && !place_meeting(x, y, Portal)){
+				_target = instance_nearest(x, y, Player);
+				if(instance_exists(_target) && _target.race != "parrot"){
+					_target = noone;
+				}
+			}
+			
+			 // Feathers:
+			with(_target){
+				for(var i = 0; i < _num; i++){
+					with(call(scr.obj_create, other.x, other.y, "ParrotFeather")){
+						bskin        = other.bskin;
+						creator      = other;
+						target       = other;
+						stick_wait   = 3;
+						speed       *= max(1, power(_num - 6, 1/5));
+						sprite_index = call(scr.race_get_sprite, other.race, bskin, sprite_index);
+					}
+					
+					 // Sound FX:
+					if(fork()){
+						wait((i * (4 / _num)) + irandom(irandom(1)));
+						sound_play_pitchvol(sndBouncerSmg, 3 + random(0.2), 0.2 + random(0.1));
+						exit;
+					}
+				}
+			}
+		}
+		
+		instance_destroy();
+	}
+	
+	
+#define ParrotFeather_create(_x, _y)
+	/*
+		A feather that homes in on its target and charms them
+		If their target is a Player then it will give them feather ammo instead of charming
+		Used for Parrot's active ability
+	*/
+	
+	with(instance_create(_x, _y, CustomObject)){
+		 // Visual:
+		sprite_index     = sprChickenFeather;
+		image_blend_fade = c_gray;
+		depth            = -1;
+		
+		 // Vars:
+		mask_index     = mskAlly;
+		creator        = noone;
+		target         = noone;
+		index          = -1;
+		bskin          = 0;
+		stick          = false;
+		stickx         = 0;
+		sticky         = 0;
+		stick_time_max = 30 * power(1.5, ultra_get("parrot", 1));
+		stick_time     = stick_time_max;
+		stick_list     = [];
+		stick_wait     = 0;
+		
+		 // Push:
+		motion_add(random(360), random_range(4, 6));
+		image_angle = direction + 135;
+		
+		return self;
+	}
+	
+#define ParrotFeather_step
+	if(stick_time > 0){
+		 // Slow:
+		speed *= power(0.9, current_time_scale);
+		
+		 // Deterioration:
+		if(stick){
+			if(!array_length(stick_list)){
+				var _list = instances_matching(instances_matching(instances_matching(obj.ParrotFeather, "target", target), "creator", creator), "stick", stick);
+				with(_list){
+					stick_list = _list;
+				}
+			}
+			if(stick_list[0] == self){
+				stick_time -= current_time_scale;
+			}
+		}
+		else stick_list = [];
+		
+		 // Targeting:
+		if(instance_exists(target)){
+			if(stick){
+				visible = target.visible;
+				depth   = target.depth - 1;
+			}
+			else{
+				 // Orbit Target:
+				if(stick_wait != 0){
+					if(stick_wait > 0){
+						stick_wait -= min(stick_wait, current_time_scale);
+					}
+					
+					var	_l = 16,
+						_d = target_direction + 180;
+						
+					_d += 5 * sign(angle_difference(direction, _d));
+					
+					var	_x = target.x + lengthdir_x(_l, _d),
+						_y = target.y + lengthdir_y(_l, _d);
+						
+					motion_add_ct(point_direction(x, y, _x, _y) + orandom(60), 1);
+				}
+				
+				 // Reach Target:
+				else{
+					var	_dis = target_distance,
+						_dir = target_direction;
+						
+					 // Fly Towards Enemy:
+					motion_add_ct(_dir + orandom(60), 1);
+					
+					 // Far Away:
+					var _disMax = 640;
+					if(_dis > _disMax){
+						var _len = ((_dis - _disMax) / 16) * current_time_scale;
+						x += lengthdir_x(_len, _dir);
+						y += lengthdir_y(_len, _dir);
+						direction = _dir;
+					}
+					
+					 // Reached Target:
+					if(
+						_dis <= speed_raw
+						|| place_meeting(x, y, target)
+						|| (target == creator && place_meeting(x, y, Portal))
+					){
+						 // Effects:
+						with(instance_create(x, y, Dust)){
+							depth = other.depth - 1;
+						}
+						sound_play_pitchvol(sndFlyFire,        2 + random(0.2),  0.25);
+						sound_play_pitchvol(sndChickenThrow,   1 + orandom(0.3), 0.25);
+						sound_play_pitchvol(sndMoneyPileBreak, 1 + random(3),    0.5);
+						
+						 // Stick to & Charm Enemy:
+						if(target != creator){
+							stick       = true;
+							stickx      = random(x - target.x) * (("right" in target) ? target.right : 1);
+							sticky      = random(y - target.y);
+							image_angle = random(360);
+							speed       = 0;
+							
+							 // Parrot's Special Stat:
+							if("ntte_charm" not in target){
+								var _race = variable_instance_get(creator, "race", char_random);
+								if(_race == "parrot"){
+									var _stat = "race:" + _race + ":spec";
+									call(scr.stat_set, _stat, call(scr.stat_get, _stat) + 1);
+								}
+							}
+							
+							 // Charm Enemy:
+							var _wasUncharmed = ("ntte_charm" not in target || !target.ntte_charm.charmed);
+							with(charm_instance(target, true)){
+								if(_wasUncharmed || time >= 0 || feather){
+									time    = max(0, time + other.stick_time);
+									index   = other.index;
+									feather = true;
+								}
+							}
+						}
+						
+						 // Player Pickup:
+						else{
+							with(creator){
+								if("feather_ammo" in self){
+									feather_ammo++;
+									if("feather_ammo_max" in self && feather_ammo > feather_ammo_max){
+										feather_ammo = feather_ammo_max;
+									}
+								}
+							}
+							instance_delete(self);
+							exit;
+						}
+					}
+				}
+			}
+		}
+		
+		 // No Target:
+		else if(instance_exists(creator)){
+			 // Unstick:
+			if(stick){
+				stick = false;
+				motion_add(random(360), 4);
+			}
+			
+			 // Auto-Target Nearest Enemy:
+			if(button_check(index, "spec") || ("usespec" in creator && creator.usespec > 0)){
+				if(instance_exists(enemy)){
+					target = call(scr.instance_nearest_array, x, y, instances_matching_ne(instances_matching_lt(enemy, "size", 6), "mask_index", mskNone));
+				}
+			}
+			
+			 // Travel Back to Creator:
+			if(!instance_exists(target)){
+				target = creator;
+			}
+		}
+		
+		 // Nothing to Do:
+		else stick_time = 0;
+		
+		 // Facing:
+		image_angle = direction + 135;
+	}
+	
+	 // End:
+	else instance_destroy();
+	
+#define ParrotFeather_end_step
+	if(stick && instance_exists(target)){
+		x = target.x + (stickx * image_xscale * (("right" in target) ? target.right : 1));
+		y = target.y + (sticky * image_yscale);
+		
+		 // Z-Axis Support:
+		if("z" in target){
+			y -= abs(target.z);
+		}
+	}
+	else{
+		visible = true;
+		if(stick_wait == 0 || position_meeting(x, y + 8, Wall) || !position_meeting(x, y + 8, Floor)){
+			depth = -8;
+		}
+		else if(depth < -6){
+			depth = -1;
+		}
+	}
+	
+#define ParrotFeather_draw
+	if(stick && stick_time < stick_time_max){
+		var _lastCol = image_blend;
+		image_blend = merge_color(image_blend, image_blend_fade, 1 - (stick_time / stick_time_max));
+		draw_self();
+		image_blend = _lastCol;
+	}
+	else draw_self();
+	
+#define ParrotFeather_destroy
+	 // Fall to Ground:
+	with(instance_create(x, y, Feather)){
+		sprite_index = other.sprite_index;
+		image_angle  = other.image_angle;
+		image_blend  = other.image_blend_fade;
+		depth        = 0;
+		
+		 // Over Wall:
+		if(position_meeting(x, y + 8, Wall) || (other.depth < -6 && !position_meeting(x, y + 8, Floor))){
+			depth = -7;
+			fall  = random_range(20, 30);
+		}
+	}
+	
+	 // Sound:
+	sound_play_pitchvol(sndMoneyPileBreak, 1.5 + random(1.5), random(0.4));
+	if("ntte_charm" in target){
+		sound_play_pitchvol(
+			sndAssassinPretend,
+			1.5 + random(1.5),
+			stick_time_max / max(stick_time_max, target.ntte_charm.time)
+		);
+	}
+	
+#define ParrotFeather_cleanup
+	with(stick_list) if(instance_exists(self)){
+		stick_list = call(scr.array_delete_value, stick_list, other);
+	}
 	
 	
 /// SCRIPTS

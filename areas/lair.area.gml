@@ -198,6 +198,7 @@
 #define area_next              return [area_scrapyards, 1];
 #define area_music             return mus.Lair;
 #define area_music_boss        return mus.BigShots;
+#define area_music_boss_intro  return mus.BigShotsIntro;
 #define area_ambient           return amb102;
 #define area_background_color  return make_color_rgb(160, 157, 75);
 #define area_shadow_color      return area_get_shadow_color(area_pizza_sewers);

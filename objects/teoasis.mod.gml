@@ -2081,6 +2081,9 @@
 				call(scr.ntte_bind_setup, script_ref_create(ntte_setup_underwater_sprite, sprWeaponChestOpen, sprClamChestOpen), ChestOpen),
 				call(scr.ntte_bind_setup, script_ref_create(ntte_setup_underwater_sound), enemy)
 			];
+			with(instances_matching(WeaponChest, "sprite_index", sprWeaponChest)){
+				sprite_index = sprClamChest;
+			}
 		}
 	}
 	

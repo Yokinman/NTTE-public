@@ -76,6 +76,10 @@
 	if(_spr == spr.TunnellerHUD) return spr.OrchidTunnellerHUD;
 	return skin_weapon_sprite(_wep, _spr);
 	
+#define skin_weapon_swap(_wep, _swap)
+	sound_play_pitchvol(sndMoneyPileBreak, 1.2, 1.45);
+	return _swap;
+	
 	
 /// SCRIPTS
 #macro  call                                                                                    script_ref_call

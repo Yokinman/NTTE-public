@@ -51,7 +51,10 @@
 			"races/beetle.race.gml",
 			"skins/angler fish.skin.gml",
 			"skins/red crystal.skin.gml",
+			"skins/bat eyes.skin.gml",
 			"skins/orchid plant.skin.gml",
+			"skins/coat venuz.skin.gml",
+			"skins/bonus robot.skin.gml",
 			"skins/cool frog.skin.gml",
 			"skills/compassion.skill.gml",
 			"skills/silver tongue.skill.gml",
@@ -2537,10 +2540,8 @@
 				_gml += _new + `	`
 				                	 // Custom:
 				_gml += _new + `	if("${_scrName}" in _wrap.scr_ref){`
-				_gml += _new + `		var	_wrapScrRefs    = _wrap.scr_ref.${_scrName},`
-				_gml += _new + `			_wrapScrRefsNum = array_length(_wrapScrRefs);`
-				_gml += _new + `			`
-				_gml += _new + `		for(var i = 0; i < _wrapScrRefsNum; i++){`
+				_gml += _new + `		var _wrapScrRefs = _wrap.scr_ref.${_scrName};`
+				_gml += _new + `		for(var i = array_length(_wrapScrRefs) - 1; i >= 0; i--){`
 				_gml += _new + `			script_ref_call(_wrapScrRefs[i], _inst, _wep, _isMain, _mainX, _mainY, _mainDirection, _mainAccuracy, _mainTeam, _mainCreator);`
 				_gml += _new + `			_inst = instances_matching_ne(_inst, "id");`
 				_gml += _new + `		}`
@@ -2644,10 +2645,8 @@
 					_gml += _new + `			`
 					                			 // Call Scripts:
 					_gml += _new + `			if(_wrapHasPlayerFire){`
-					_gml += _new + `				var	_wrapScrRefs    = _wrap.scr_ref.player_fire,`
-					_gml += _new + `					_wrapScrRefsNum = array_length(_wrapScrRefs);`
-					_gml += _new + `					`
-					_gml += _new + `				for(var i = 0; i < _wrapScrRefsNum; i++){`
+					_gml += _new + `				var _wrapScrRefs = _wrap.scr_ref.player_fire;`
+					_gml += _new + `				for(var i = array_length(_wrapScrRefs) - 1; i >= 0; i--){`
 					_gml += _new + `					script_ref_call(_wrapScrRefs[i], _wep, _at);`
 					_gml += _new + `				}`
 					_gml += _new + `			}`
@@ -2785,10 +2784,8 @@
 				_gml += _new + `	`
 				                	 // Custom:
 				_gml += _new + `	if("${_scrName}" in _wrap.scr_ref){`
-				_gml += _new + `		var	_wrapScrRefs    = _wrap.scr_ref.${_scrName},`
-				_gml += _new + `			_wrapScrRefsNum = array_length(_wrapScrRefs);`
-				_gml += _new + `			`
-				_gml += _new + `		for(var i = 0; i < _wrapScrRefsNum; i++){`
+				_gml += _new + `		var _wrapScrRefs = _wrap.scr_ref.${_scrName};`
+				_gml += _new + `		for(var i = array_length(_wrapScrRefs) - 1; i >= 0; i--){`
 				_gml += _new + `			_call = script_ref_call(_wrapScrRefs[i], _wep, _call);`
 				_gml += _new + `		}`
 				_gml += _new + `	}`
@@ -3008,10 +3005,8 @@
 			//	_gml += _new + `	`
 				                	 // Custom:
 				_gml += _new + `	if("${_scrName}" in _wrap.scr_ref){`
-				_gml += _new + `		var	_wrapScrRefs    = _wrap.scr_ref.${_scrName},`
-				_gml += _new + `			_wrapScrRefsNum = array_length(_wrapScrRefs);`
-				_gml += _new + `			`
-				_gml += _new + `		for(var i = 0; i < _wrapScrRefsNum; i++){`
+				_gml += _new + `		var _wrapScrRefs = _wrap.scr_ref.${_scrName};`
+				_gml += _new + `		for(var i = array_length(_wrapScrRefs) - 1; i >= 0; i--){`
 				_gml += _new + `			script_ref_call(_wrapScrRefs[i], _primary);`
 				_gml += _new + `		}`
 				_gml += _new + `	}`
@@ -3090,10 +3085,8 @@
 				_gml += _new + `	`
 				                	 // Custom:
 				_gml += _new + `	if("${_scrName}" in _wrap.scr_ref){`
-				_gml += _new + `		var	_wrapScrRefs    = _wrap.scr_ref.${_scrName},`
-				_gml += _new + `			_wrapScrRefsNum = array_length(_wrapScrRefs);`
-				_gml += _new + `			`
-				_gml += _new + `		for(var i = 0; i < _wrapScrRefsNum; i++){`
+				_gml += _new + `		var _wrapScrRefs = _wrap.scr_ref.${_scrName};`
+				_gml += _new + `		for(var i = array_length(_wrapScrRefs) - 1; i >= 0; i--){`
 				_gml += _new + `			var _wrapScrRef = array_clone(_wrapScrRefs[i]);`
 				_gml += _new + `			array_copy(_wrapScrRef, array_length(_wrapScrRef), _ref, 3, array_length(_ref) - 3);`
 				_gml += _new + `			_call = script_ref_call(_wrapScrRef, _call);`

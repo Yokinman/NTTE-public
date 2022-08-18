@@ -2227,6 +2227,7 @@
 		maxhealth          = call(scr.boss_hp, 340);
 		tauntdelay         = 60;
 		intro              = false;
+		can_intro          = false;
 		raddrop            = 50;
 		size               = 5;
 		canfly             = true;
@@ -2323,17 +2324,18 @@
 		}
 		*/
 		
-		 // Intro Dim Music:
-		if(
-			!intro
-			&& "ntte_music_index" in GameCont
-			&& audio_is_playing(GameCont.ntte_music_index)
-		){
-			var _vol = audio_sound_get_gain(GameCont.ntte_music_index);
-			if(_vol > 0.3){
-				sound_volume(GameCont.ntte_music_index, _vol - (0.01 * current_time_scale));
-			}
-		}
+		//  // Intro Dim Music:
+		// if(
+		// 	!intro
+		// 	&& sink
+		// 	&& "ntte_music_index" in GameCont
+		// 	&& audio_is_playing(GameCont.ntte_music_index)
+		// ){
+		// 	var _vol = audio_sound_get_gain(GameCont.ntte_music_index);
+		// 	if(_vol > 0.3){
+		// 		sound_volume(GameCont.ntte_music_index, _vol - (0.01 * current_time_scale));
+		// 	}
+		// }
 	}
 	else{
 		 // Slow Initial Rise:
@@ -2386,6 +2388,20 @@
 						sound_play_pitchvol(sndNothing2Taunt, 0.7, 0.8);
 						view_shake_at(x, y, 30);
 					}
+				}
+			}
+		}
+		
+		 // Start Intro:
+		else if(!can_intro){
+			alarm1 = 3.746 * 30;
+			if((instance_number(enemy) - instance_number(Van)) <= array_length(instances_matching_ne(obj.PitSquid, "id"))){
+				can_intro = true;
+				
+				 // Intro Music:
+				with(MusCont){
+					alarm_set(2, 1);
+					alarm_set(3, -1);
 				}
 			}
 		}
@@ -2683,7 +2699,7 @@
 	alarm1 = 20 + irandom(30);
 	
 	if(enemy_target(x, y)){
-		if(intro || pit_height < 1 || (instance_number(enemy) - instance_number(Van)) <= array_length(instances_matching_ne(obj.PitSquid, "id"))){
+		if(intro || pit_height < 1 || can_intro){
 			if(intro || pit_height < 1){
 				var	_targetDir = target_direction,
 					_targetDis = target_distance;
@@ -2697,7 +2713,7 @@
 					
 					 // In Pit:
 					if(sink){
-						alarm1 = 20 + random(10);
+						alarm1 = (intro ? (20 + random(10)) : (3.736 * 30));
 						
 						direction = _targetDir;
 						speed = max(speed, 2.4);
@@ -2717,8 +2733,13 @@
 							sink = false;
 							if(!intro){
 								speed /= 2;
-								rise_delay = 84;
-								sound_play_pitchvol(mus.PitSquidIntro, 1, audio_sound_get_gain(mus.Trench));
+								rise_delay = 60;
+								
+								 // Music:
+								with(MusCont){
+									alarm_set(2, 1);
+									alarm_set(3, -1);
+								}
 							}
 						}
 					}
@@ -2773,7 +2794,10 @@
 					}
 				}
 			}
-			else sink = true;
+			else{
+				sink   = true;
+				alarm1 = 3.423 * 30;
+			}
 		}
 	}
 	

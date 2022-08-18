@@ -15,6 +15,7 @@
 #define area_next              return [mod_current, 1]; // CAN'T LEAVE
 #define area_music             return mus.Red;
 #define area_music_boss        return mus.Tesseract;
+#define area_music_boss_intro  return mus.TesseractIntro;
 #define area_ambient           return amb104;
 #define area_background_color  return make_color_rgb(235, 0, 67);
 #define area_shadow_color      return make_color_rgb(16, 0, 24);

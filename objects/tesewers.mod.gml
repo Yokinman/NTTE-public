@@ -1012,9 +1012,9 @@
 		depth        = -2;
 		
 		 // Sound:
-		snd_hurt = sndMutant10Hurt;
-		snd_dead = sndMutant10Dead;
-		snd_lowh = sndNothing2HalfHP;
+		snd_hurt = snd.BigBatHurt;//sndMutant10Hurt;
+		snd_dead = snd.BigBatDead;//sndMutant10Dead;
+		snd_lowh = snd.BigBatScreech;//sndNothing2HalfHP;
 		
 		 // Vars:
 		mask_index  = mskBanditBoss;
@@ -1091,7 +1091,8 @@
 	if(tauntdelay > 0 && !instance_exists(Player)){
 		tauntdelay -= current_time_scale;
 		if(tauntdelay <= 0){
-			sound_play_pitchvol(sndMutant10KillBigBandit, 0.7 + orandom(0.05), 1);
+			//sound_play_pitchvol(sndMutant10KillBigBandit, 0.7 + orandom(0.05), 1);
+			sound_play(array_length(instances_matching_ne(obj.CatBoss, "id")) ? snd.BigShotsTaunt : snd.BigBatTaunt);
 		}
 	}
 	
@@ -1209,7 +1210,7 @@
 #define BatBoss_alrm0
 	intro = true;
 	call(scr.boss_intro, "CatBat");
-	sound_play(sndScorpionFireStart);
+	sound_play(snd.BigBatIntro);
 	
 	 // Disable Bros:
 	with(instances_matching_gt(call(scr.array_combine, obj.BatBoss, obj.CatBoss), "alarm0", 0)){
@@ -2828,9 +2829,9 @@ var _extraScale = argument_count > 1 ? argument[1] : 0.5;
 		depth         = -2;
 		
 		 // Sound:
-		snd_hurt     = sndBuffGatorHit;
-		snd_dead     = sndSalamanderDead;
-		snd_lowh     = sndBallMamaAppear;
+		snd_hurt     = snd.BigCatHurt;//sndBuffGatorHit;
+		snd_dead     = snd.BigCatDead;//sndSalamanderDead;
+		snd_lowh     = snd.BigCatTaunt;//sndBallMamaAppear;
 		jetpack_loop = -1;
 		
 		 // Vars:
@@ -2877,8 +2878,11 @@ var _extraScale = argument_count > 1 ? argument[1] : 0.5;
 	if(tauntdelay > 0 && !instance_exists(Player)){
 		tauntdelay -= current_time_scale;
 		if(tauntdelay <= 0){
-			var _snd = sound_play_pitchvol(sndBallMamaTaunt, 0.9, 3);
-			audio_sound_set_track_position(_snd, 1);
+			// var _snd = sound_play_pitchvol(sndBallMamaTaunt, 0.9, 3);
+			// audio_sound_set_track_position(_snd, 1);
+			if(!array_length(instances_matching_ne(obj.BatBoss, "id"))){
+				sound_play(snd.BigCatTaunt);
+			}
 			
 			 // Epic Fart:
 			walk = 0;
@@ -2958,15 +2962,16 @@ var _extraScale = argument_count > 1 ? argument[1] : 0.5;
 	if(gunangle <= 180) draw_self_enemy();
 	
 #define CatBoss_alrm0
-	intro = true;
-	call(scr.boss_intro, "CatBat");
-	sound_play(sndScorpionFireStart);
-	
-	 // Disable Bros:
-	with(instances_matching_gt(call(scr.array_combine, obj.BatBoss, obj.CatBoss), "alarm0", 0)){
-		intro  = true;
-		alarm0 = -1;
+	if(!intro){
+		intro = true;
+		call(scr.boss_intro, "CatBat");
+		
+		 // Disable Bros:
+		with(instances_matching_gt(call(scr.array_combine, obj.BatBoss, obj.CatBoss), "alarm0", 0)){
+			intro = true;
+		}
 	}
+	sound_play(snd.BigCatIntro);
 
 #define CatBoss_alrm1
 	alarm1 = 20 + random(20);
@@ -3064,7 +3069,8 @@ var _extraScale = argument_count > 1 ? argument[1] : 0.5;
 						
 						 // Effects:
 						repeat(16) call(scr.fx, x, y, random(5), Dust);
-						sound_play_pitchvol(sndBigBanditMeleeStart, 0.6 + random(0.2), 1.2);
+						sound_play_pitchvol(sndBigBanditMeleeStart, 0.6 + random(0.2), 0.4);
+						sound_play(snd.BigCatCharge);
 					}
 				}
 				
@@ -3492,6 +3498,9 @@ var _extraScale = argument_count > 1 ? argument[1] : 0.5;
 						if(projectile_canhit_melee(other)){
 							if(collision_circle(_lx, _ly, _radius / 2, other, true, false)){
 								projectile_hit(other, damage, force, _dir);
+								if(!instance_exists(self)){
+									exit;
+								}
 							}
 						}
 					}
@@ -4063,7 +4072,7 @@ var _extraScale = argument_count > 1 ? argument[1] : 0.5;
 	}
 	
 	 // Dim Music:
-	else if("ntte_music_index" in GameCont){
+	else if(phase < 2 && "ntte_music_index" in GameCont){
 		if(audio_is_playing(GameCont.ntte_music_index)){
 			var _vol = audio_sound_get_gain(GameCont.ntte_music_index);
 			sound_volume(GameCont.ntte_music_index, _vol + min(0, (((phase < 2) ? 0.4 : 0) - _vol) * 0.05 * current_time_scale));
@@ -4139,6 +4148,14 @@ var _extraScale = argument_count > 1 ? argument[1] : 0.5;
 				sound_play_pitch(sndHitMetal, 0.5 + random(0.2));
 				view_shake_at(x, y, 20);
 				sleep(20);
+				
+				 // Intro Music:
+				if(phase > 1){
+					with(MusCont){
+						alarm_set(2, 1);
+						alarm_set(3, -1);
+					}
+				}
 			}
 		}
 		
@@ -6250,6 +6267,15 @@ var _extraScale = argument_count > 1 ? argument[1] : 0.5;
 	if(array_length(obj.FlameSpark)){
 		with(instances_matching_ne(obj.FlameSpark, "id")){
 			draw_sprite_ext(sprite_index, image_index, x, y, image_xscale * 3, image_yscale * 3, image_angle, image_blend, image_alpha * 0.1);
+		}
+	}
+	
+#define chat_message(_message, _index)
+	 // The Peas Feature (Peature):
+	if(string_upper(_message) == "LEGUME"){
+		with(instances_matching(obj.PizzaRubble, "peas", false)){
+			peas = true;
+			sound_play_hit(sndUncurse, 0);
 		}
 	}
 	

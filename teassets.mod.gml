@@ -1,29 +1,32 @@
 #define init
-	ntte_version = 2.05;
+	ntte_version = 2.06;
 	
 	 // Debug Lag:
 	lag = false;
 	
 	 // Custom Object Related:
-	obj                                      = {};
-	global.obj_create_event_ref_map          = ds_map_create();
-	global.obj_event_index_list_map          = ds_map_create();
-	global.obj_parent_map                    = ds_map_create();
-	global.obj_search_bind_map               = ds_map_create();
-	global.event_obj_list_map                = ds_map_create();
-	global.depth_obj_draw_event_instance_map = ds_map_create();
-	global.object_event_index_list_map       = ds_map_create();
+	obj = {};
+	with([
+		"obj_create_event_ref_map",
+		"obj_event_index_list_map",
+		"obj_parent_map",
+		"obj_search_bind_map",
+		"event_obj_list_map",
+		"depth_obj_draw_event_instance_map",
+		"object_event_index_list_map"
+	]){
+		mod_variable_set("mod", mod_current, self, ds_map_create());
+	}
 	
 	 // Custom Object Event Variable Names:
 	global.event_varname_list = ["script", "on_step", "on_begin_step", "on_end_step", "on_draw", "on_destroy", "on_cleanup", "on_anim", "on_death", "on_hurt", "on_hit", "on_wall", "on_projectile", "on_grenade"];
-	for(var _alarmIndex = 0; _alarmIndex < 10; _alarmIndex++){
-		array_push(global.event_varname_list, `on_alrm${_alarmIndex}`);
+	var _alarmIndex = 0;
+	repeat(10){
+		array_push(global.event_varname_list, `on_alrm${_alarmIndex++}`);
 	}
 	with([CustomObject, CustomHitme, CustomProp, CustomProjectile, CustomSlash, CustomEnemy, CustomScript, CustomBeginStep, CustomStep, CustomEndStep, CustomDraw]){
-		var	_object         = self,
-			_eventIndexList = [];
-			
-		with(instance_create(0, 0, _object)){
+		var _eventIndexList = [];
+		with(instance_create(0, 0, self)){
 			var _eventIndex = 0;
 			with(global.event_varname_list){
 				var _eventVarName = self;
@@ -34,8 +37,7 @@
 			}
 			instance_delete(self);
 		}
-		
-		global.object_event_index_list_map[? _object] = _eventIndexList;
+		global.object_event_index_list_map[? self] = _eventIndexList;
 	}
 	
 	 // Script References:
@@ -62,15 +64,19 @@
 		
 		 // Shine Overlay:
 		spr_path_set("shine/");
-		Shine8    = sprite_add(spr_path + "sprShine8.png",    7,  4,  4); // Rads
-		Shine10   = sprite_add(spr_path + "sprShine10.png",   7,  5,  5); // Pickups
-		Shine12   = sprite_add(spr_path + "sprShine12.png",   7,  6,  6); // Big Rads
-		Shine16   = sprite_add(spr_path + "sprShine16.png",   7,  8,  8); // Normal Chests
-		Shine20   = sprite_add(spr_path + "sprShine20.png",   7, 10, 10); // Heavy Chests (Steroids)
-		Shine24   = sprite_add(spr_path + "sprShine24.png",   7, 12, 12); // Big Chests
-		Shine64   = sprite_add(spr_path + "sprShine64.png",   7, 32, 32); // Giant Chests (YV)
-		ShineHurt = sprite_add(spr_path + "sprShineHurt.png", 3,  0,  0); // Hurt Flash
-		ShineSnow = sprite_add(spr_path + "sprShineSnow.png", 1,  0,  0); // Snow Floors
+		with([
+			8,  // Rads
+			10, // Pickups
+			12, // Big Rads
+			16, // Normal Chests
+			20, // Heavy Chests (Steroids)
+			24, // Big Chests
+			64, // Giant Chests (YV)
+		]){
+			lq_set(spr, `Shine${self}`, sprite_add(spr_path + `sprShine${self}.png`, 7, self / 2, self / 2));
+		}
+		ShineHurt = sprite_add(spr_path + "sprShineHurt.png", 3, 0, 0); // Hurt Flash
+		ShineSnow = sprite_add(spr_path + "sprShineSnow.png", 1, 0, 0); // Snow Floors
 		
 		//#region MENU / HUD
 		
@@ -730,10 +736,11 @@
 			
 			 // Pelican:
 			spr_path_add("Pelican/");
-			PelicanIdle   = spr_add("sprPelicanIdle",   6, 24, 24);
-			PelicanWalk   = spr_add("sprPelicanWalk",   6, 24, 24);
+			PelicanIdle   = spr_add("sprPelicanIdle",   5, 24, 24);
+			PelicanWalk   = spr_add("sprPelicanWalk",   8, 24, 24);
 			PelicanHurt   = spr_add("sprPelicanHurt",   3, 24, 24);
 			PelicanDead   = spr_add("sprPelicanDead",   6, 24, 24);
+			PelicanChrg   = spr_add("sprPelicanChrg",   2, 24, 24);
 			PelicanHammer = spr_add("sprPelicanHammer", 1,  6,  8, shnWep);
 			spr_path_add("../");
 			
@@ -830,7 +837,14 @@
 			SealHurt = [];
 			SealDead = [];
 			SealSpwn = [];
-			SealWeap = [];
+			SealWeap = [
+				mskNone,
+				spr_add("sprHookPole",    1, 18,  2),
+				spr_add("sprSabre",       1, -2,  1),
+				spr_add("sprBlunderbuss", 1,  7,  1),
+				spr_add("sprRepeater",    1,  6,  2),
+				sprBanditGun
+			];
 			for(var i = 0; i <= 6; i++){
 				var _num = ((i == 0) ? "" : i);
 				SealIdle[i] = spr_add(`sprSealIdle${_num}`, 6, 12, 12);
@@ -838,13 +852,7 @@
 				SealHurt[i] = spr_add(`sprSealHurt${_num}`, 3, 12, 12);
 				SealDead[i] = spr_add(`sprSealDead${_num}`, 6, 12, 12);
 				SealSpwn[i] = spr_add(`sprSealSpwn${_num}`, 6, 12, 12);
-				SealWeap[i] = mskNone;
 			}
-			SealWeap[1] = spr_add("sprHookPole",    1, 18,  2);
-			SealWeap[2] = spr_add("sprSabre",       1, -2,  1);
-			SealWeap[3] = spr_add("sprBlunderbuss", 1,  7,  1);
-			SealWeap[4] = spr_add("sprRepeater",    1,  6,  2);
-			SealWeap[6] = sprBanditGun;
 			SealDisc    = spr_add("sprSealDisc",    2,  7,  7);
 			SkealIdle   = spr_add("sprSkealIdle",   6, 12, 12);
 			SkealWalk   = spr_add("sprSkealWalk",   7, 12, 12);
@@ -1762,13 +1770,13 @@
 			BatChestBigCursedOpen = spr_add("sprBatChestBigCursedOpen", 1, 12, 12);
 			
 			 // Bone:
-			BonePickup    = array_create(4, -1);
-			BonePickupBig = array_create(2, -1);
-			for(var i = 0; i < array_length(BonePickup); i++){
-				BonePickup[i] = spr_add(`sprBonePickup${i}`, 1, 4, 4, shn8);
+			BonePickup    = [];
+			BonePickupBig = [];
+			for(var i = 0; i < 4; i++){
+				array_push(BonePickup, spr_add(`sprBonePickup${i}`, 1, 4, 4, shn8));
 			}
-			for(var i = 0; i < array_length(BonePickupBig); i++){
-				BonePickupBig[i] = spr_add(`sprBoneBigPickup${i}`, 1, 8, 8, shn16);
+			for(var i = 0; i < 2; i++){
+				array_push(BonePickupBig, spr_add(`sprBoneBigPickup${i}`, 1, 8, 8, shn16));
 			}
 			
 			 // Bonus Pickups:
@@ -1921,45 +1929,48 @@
 				"parrot" : {
 					skin : 2,
 					sprt : [
-						["Loadout",       2, 16,  16, true],
-						["Map",           1, 10,  10, true],
-						["Portrait",      1, 20, 221, true],
+						["Loadout",       2, 16],
+						["Map",           1, 10],
+						["Portrait",      1, 20, 221],
 						["Select",        2,  0,   0, false],
 						["UltraIcon",     2, 12,  16, false],
 						["UltraHUDA",     1,  8,   9, false],
 						["UltraHUDB",     1,  8,   9, false],
-						["Idle",          4, 12,  12, true],
-						["Walk",          6, 12,  12, true],
-						["Hurt",          3, 12,  12, true],
-						["Dead",          6, 12,  12, true],
-						["GoSit",         3, 12,  12, true],
-						["Sit",           1, 12,  12, true],
-						["MenuSelected", 10, 16,  16, false],
-						["Feather",       1,  3,   4, true],
-						["FeatherHUD",    8,  5,   5, true]
+						["Idle",          4],
+						["Walk",          6],
+						["Hurt",          3],
+						["Dead",          6],
+						["GoSit",         3],
+						["Sit",           1],
+						["Menu",         40, 12,  12, false],
+						["MenuSelect",    3, 12,  12, false],
+						["MenuSelected", 30, 16,  16, false],
+						["MenuDeselect",  4, 12,  12, false],
+						["Feather",       1,  3,   4],
+						["FeatherHUD",    8,  5]
 					]
 				},
 				
 				"beetle" : {
 					skin : 2,
 					sprt : [
-						["Loadout",         2, 16,  16, true],
-						["Map",             1, 10,  10, true],
-						["Portrait",        1, 90, 243, true],
+						["Loadout",         2, 16],
+						["Map",             1, 10],
+						["Portrait",        1, 90, 243],
 						["Select",          2,  0,   0, false],
 						["UltraIcon",       2, 12,  16, false],
 						["UltraHUDA",       1,  8,   9, false],
 						["UltraHUDB",       1,  8,   9, false],
-						["Idle",            4, 12,  12, true],
-						["Walk",            8, 12,  12, true],
-						["Hurt",            3, 12,  12, true],
-						["Dead",           10, 12,  12, true],
-						["GoSit",           3, 12,  12, true],
-						["Sit",             1, 12,  12, true],
-						["Menu",            4, 12,  12, false],
-						["MenuSelect",      4, 12,  12, false],
-						["MenuSelected",    8, 12,  12, false],
-						["MenuDeselect",    8, 12,  12, false],
+						["Idle",            4],
+						["Walk",            8],
+						["Hurt",            3],
+						["Dead",           10],
+						["GoSit",           3],
+						["Sit",             1],
+						["Menu",           48, 12,  12, false],
+						["MenuSelect",     18, 12,  12, false],
+						["MenuSelected",   26, 12,  12, false],
+						["MenuDeselect",   18, 12,  12, false],
 						["ThroneButtIcon",  1,  5,   5, false]
 					]
 				}/*,
@@ -1967,19 +1978,19 @@
 				"???" : {
 					skin : 2,
 					sprt : [
-						["Loadout",   2, 16,  16, true],
-						["Map",       1, 10,  10, true],
-						["Portrait",  1, 40, 243, true],
+						["Loadout",   2, 16],
+						["Map",       1, 10],
+						["Portrait",  1, 40, 243],
 						["Select",    2,  0,   0, false],
 						["UltraIcon", 2, 12,  16, false],
 						["UltraHUDA", 1,  8,   9, false],
 						["UltraHUDB", 1,  8,   9, false],
-						["Idle",      8, 12,  12, true],
-						["Walk",      6, 12,  12, true],
-						["Hurt",      3, 12,  12, true],
-						["Dead",      6, 12,  12, true],
-						["GoSit",     3, 12,  12, true],
-						["Sit",       1, 12,  12, true]
+						["Idle",      8],
+						["Walk",      6],
+						["Hurt",      3],
+						["Dead",      6],
+						["GoSit",     3],
+						["Sit",       1]
 					]
 				}*/
 			};
@@ -2001,9 +2012,9 @@
 					with(_raceInfo.sprt){
 						var	_name = self[0],
 							_img  = self[1],
-							_x    = self[2],
-							_y    = self[3],
-							_hasB = self[4];
+							_x    = ((array_length(self) > 2) ? self[2] : 12),
+							_y    = ((array_length(self) > 3) ? self[3] : _x),
+							_hasB = ((array_length(self) > 4) ? self[4] : true);
 							
 						lq_set(_skinSprMap, _name, spr_add("spr" + _raceName + (_hasB ? _skinName : "") + _name, _img, _x, _y));
 					}
@@ -2016,8 +2027,9 @@
 				lq_set(Race, _race, _raceSkinSprMapList);
 			}
 			
-			 // Parrot Charm:
+			 // Parrot:
 			spr_path_add("Parrot/");
+			shd.ParrotMenu      = spr_add("shdParrotMenu",          1, 16, 16);
 			AllyReviveArea      = spr_add("sprAllyReviveArea",      4, 35, 45);
 			AllyNecroReviveArea = spr_add("sprAllyNecroReviveArea", 4, 17, 20);
 			spr_path_add("../");
@@ -2052,62 +2064,65 @@
 			spr_path_add("../");
 			//#endregion
 			
-			////#region BAT EYES
-			//spr_path_add("EyesBat/");
-			//
-			//	 // Player:
-			//	EyesBatIdle  = spr_add("sprEyesBatIdle",  4, 12, 12);
-			//	EyesBatWalk  = spr_add("sprEyesBatWalk",  6, 12, 16);
-			//	EyesBatHurt  = spr_add("sprEyesBatHurt",  3, 12, 12);
-			//	EyesBatDead  = spr_add("sprEyesBatDead",  6, 12, 12);
-			//	EyesBatGoSit = spr_add("sprEyesBatGoSit", 3, 12, 12);
-			//	EyesBatSit   = spr_add("sprEyesBatSit",   1, 12, 12);
-			//	
-			//	 // Menu:
-			//	EyesBatPortrait = spr_add("sprEyesBatPortrait", 1, 40, 243);
-			//	EyesBatLoadout  = spr_add("sprEyesBatLoadout",  2, 16,  16);
-			//	EyesBatMapIcon  = spr_add("sprEyesBatMapIcon",  1, 10,  10);
-			//	
-			//spr_path_add("../");
-			////#endregion
-			//
-			////#region BONUS ROBOT
-			//spr_path_add("RobotBonus/");
-			//
-			//	 // Player:
-			//	RobotBonusIdle  = spr_add("sprRobotBonusIdle",  15, 12, 12);
-			//	RobotBonusWalk  = spr_add("sprRobotBonusWalk",   6, 12, 12);
-			//	RobotBonusHurt  = spr_add("sprRobotBonusHurt",   3, 12, 12);
-			//	RobotBonusDead  = spr_add("sprRobotBonusDead",   6, 12, 12);
-			//	RobotBonusGoSit = spr_add("sprRobotBonusGoSit",  3, 12, 12);
-			//	RobotBonusSit   = spr_add("sprRobotBonusSit",    1, 12, 12);
-			//	
-			//	 // Menu:
-			//	RobotBonusPortrait = spr_add("sprRobotBonusPortrait", 1, 40, 243);
-			//	RobotBonusLoadout  = spr_add("sprRobotBonusLoadout",  2, 16,  16);
-			//	RobotBonusMapIcon  = spr_add("sprRobotBonusMapIcon",  1, 10,  10);
-			//	
-			//spr_path_add("../");
-			////#endregion
-			//
-			////#region COAT Y.V.
-			//spr_path_add("YVCoat/");
-			//
-			//	 // Player:
-			//	YVCoatIdle  = spr_add("sprYVCoatIdle",  14, 12, 12);
-			//	YVCoatWalk  = spr_add("sprYVCoatWalk",   6, 12, 12);
-			//	YVCoatHurt  = spr_add("sprYVCoatHurt",   3, 12, 12);
-			//	YVCoatDead  = spr_add("sprYVCoatDead",  19, 24, 24);
-			//	YVCoatGoSit = spr_add("sprYVCoatGoSit",  3, 12, 12);
-			//	YVCoatSit   = spr_add("sprYVCoatSit",    1, 12, 12);
-			//	
-			//	 // Menu:
-			//	YVCoatPortrait = spr_add("sprYVCoatPortrait", 1, 40, 243);
-			//	YVCoatLoadout  = spr_add("sprYVCoatLoadout",  2, 16,  16);
-			//	YVCoatMapIcon  = spr_add("sprYVCoatMapIcon",  1, 10,  10);
-			//	
-			//spr_path_add("../");
-			////#endregion
+			//#region BAT EYES
+			spr_path_add("EyesBat/");
+			
+				 // Player:
+				EyesBatIdle  = spr_add("sprEyesBatIdle",  4, 12, 12);
+				EyesBatWalk  = spr_add("sprEyesBatWalk",  6, 12, 16);
+				EyesBatHurt  = spr_add("sprEyesBatHurt",  3, 12, 12);
+				EyesBatDead  = spr_add("sprEyesBatDead",  6, 12, 12);
+				EyesBatGoSit = spr_add("sprEyesBatGoSit", 3, 12, 12);
+				EyesBatSit   = spr_add("sprEyesBatSit",   1, 12, 12);
+				
+				 // Menu:
+				EyesBatPortrait = spr_add("sprEyesBatPortrait", 1, 40, 243);
+				EyesBatLoadout  = spr_add("sprEyesBatLoadout",  2, 16,  16);
+				EyesBatMapIcon  = spr_add("sprEyesBatMapIcon",  1, 10,  10);
+				
+			spr_path_add("../");
+			//#endregion
+			
+			//#region BONUS ROBOT
+			spr_path_add("RobotBonus/");
+			
+				 // Player:
+				RobotBonusIdle  = spr_add("sprRobotBonusIdle",  15, 12, 12);
+				RobotBonusWalk  = spr_add("sprRobotBonusWalk",   6, 12, 12);
+				RobotBonusHurt  = spr_add("sprRobotBonusHurt",   3, 12, 12);
+				RobotBonusDead  = spr_add("sprRobotBonusDead",   6, 12, 12);
+				RobotBonusGoSit = spr_add("sprRobotBonusGoSit",  3, 12, 12);
+				RobotBonusSit   = spr_add("sprRobotBonusSit",    1, 12, 12);
+				
+				 // Menu:
+				RobotBonusPortrait = spr_add("sprRobotBonusPortrait", 1, 40, 243);
+				RobotBonusLoadout  = spr_add("sprRobotBonusLoadout",  2, 16,  16);
+				RobotBonusMapIcon  = spr_add("sprRobotBonusMapIcon",  1, 10,  10);
+				
+			spr_path_add("../");
+			//#endregion
+			
+			//#region COAT Y.V.
+			spr_path_add("YVCoat/");
+			
+				 // Coat:
+				YVCoat = spr_add("sprYVCoat", 1, 12, 12);
+				
+				 // Player:
+				YVCoatIdle  = spr_add("sprYVCoatIdle",  14, 12, 12);
+				YVCoatWalk  = spr_add("sprYVCoatWalk",   6, 12, 12);
+				YVCoatHurt  = spr_add("sprYVCoatHurt",   3, 12, 12);
+				YVCoatDead  = spr_add("sprYVCoatDead",  19, 24, 24);
+				YVCoatGoSit = spr_add("sprYVCoatGoSit",  3, 12, 12);
+				YVCoatSit   = spr_add("sprYVCoatSit",    1, 12, 12);
+				
+				 // Menu:
+				YVCoatPortrait = spr_add("sprYVCoatPortrait", 1, 40, 243);
+				YVCoatLoadout  = spr_add("sprYVCoatLoadout",  2, 16,  16);
+				YVCoatMapIcon  = spr_add("sprYVCoatMapIcon",  1, 10,  10);
+				
+			spr_path_add("../");
+			//#endregion
 			
 			//#region COOL FROG
 			spr_path_add("FrogCool/");
@@ -2209,6 +2224,90 @@
 				AnglerGrenade         = spr_add("sprAnglerGrenade",         1,  3,  3);
 				AnglerNuke            = spr_add("sprAnglerNuke",            1,  8,  8);
 				AnglerRocket          = spr_add("sprAnglerRocket",          1,  4,  4);
+				spr_path_add("../");
+				
+				 // Bat:
+				spr_path_add("Bat/");
+				BatAssaultRifle    = spr_add("sprBatAssaultRifle",    1,  2, 3, shnWep);
+				BatBazooka         = spr_add("sprBatBazooka",         1, 10, 5, shnWep);
+				BatCrossbow        = spr_add("sprBatCrossbow",        1,  2, 3, shnWep);
+				BatDiscGun         = spr_add("sprBatDiscGun",         1, -3, 4, shnWep);
+				BatGrenadeLauncher = spr_add("sprBatGrenadeLauncher", 1,  2, 2, shnWep);
+				BatLaserPistol     = spr_add("sprBatLaserPistol",     1, -2, 2, shnWep);
+				BatMachinegun      = spr_add("sprBatMachinegun",      1,  1, 2, shnWep);
+				BatNukeLauncher    = spr_add("sprBatNukeLauncher",    1,  7, 7, shnWep);
+				BatPlasmaGun       = spr_add("sprBatPlasmaGun",       1,  3, 4, shnWep);
+				BatRevolver        = spr_add("sprBatRevolver",        1, -3, 3, shnWep);
+				BatScrewdriver     = spr_add("sprBatScrewdriver",     1, -1, 2, shnWep);
+				BatShotgun         = spr_add("sprBatShotgun",         1,  5, 2, shnWep);
+				BatSlugger         = spr_add("sprBatSlugger",         1,  2, 3, shnWep);
+				BatSplinterGun     = spr_add("sprBatSplinterGun",     1,  2, 4, shnWep);
+				BatTeleportGun     = spr_add("sprBatTeleportGun",     1,  7, 6, shnWep);
+				BatTrident         = spr_add("sprBatTrident",         1, 12, 7, shnWep);
+				BatTunneller       = spr_add("sprBatTunneller",       1, 14, 5, shnWep);
+				BatTunnellerHUD    = spr_add("sprBatTunneller",       1, 18, 5, shnWep);
+				BatWrench          = spr_add("sprBatWrench",          1,  1, 3, shnWep);
+				BatBolt            = spr_add("sprBatBolt",            2,  4, 8);
+				BatDisk            = spr_add("sprBatDisc",            2,  7, 7);
+				BatGrenade         = spr_add("sprBatGrenade",         1,  3, 3);
+				BatNuke            = spr_add("sprBatNuke",            1,  8, 8);
+				BatRocket          = spr_add("sprBatRocket",          1,  4, 4);
+				spr_path_add("../");
+				
+				 // Bonus:
+				spr_path_add("Bonus/");
+				BonusAssaultRifle    = spr_add("sprBonusAssaultRifle",    1,  4, 3, shnWep);
+				BonusBazooka         = spr_add("sprBonusBazooka",         1, 11, 2, shnWep);
+				BonusCrossbow        = spr_add("sprBonusCrossbow",        1,  2, 4, shnWep);
+				BonusDiscGun         = spr_add("sprBonusDiscGun",         1, -4, 2, shnWep);
+				BonusGrenadeLauncher = spr_add("sprBonusGrenadeLauncher", 1,  2, 2, shnWep);
+				BonusLaserPistol     = spr_add("sprBonusLaserPistol",     1, -3, 2, shnWep);
+				BonusMachinegun      = spr_add("sprBonusMachinegun",      1,  0, 1, shnWep);
+				BonusNukeLauncher    = spr_add("sprBonusNukeLauncher",    1,  7, 6, shnWep);
+				BonusPlasmaGun       = spr_add("sprBonusPlasmaGun",       1,  3, 4, shnWep);
+				BonusRevolver        = spr_add("sprBonusRevolver",        1, -3, 2, shnWep);
+				BonusScrewdriver     = spr_add("sprBonusScrewdriver",     1, -1, 1, shnWep);
+				BonusShotgun         = spr_add("sprBonusShotgun",         1,  4, 2, shnWep);
+				BonusSlugger         = spr_add("sprBonusSlugger",         1,  0, 2, shnWep);
+				BonusSplinterGun     = spr_add("sprBonusSplinterGun",     1,  1, 3, shnWep);
+				BonusTeleportGun     = spr_add("sprBonusTeleportGun",     1,  4, 4, shnWep);
+				BonusTrident         = spr_add("sprBonusTrident",         1, 11, 7, shnWep);
+				BonusTunneller       = spr_add("sprBonusTunneller",       1, 14, 8, shnWep);
+				BonusTunnellerHUD    = spr_add("sprBonusTunneller",       1, 17, 8, shnWep);
+				BonusWrench          = spr_add("sprBonusWrench",          1,  1, 3, shnWep);
+				BonusBolt            = spr_add("sprBonusBolt",            2,  4, 8);
+				BonusDisc            = spr_add("sprBonusDisc",            2,  6, 6);
+				BonusGrenade         = spr_add("sprBonusGrenade",         1,  3, 3);
+				BonusNuke            = spr_add("sprBonusNuke",            1,  8, 8);
+				BonusRocket          = spr_add("sprBonusRocket",          1,  4, 4);
+				spr_path_add("../");
+				
+				 // Coat:
+				spr_path_add("Coat/");
+				CoatAssaultRifle    = spr_add("sprCoatAssaultRifle",    1,  5,  4, shnWep);
+				CoatBazooka         = spr_add("sprCoatBazooka",         1, 11,  5, shnWep);
+				CoatCrossbow        = spr_add("sprCoatCrossbow",        1,  3,  3, shnWep);
+				CoatDiscGun         = spr_add("sprCoatDiscGun",         1, -4,  2, shnWep);
+				CoatGrenadeLauncher = spr_add("sprCoatGrenadeLauncher", 1,  1,  5, shnWep);
+				CoatLaserPistol     = spr_add("sprCoatLaserPistol",     1, -3,  2, shnWep);
+				CoatMachinegun      = spr_add("sprCoatMachinegun",      1,  1,  3, shnWep);
+				CoatNukeLauncher    = spr_add("sprCoatNukeLauncher",    1,  8,  9, shnWep);
+				CoatPlasmaGun       = spr_add("sprCoatPlasmaGun",       1,  3,  4, shnWep);
+				CoatRevolver        = spr_add("sprCoatRevolver",        1, -4,  3, shnWep);
+				CoatScrewdriver     = spr_add("sprCoatScrewdriver",     1,  0,  4, shnWep);
+				CoatShotgun         = spr_add("sprCoatShotgun",         1,  3,  3, shnWep);
+				CoatSlugger         = spr_add("sprCoatSlugger",         1,  1,  4, shnWep);
+				CoatSplinterGun     = spr_add("sprCoatSplinterGun",     1,  2,  4, shnWep);
+				CoatTeleportGun     = spr_add("sprCoatTeleportGun",     1,  6,  6, shnWep);
+				CoatTrident         = spr_add("sprCoatTrident",         1, 11,  6, shnWep);
+				CoatTunneller       = spr_add("sprCoatTunneller",       1, 16, 11, shnWep);
+				CoatTunnellerHUD    = spr_add("sprCoatTunneller",       1, 22, 11, shnWep);
+				CoatWrench          = spr_add("sprCoatWrench",          1,  1,  5, shnWep);
+				CoatBolt            = spr_add("sprCoatBolt",            2,  4,  8);
+				CoatDisc            = spr_add("sprCoatDisc",            2,  6,  6);
+				CoatGrenade         = spr_add("sprCoatGrenade",         1,  3,  3);
+				CoatNuke            = spr_add("sprCoatNuke",            1,  8,  8);
+				CoatRocket          = spr_add("sprCoatRocket",          1,  4,  4);
 				spr_path_add("../");
 				
 				 // Cool:
@@ -2478,44 +2577,72 @@
 	}
 	
 	 // SOUNDS //
-	snd = {};
+	snd = { "mus": { "amb": {} } };
 	with(snd){
-		var	m = "sounds/enemies/",
-			p;
-			
+		 // SawTrap:
+		SawTrap = sound_add("sounds/enemies/SawTrap/sndSawTrap.ogg");
+		
 		 // Palanking:
-		p = m + "Palanking/";
-		PalankingHurt  = sound_add(p + "sndPalankingHurt.ogg");
-		PalankingDead  = sound_add(p + "sndPalankingDead.ogg");
-		PalankingCall  = sound_add(p + "sndPalankingCall.ogg");
-		PalankingSwipe = sound_add(p + "sndPalankingSwipe.ogg");
-		PalankingTaunt = sound_add(p + "sndPalankingTaunt.ogg");
+		with(["Hurt", "Dead", "Taunt", "Call", "Swipe"]){
+			lq_set(other, `Palanking${self}`, sound_add(`sounds/enemies/Palanking/sndPalanking${self}.ogg`));
+		}
 		sound_volume(PalankingHurt, 0.6);
 		
-		 // SawTrap:
-		p = m + "SawTrap/";
-		SawTrap = sound_add(p + "sndSawTrap.ogg");
+		 // Big Shots:
+		with(["Hurt", "Dead", "Intro", "Taunt"]){
+			lq_set(other, `BigBat${self}`, sound_add(`sounds/enemies/BigShots/sndBigBat${self}.ogg`));
+			lq_set(other, `BigCat${self}`, sound_add(`sounds/enemies/BigShots/sndBigCat${self}.ogg`));
+		}
+		BigBatScreech = sound_add("sounds/enemies/BigShots/sndBigBatScreech.ogg");
+		BigCatCharge  = sound_add("sounds/enemies/BigShots/sndBigCatCharge.ogg");
+		BigShotsTaunt = sound_add("sounds/enemies/BigShots/sndBigShotsTaunt.ogg");
+		
+		 // Characters:
+		with([
+			"Slct",
+			"Cnfm",
+			"Wrld",
+			"Hurt",
+			"Dead",
+			"LowA",
+			"LowH",
+			"Chst",
+		//	"Valt",
+			"Crwn",
+			"Spch",
+			"IDPD",
+		//	"Cptn",
+		//	"Thrn",
+			"UltraA",
+			"UltraB"
+		]){
+			with(["Beetle", "Parrot"]){
+				lq_set(snd, self + other, sound_add(`sounds/races/${self}/snd${self + other}.ogg`));
+			}
+		}
 		
 		 // Music:
-		mus = {};
-		with(mus){
-			var p = "sounds/music/";
-			amb = {};
-			
+		with([
 			 // Areas:
-			Coast   = sound_add(p + "musCoast.ogg");
-			CoastB  = sound_add(p + "musCoastB.ogg");
-			Trench  = sound_add(p + "musTrench.ogg");
-			TrenchB = sound_add(p + "musTrenchB.ogg");
-			Lair    = sound_add(p + "musLair.ogg");
-			Red     = sound_add(p + "musRed.ogg");
+			"Coast",
+			"CoastB",
+			"Trench",
+			"TrenchB",
+			"Lair",
+			"Red",
 			
 			 // Bosses:
-			SealKing      = sound_add(p + "musSealKing.ogg");
-			BigShots      = sound_add(p + "musBigShots.ogg");
-			PitSquid      = sound_add(p + "musPitSquid.ogg");
-			PitSquidIntro = sound_add(p + "musPitSquidIntro.ogg");
-			Tesseract     = sound_add(p + "musTesseract.ogg");
+			"SealKing",
+			"BigShots",
+			"BigShotsIntro",
+			"PitSquid",
+			"PitSquidIntro",
+			"PitSquidIntroStart",
+			"PitSquidIntroLoop",
+			"Tesseract",
+			"TesseractIntro"
+		]){
+			lq_set(mus, self, sound_add(`sounds/music/mus${self}.ogg`));
 		}
 	}
 	
@@ -2654,7 +2781,6 @@
 	global.loadout_wep_clone = ds_list_create();
 	
 	 // Math Epsilon:
-	global.epsilon = 1;
 	for(var i = 0; i <= 16; i++){
 		global.epsilon = power(10, -i);
 		if(global.epsilon == 0){
@@ -2830,7 +2956,7 @@
 #define cleanup
 	 // Reset Starting Weapons:
 	loadout_wep_reset();
-	ds_list_destroy(global.loadout_wep_clone);
+	//ds_list_destroy(global.loadout_wep_clone);
 	
 	 // Save Game:
 	if(save_auto){
@@ -2849,7 +2975,7 @@
 			repeat(8) with(instance_create(random_range(bbox_left, bbox_right + 1), random_range(bbox_top, bbox_bottom + 1), Dust)){
 				motion_add(random(360), random(random(8)));
 			}
-			instance_delete(self);
+			instance_destroy();
 		}
 	}
 	
@@ -2929,14 +3055,18 @@
 		_name = _ref[1];
 		
 	 // Set Global Variables:
-	mod_variable_set(_type, _name, "scr",       scr);
-	mod_variable_set(_type, _name, "obj",       obj);
-	mod_variable_set(_type, _name, "spr",       spr);
-	mod_variable_set(_type, _name, "snd",       snd);
-	mod_variable_set(_type, _name, "debug_lag", false);
-	mod_variable_set(_type, _name, "ntte_vars", ntte_vars);
-	mod_variable_set(_type, _name, "epsilon",   global.epsilon);
-	mod_variable_set(_type, _name, "mod_type",  _type);
+	with([
+		["scr",       scr],
+		["obj",       obj],
+		["spr",       spr],
+		["snd",       snd],
+		["debug_lag", false],
+		["ntte_vars", ntte_vars],
+		["epsilon",   global.epsilon],
+		["mod_type",  _type]
+	]){
+		mod_variable_set(_type, _name, self[0], self[1]);
+	}
 	
 	 // Bind Object Setup Scripts:
 	var _list = [];
@@ -3155,10 +3285,9 @@
 			save_get("stat:pet:Baby.examplepet.mod:found")
 	*/
 	
-	var	_path = string_split(_name, ":"),
-		_save = save_data;
-		
-	with(_path){
+	var _save = save_data;
+	
+	with(string_split(_name, ":")){
 		if(self not in _save){
 			return _default;
 		}
@@ -3502,12 +3631,12 @@
 					}
 					
 					 // Game Paused:
-					else for(var i = 0; i < maxp; i++){
-						if(button_pressed(i, "paus")){
+					else{ var i = 0; repeat(maxp){
+						if(button_pressed(i++, "paus")){
 							reset = true;
 							break;
 						}
-					}
+					}}
 					
 					wait 0;
 				}
@@ -3577,25 +3706,17 @@
 				 // Shader-Specific:
 				switch(name){
 					case "Charm":
-						var	_w = _args[0],
-							_h = _args[1];
-							
-						shader_set_fragment_constant_f(0, [1 / _w, 1 / _h]);
+						shader_set_fragment_constant_f(0, [1 / _args[0], 1 / _args[1]]);
 						break;
 						
 					case "SludgePool":
-						var	_w     = _args[0],
-							_h     = _args[1],
-							_color = _args[2];
-							
-						shader_set_fragment_constant_f(0, [1 / _w, 1 / _h]);
+						var _color = _args[2];
+						shader_set_fragment_constant_f(0, [1 / _args[0], 1 / _args[1]]);
 						shader_set_fragment_constant_f(1, [color_get_red(_color) / 255, color_get_green(_color) / 255, color_get_blue(_color) / 255]);
 						break;
 						
 					case "Unblend":
-						var _blendNum = _args[0];
-						
-						shader_set_fragment_constant_f(0, [1 / power(2, _blendNum)]);
+						shader_set_fragment_constant_f(0, [1 / power(2, _args[0])]);
 						break;
 				}
 				
@@ -3722,9 +3843,7 @@
 			script_bind(script_ref_create(0), CustomDraw, script_ref_create(draw_thing, true), -8, true)
 	*/
 	
-	var	_modType = _modRef[0],
-		_modName = _modRef[1],
-		_bindKey = _modName + ":" + _modType,
+	var	_bindKey = _modRef[1] + ":" + _modRef[0],
 		_bind    = {
 			"object"  : _scriptObj,
 			"script"  : _scriptRef,
@@ -3762,46 +3881,46 @@
 	
 	return _bind;
 	
-#define ntte_bind_step(_scriptRef)
-	/*
-		
-	*/
-	
-	_scriptRef = array_clone(_scriptRef);
-	
-	
-	return _scriptRef;
-	
-#define ntte_bind_begin_step(_scriptRef)
-	/*
-		
-	*/
-	
-	_scriptRef = array_clone(_scriptRef);
-	
-	
-	return _scriptRef;
-	
-#define ntte_bind_end_step(_scriptRef)
-	/*
-		
-	*/
-	
-	_scriptRef = array_clone(_scriptRef);
-	
-	
-	return _scriptRef;
-	
-#define ntte_bind_draw(_scriptRef, _depth)
-	/*
-		
-	*/
-	
-	_scriptRef = array_clone(_scriptRef);
-	
-	
-	return _scriptRef;
-	
+//#define ntte_bind_step(_scriptRef)
+//	/*
+//		
+//	*/
+//	
+//	_scriptRef = array_clone(_scriptRef);
+//	
+//	
+//	return _scriptRef;
+//	
+//#define ntte_bind_begin_step(_scriptRef)
+//	/*
+//		
+//	*/
+//	
+//	_scriptRef = array_clone(_scriptRef);
+//	
+//	
+//	return _scriptRef;
+//	
+//#define ntte_bind_end_step(_scriptRef)
+//	/*
+//		
+//	*/
+//	
+//	_scriptRef = array_clone(_scriptRef);
+//	
+//	
+//	return _scriptRef;
+//	
+//#define ntte_bind_draw(_scriptRef, _depth)
+//	/*
+//		
+//	*/
+//	
+//	_scriptRef = array_clone(_scriptRef);
+//	
+//	
+//	return _scriptRef;
+//	
 #define ntte_bind_setup(_scriptRef, _obj)
 	/*
 		Binds the given script reference to a setup event for the given object
@@ -3828,11 +3947,12 @@
 	}
 	
 	 // Link Script Reference to Object(s) & Their Children:
-	var	_objectList    = (is_array(_obj) ? array_clone(_obj) : [_obj]),
+	var	_objectIndex   = 0,
+		_objectList    = (is_array(_obj) ? array_clone(_obj) : [_obj]),
 		_objectListMax = array_length(_objectList);
 		
-	for(var i = 0; i < _objectListMax; i++){
-		var	_object    = _objectList[i],
+	while(_objectIndex < _objectListMax){
+		var	_object    = _objectList[_objectIndex++],
 			_childList = _objectChildList[_object],
 			_refList   = _objectRefList[_object];
 			
@@ -3880,10 +4000,11 @@
 	spr_path_add(_path);
 	
 #define spr_path_add(_path)
-	var	_pathSplit    = string_split(_path, "/"),
+	var	_pathIndex    = 0,
+		_pathSplit    = string_split(_path, "/"),
 		_sprPathSplit = string_split(spr_path, "/");
 		
-	for(var _pathIndex = 0; _pathIndex < array_length(_pathSplit); _pathIndex++){
+	repeat(array_length(_pathSplit)){
 		var _pathItem = _pathSplit[_pathIndex];
 		if(_pathItem == ".."){
 			_sprPathSplit = array_slice(_sprPathSplit, 0, array_length(_sprPathSplit) - 1);
@@ -3895,6 +4016,7 @@
 				array_push(_sprPathSplit, "");
 			}
 		}
+		_pathIndex++;
 	}
 	
 	spr_path = array_join(_sprPathSplit, "/");
@@ -3916,8 +4038,8 @@ var _shine = argument_count > 4 ? argument[4] : shnNone;
 	};
 	
 #define trace_error(_error)
-	trace(_error);
-	trace_color(" ^ Screenshot that error and post it on NT:TE's itch.io page, thanks!", c_yellow);
+	//trace(_error);
+	//trace_color(" ^ Screenshot that error and post it on NT:TE's itch.io page, thanks!", c_yellow);
 	
 #define game_start
 	 // Autosave:
@@ -4052,14 +4174,24 @@ var _shine = argument_count > 4 ? argument[4] : shnNone;
 					depth      = other.depth;
 					visible    = other.visible;
 					persistent = true;
+					if(depth == object_get_depth(SubTopCont)){
+						if(fork()){
+							wait 0;
+							with(SubTopCont){
+								instance_create(0, 0, SubTopCont);
+								instance_destroy();
+							}
+							exit;
+						}
+					}
 				}
 			}
 		}
 	}
 	
 	 // Autosave (Return to Character Select):
-	if(instance_exists(Menu) && save_auto){
-		with(instances_matching(Menu, "ntte_autosave", null)){
+	if(save_auto){
+		with(instances_matching([Menu, GenCont], "ntte_autosave", null)){
 			ntte_autosave = true;
 			ntte_save();
 		}
@@ -4070,16 +4202,11 @@ var _shine = argument_count > 4 ? argument[4] : shnNone;
 #define draw_pause
 	 // Remind Player:
 	if(option_get("reminders")){
-		var	_vx       = view_xview_nonsync,
-			_vy       = view_yview_nonsync,
-			_gw       = game_width,
-			_gh       = game_height,
-			_timeTick = 1;
-			
+		var _timeTick = 1;
 		with(global.remind){
 			if(active){
-				var	_x = (_gw / 2),
-					_y = (_gh / 2) - 40;
+				var	_x = (game_width  / 2),
+					_y = (game_height / 2) - 40;
 					
 				 // Reminding:
 				if(instance_exists(object)){
@@ -4095,11 +4222,9 @@ var _shine = argument_count > 4 ? argument[4] : shnNone;
 							active = false;
 							
 							 // Text:
-							text_inst = instance_create(_x, _y, PopupText);
-							with(text_inst){
-								text     = other.text;
-								friction = 0.1;
-							}
+							text_inst          = instance_create(_x, _y, PopupText);
+							text_inst.text     = text;
+							text_inst.friction = 0.1;
 						}
 					}
 				}
@@ -4137,7 +4262,7 @@ var _shine = argument_count > 4 ? argument[4] : shnNone;
 						}
 						if(_break) break;
 						
-						_x = game_width - 124;
+						_x = game_width  - 124;
 						_y = game_height - 78;
 					}
 					
@@ -4146,7 +4271,7 @@ var _shine = argument_count > 4 ? argument[4] : shnNone;
 				
 				 // Draw Icon:
 				with(other){
-					draw_sprite(sprNew, 0, _vx + _x, _vy + _y + sin(current_frame / 10));
+					draw_sprite(sprNew, 0, view_xview_nonsync + _x, view_yview_nonsync + _y + sin(current_frame / 10));
 				}
 			}
 			
@@ -4158,7 +4283,7 @@ var _shine = argument_count > 4 ? argument[4] : shnNone;
 				draw_set_halign(fa_center);
 				draw_set_valign(fa_top);
 				with(instances_matching(text_inst, "visible", true)){
-					draw_text_nt(_vx + x, _vy + y, text);
+					draw_text_nt(view_xview_nonsync + x, view_yview_nonsync + y, text);
 				}
 			}
 		}
@@ -4189,15 +4314,14 @@ var _shine = argument_count > 4 ? argument[4] : shnNone;
 		
 		with(UberCont){
 			for(var _img = 0; _img < _sprImg; _img++){
-				var	_x = _sprW * _img,
-					_y = 0;
-					
+				var _x = _sprW * _img;
+				
 				 // Normal Sprite:
-				draw_sprite(_spr, _img, _x + _sprX, _y + _sprY);
+				draw_sprite(_spr, _img, _x + _sprX, _sprY);
 				
 				 // Overlay Shine:
 				draw_set_color_write_enable(true, true, true, false);
-				draw_sprite_stretched(_shine, _img, _x, _y, _sprW, _sprH);
+				draw_sprite_stretched(_shine, _img, _x, 0, _sprW, _sprH);
 				draw_set_color_write_enable(true, true, true, true);
 			}
 		}
@@ -4285,23 +4409,22 @@ var _shine = argument_count > 4 ? argument[4] : shnNone;
 				_wepSpriteCount = array_length(_wepSpriteList);
 				
 			with(_wepSpriteList){
-				var	_wepSprite  = self,
-					_mergeSlice = {
-						"sprite_index"   : _wepSprite,
-						"sprite_width"   : sprite_get_width(_wepSprite),
-						"sprite_height"  : sprite_get_height(_wepSprite),
-						"sprite_xoffset" : sprite_get_xoffset(_wepSprite),
-						"sprite_yoffset" : sprite_get_yoffset(_wepSprite),
-						"sprite_bbox_y1" : sprite_get_bbox_top(_wepSprite)        - sprite_get_yoffset(_wepSprite),
-						"sprite_bbox_y2" : sprite_get_bbox_bottom(_wepSprite) + 1 - sprite_get_yoffset(_wepSprite),
-						"image_number"   : sprite_get_number(_wepSprite),
-						"x1"             : 0,
-						"x2"             : 0,
-						"next_slice"     : undefined
-					};
-					
+				var _mergeSlice = {
+					"sprite_index"   : self,
+					"sprite_width"   : sprite_get_width(self),
+					"sprite_height"  : sprite_get_height(self),
+					"sprite_xoffset" : sprite_get_xoffset(self),
+					"sprite_yoffset" : sprite_get_yoffset(self),
+					"sprite_bbox_y1" : sprite_get_bbox_top(self)        - sprite_get_yoffset(self),
+					"sprite_bbox_y2" : sprite_get_bbox_bottom(self) + 1 - sprite_get_yoffset(self),
+					"image_number"   : sprite_get_number(self),
+					"x1"             : 0,
+					"x2"             : 0,
+					"next_slice"     : undefined
+				};
+				
 				 // Manual Adjustments:
-				switch(_wepSprite){
+				switch(self){
 					case sprToxicBow:
 						_mergeSlice.sprite_yoffset += 2;
 						break;
@@ -4326,9 +4449,9 @@ var _shine = argument_count > 4 ? argument[4] : shnNone;
 				}
 				
 				 // Determine Slice Dimensions:
-				if(_wepSprite != mskNone){
-					var	_sliceX1 = sprite_get_bbox_left(_wepSprite) + 1,
-						_sliceX3 = sprite_get_bbox_right(_wepSprite),
+				if(self != mskNone){
+					var	_sliceX1 = sprite_get_bbox_left(self) + 1,
+						_sliceX3 = sprite_get_bbox_right(self),
 						_sliceX2 = round(lerp(_sliceX1, _sliceX3, 0.4));
 						
 					for(var _sliceSide = 0; _sliceSide <= 1; _sliceSide++){
@@ -4547,23 +4670,22 @@ var _shine = argument_count > 4 ? argument[4] : shnNone;
 				_wepLoadoutSpriteCount = array_length(_wepLoadoutSpriteList);
 				
 			with(_wepLoadoutSpriteList){
-				var	_wepLoadoutSprite = self,
-					_mergeSlice       = {
-						"sprite_index"   : _wepLoadoutSprite,
-						"sprite_width"   : sprite_get_width(_wepLoadoutSprite),
-						"sprite_height"  : sprite_get_height(_wepLoadoutSprite),
-						"sprite_xoffset" : sprite_get_xoffset(_wepLoadoutSprite),
-						"sprite_yoffset" : sprite_get_yoffset(_wepLoadoutSprite),
-						"image_number"   : sprite_get_number(_wepLoadoutSprite),
-						"sprite_length1" : 0,
-						"sprite_length2" : 0,
-						"length1"        : 0,
-						"length2"        : 0,
-						"next_slice"     : undefined
-					};
-					
+				var _mergeSlice = {
+					"sprite_index"   : self,
+					"sprite_width"   : sprite_get_width(self),
+					"sprite_height"  : sprite_get_height(self),
+					"sprite_xoffset" : sprite_get_xoffset(self),
+					"sprite_yoffset" : sprite_get_yoffset(self),
+					"image_number"   : sprite_get_number(self),
+					"sprite_length1" : 0,
+					"sprite_length2" : 0,
+					"length1"        : 0,
+					"length2"        : 0,
+					"next_slice"     : undefined
+				};
+				
 				 // Determine Slice Dimensions:
-				if(_wepLoadoutSprite != mskNone){
+				if(self != mskNone){
 					var	_sliceDis1 = floor(((sprite_get_bbox_left(_mergeSlice.sprite_index)  + 2) - _mergeSlice.sprite_xoffset) * _loadoutSpriteXFactor) - 4,
 						_sliceDis3 =  ceil(((sprite_get_bbox_right(_mergeSlice.sprite_index) - 1) - _mergeSlice.sprite_xoffset) * _loadoutSpriteXFactor) - 4,
 						_sliceDis2 = /*round*/(lerp(_sliceDis1, _sliceDis3, 0.4));
@@ -4802,14 +4924,9 @@ var _shine = argument_count > 4 ? argument[4] : shnNone;
 			draw_clear_alpha(c_black, 0);
 			
 				 // Background:
-				var	_x1 = -1,
-					_y1 = -1,
-					_x2 = _x1 + w,
-					_y2 = _y1 + h;
-					
 				draw_set_alpha(0.8);
 				draw_set_color(c_black);
-				draw_roundrect_ext(_x1, _y1 + _topSpace, _x2, _y2, 5, 5, false);
+				draw_roundrect_ext(-1, -1 + _topSpace, w - 1, h - 1, 5, 5, false);
 				draw_set_alpha(1);
 				
 				 // Text:
@@ -4842,8 +4959,9 @@ var _shine = argument_count > 4 ? argument[4] : shnNone;
 		
 	with(surface_setup("sprTopTiny", (_sprW / 2) * _sprImg, (_sprH / 2), 1)){
 		free = true;
-		for(var _x = 0; _x < array_length(_sprList[0]); _x++){
-			for(var _y = 0; _y < array_length(_sprList[1]); _y++){
+		
+		for(var _x = 0; _x < 2; _x++){
+			for(var _y = 0; _y < 2; _y++){
 				surface_set_target(surf);
 				draw_clear_alpha(c_black, 0);
 				
@@ -4866,7 +4984,7 @@ var _shine = argument_count > 4 ? argument[4] : shnNone;
 				
 				 // Add Sprite:
 				surface_save(surf, name + ".png");
-				_sprList[_x, _y] = sprite_add(
+				_sprList[@ _x][@ _y] = sprite_add(
 					name + ".png",
 					_sprImg,
 					(_sprX - 8) * _x,
@@ -4886,7 +5004,7 @@ var _shine = argument_count > 4 ? argument[4] : shnNone;
 	var _wep = unlock_get(`loadout:wep:${_race}:${_name}`);
 	
 	if(is_object(_wep)){
-		ds_list_add(global.loadout_wep_clone, [_race, _name, _wep, lq_clone(_wep)]);
+		ds_list_add(global.loadout_wep_clone, [_race, _name, _wep, call(scr.data_clone, _wep)]);
 	}
 	
 #define loadout_wep_reset()
@@ -4901,8 +5019,7 @@ var _shine = argument_count > 4 ? argument[4] : shnNone;
 			_wepSave = unlock_get(`loadout:wep:${_race}:${_name}`);
 			
 		if(_wep == _wepSave){
-			var _wepCopy = self[3];
-			save_set(`unlock:loadout:wep:${_race}:${_name}`, _wepCopy);
+			save_set(`unlock:loadout:wep:${_race}:${_name}`, self[3]);
 		}
 	}
 	

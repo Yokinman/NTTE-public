@@ -806,26 +806,6 @@
 	
 	draw_surface_ext(_surf, _x, _y, _scale, _scale, 0, c_white, draw_get_alpha());
 	
-#define draw_text_bn(_x, _y, _string, _angle)
-	/*
-		Draw big portrait name text
-		Portrait names use an angle of 1.5
-		
-		Ex:
-			draw_set_font(fntBigName)
-			draw_text_bn(x, y, "FISH", 1.5);
-	*/
-	
-	_string = string_upper(_string);
-	
-	var _col = draw_get_color();
-	draw_set_color(c_black);
-	draw_text_transformed(_x + 1, _y,     _string, 1, 1, _angle);
-	draw_text_transformed(_x,     _y + 2, _string, 1, 1, _angle);
-	draw_text_transformed(_x + 1, _y + 2, _string, 1, 1, _angle);
-	draw_set_color(_col);
-	draw_text_transformed(_x,     _y,     _string, 1, 1, _angle);
-	
 #define string_split_nt(_string)
 	/*
 		Returns an array of the given string split into 'draw_text_nt()' tags and normal text
@@ -3176,11 +3156,11 @@
 				
 			if(_obj == TopCont){
 				with(_vars){
-					if(self[0] == "fogscroll"){
+					var _varName = self[0];
+					if(_varName != "fog" && _varName != "darkness"){
 						with(_obj){
-							variable_instance_set(self, other[0], other[1]);
+							variable_instance_set(self, _varName, other[1]);
 						}
-						break;
 					}
 				}
 			}
@@ -3871,7 +3851,14 @@
 		Returns the given weapon as a resprited variant for the given skin if one exists
 	*/
 	
-	if(is_string(_skin) && array_find_index(ntte.mods.skin, _skin) >= 0){
+	if(call(scr.weapon_has_temerge, _wep)){
+		call(scr.weapon_deactivate_temerge, _wep);
+		_wep = wep_skin(_wep, _race, _skin);
+		call(scr.weapon_activate_temerge, _wep);
+		call(scr.weapon_set_temerge_weapon, _wep, wep_skin(call(scr.weapon_get_temerge_weapon, _wep), _race, _skin));
+	}
+	
+	else if(is_string(_skin) && array_find_index(ntte.mods.skin, _skin) >= 0){
 		var _refSprt = script_ref_create_ext("skin", _skin, "skin_weapon_sprite");
 		if(mod_script_exists(_refSprt[0], _refSprt[1], _refSprt[2])){
 			var _spr = weapon_get_sprt(_wep);
@@ -6082,6 +6069,13 @@
 						
 					case Tires:
 						spr_shadow_y = -1;
+						break;
+						
+					case CampChar:
+						if("race" in target && target.race == "parrot"){
+							spr_shadow = spr.shd.ParrotMenu;
+							mask_index = mskAlly;
+						}
 						break;
 						
 					default: // Custom Stuff

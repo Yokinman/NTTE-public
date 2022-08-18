@@ -986,7 +986,9 @@
 				}
 				with(instances_matching_ne(_inst, "sprite_index", _spr)){
 					var _lastSpr = sprite_index;
-					sprite_index = _spr;
+					if(mask_index == mskFloor){
+						sprite_index = _spr;
+					}
 					draw_self();
 					sprite_index = _lastSpr;
 				}

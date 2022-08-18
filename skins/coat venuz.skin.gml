@@ -11,10 +11,10 @@
 
 #define skin_race      return "venuz";
 #define skin_name      return ((argument_count <= 0 || argument0) ? "COAT" : skin_lock());
-#define skin_lock      return "???";
-#define skin_unlock    return "???";
-#define skin_ttip      return "???";
-#define skin_avail     return call(scr.unlock_get, "skin:" + mod_current) || 1;
+#define skin_lock      return "BUY A COAT";
+#define skin_unlock    return "FOR BUYING A COAT";
+#define skin_ttip      return choose("GUNS THAT SEW THREADSES", "FRESH FIT", "IS THAT DESIGNER", "DROWNING IN STYLE");
+#define skin_avail     return call(scr.unlock_get, "skin:" + mod_current);
 #define skin_portrait  return skin_sprite(sprBigPortrait);
 #define skin_mapicon   return skin_sprite(sprMapIcon);
 
@@ -34,6 +34,47 @@
 		case sprLoadoutSkin  : return spr.YVCoatLoadout;
 		case sprMapIcon      : return spr.YVCoatMapIcon;
 	}
+	
+#define skin_weapon_sprite(_wep, _spr)
+	switch(_spr){
+		case sprGoldARifle       : return spr.CoatAssaultRifle;
+		case sprGoldBazooka      : return spr.CoatBazooka;
+		case sprGoldCrossbow     : return spr.CoatCrossbow;
+		case sprGoldDiscgun      : return spr.CoatDiscGun;
+		case sprGoldNader        : return spr.CoatGrenadeLauncher;
+		case sprGoldLaserGun     : return spr.CoatLaserPistol;
+		case sprGoldMachinegun   : return spr.CoatMachinegun;
+		case sprGoldNukeLauncher : return spr.CoatNukeLauncher;
+		case sprGoldPlasmaGun    : return spr.CoatPlasmaGun;
+		case sprGoldRevolver     : return spr.CoatRevolver;
+		case sprGoldScrewdriver  : return spr.CoatScrewdriver;
+		case sprGoldShotgun      : return spr.CoatShotgun;
+		case sprGoldSlugger      : return spr.CoatSlugger;
+		case sprGoldSplinterGun  : return spr.CoatSplinterGun;
+		case sprGoldWrench       : return spr.CoatWrench;
+		
+		 // Projectiles:
+		case sprBoltGold         : return spr.CoatBolt;
+		case sprGoldDisc         : return spr.CoatDisc;
+		case sprGoldGrenade      : return spr.CoatGrenade;
+		case sprGoldNuke         : return spr.CoatNuke;
+		case sprGoldRocket       : return spr.CoatRocket;
+		
+		 // Modded:
+		default:
+			if(_spr == spr.GoldTeleportGun) return spr.CoatTeleportGun;
+			if(_spr == spr.GoldTrident    ) return spr.CoatTrident;
+			if(_spr == spr.GoldTunneller  ) return spr.CoatTunneller;
+	}
+	return _spr;
+	
+#define skin_weapon_sprite_hud(_wep, _spr)
+	if(_spr == spr.TunnellerHUD) return spr.CoatTunnellerHUD;
+	return skin_weapon_sprite(_wep, _spr);
+	
+#define skin_weapon_swap(_wep, _swap)
+	sound_play_pitchvol(choose(sndMenuASkin, sndMenuBSkin), 1.1, 1.2);
+	return _swap;
 	
 	
 /// SCRIPTS

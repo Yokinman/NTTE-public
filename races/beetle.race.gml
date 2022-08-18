@@ -12,7 +12,7 @@
 #define race_text              return "BEETLE CHEST#MERGE WEAPONS";
 #define race_lock              return "OPEN THE CHEST";
 #define race_unlock            return "FOR OPENING THE CHEST";
-#define race_tb_text           return "@wMERGED WEAPON @sPARTS CAN BE#REPLACED BY @ySAME-TYPE @sWEAPONS";//"HOLDING MORE WEAPONS INCREASES AMMO";//"MERGING COSTS @gRADS#@sINSTEAD OF @rMAX HP";
+#define race_tb_text           return "PARTS OF @wMERGED WEAPONS @sCAN BE REPLACED#BY WEAPONS OF THE SAME @yAMMO TYPE";//"HOLDING MORE WEAPONS INCREASES AMMO";//"MERGING COSTS @gRADS#@sINSTEAD OF @rMAX HP";
 #define race_portrait(_p, _b)  return race_sprite_raw("Portrait", _b);
 #define race_mapicon(_p, _b)   return race_sprite_raw("Map",      _b);
 #define race_avail             return call(scr.unlock_get, "race:" + mod_current);
@@ -59,18 +59,18 @@
 	var _sndNone = sndFootPlaSand5; // playing a sound that doesn't exist using sound_play_pitch/sound_play_pitchvol modifies sndSwapPistol's pitch/volume
 	
 	switch(_snd){
-		case sndMutant1Wrld : return sndMutant5Wrld;
-		case sndMutant1Hurt : return sndMutant5Hurt;
-		case sndMutant1Dead : return sndMutant5Dead;
-		case sndMutant1LowA : return sndMutant5LowA;
-		case sndMutant1LowH : return sndMutant5LowH;
-		case sndMutant1Chst : return sndMutant5Chst;
-		case sndMutant1Valt : return sndMutant5Valt;
-		case sndMutant1Crwn : return sndMutant5Crwn;
-		case sndMutant1Spch : return sndMutant5Spch;
-		case sndMutant1IDPD : return sndMutant5IDPD;
-		case sndMutant1Cptn : return sndMutant5Cptn;
-		case sndMutant1Thrn : return sndMutant5Thrn;
+		case sndMutant1Wrld : return snd.BeetleWrld;
+		case sndMutant1Hurt : return snd.BeetleHurt;
+		case sndMutant1Dead : return snd.BeetleDead;
+		case sndMutant1LowA : return snd.BeetleLowA;
+		case sndMutant1LowH : return snd.BeetleLowH;
+		case sndMutant1Chst : return snd.BeetleChst;
+		case sndMutant1Valt : return snd.BeetleChst;
+		case sndMutant1Crwn : return snd.BeetleCrwn;
+		case sndMutant1Spch : return snd.BeetleSpch;
+		case sndMutant1IDPD : return snd.BeetleIDPD;
+		case sndMutant1Cptn : return snd.BeetleSpch;
+		case sndMutant1Thrn : return snd.BeetleLowH;
 	}
 	
 	return -1;
@@ -87,10 +87,10 @@
 	
 /// Menu
 #define race_menu_select
-	return sndMutant5Slct;
+	return snd.BeetleSlct;
 	
 #define race_menu_confirm
-	return sndMutant5Cnfm;
+	return snd.BeetleCnfm;
 	
 #define race_menu_button
 	sprite_index = race_sprite_raw("Select", 0);
@@ -183,13 +183,8 @@
 	 // Ultra Sound:
 	if(_state != 0 && instance_exists(EGSkillIcon)){
 		switch(_ultra){
-			case ultA:
-				sound_play(sndPlantUltraB);
-				break;
-				
-			case ultB:
-				sound_play(sndFishUltraB);
-				break;
+			case ultA : sound_play_gun(snd.BeetleUltraA, 0, 0.3); break;
+			case ultB : sound_play_gun(snd.BeetleUltraB, 0, 0.3); break;
 		}
 	}
 	

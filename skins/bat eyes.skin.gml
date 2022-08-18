@@ -11,10 +11,10 @@
 
 #define skin_race      return "eyes";
 #define skin_name      return ((argument_count <= 0 || argument0) ? "BAT" : skin_lock());
-#define skin_lock      return "???";
-#define skin_unlock    return "???";
-#define skin_ttip      return "???";
-#define skin_avail     return call(scr.unlock_get, "skin:" + mod_current) || 1;
+#define skin_lock      return "REACH MAX @rCRIME @wBOUNTY";
+#define skin_unlock    return "FOR REACHING MAX @rCRIME @wBOUNTY";
+#define skin_ttip      return choose("THE DANGER", "TREAD LIGHTLY", "SAY MY NAME");
+#define skin_avail     return call(scr.unlock_get, "skin:" + mod_current);
 #define skin_portrait  return skin_sprite(sprBigPortrait);
 #define skin_mapicon   return skin_sprite(sprMapIcon);
 
@@ -34,6 +34,47 @@
 		case sprLoadoutSkin  : return spr.EyesBatLoadout;
 		case sprMapIcon      : return spr.EyesBatMapIcon;
 	}
+	
+#define skin_weapon_sprite(_wep, _spr)
+	switch(_spr){
+		case sprGoldARifle       : return spr.BatAssaultRifle;
+		case sprGoldBazooka      : return spr.BatBazooka;
+		case sprGoldCrossbow     : return spr.BatCrossbow;
+		case sprGoldDiscgun      : return spr.BatDiscGun;
+		case sprGoldNader        : return spr.BatGrenadeLauncher;
+		case sprGoldLaserGun     : return spr.BatLaserPistol;
+		case sprGoldMachinegun   : return spr.BatMachinegun;
+		case sprGoldNukeLauncher : return spr.BatNukeLauncher;
+		case sprGoldPlasmaGun    : return spr.BatPlasmaGun;
+		case sprGoldRevolver     : return spr.BatRevolver;
+		case sprGoldScrewdriver  : return spr.BatScrewdriver;
+		case sprGoldShotgun      : return spr.BatShotgun;
+		case sprGoldSlugger      : return spr.BatSlugger;
+		case sprGoldSplinterGun  : return spr.BatSplinterGun;
+		case sprGoldWrench       : return spr.BatWrench;
+		
+		 // Projectiles:
+		case sprBoltGold         : return spr.BatBolt;
+		case sprGoldDisc         : return spr.BatDisk;
+		case sprGoldGrenade      : return spr.BatGrenade;
+		case sprGoldNuke         : return spr.BatNuke;
+		case sprGoldRocket       : return spr.BatRocket;
+		
+		 // Modded:
+		default:
+			if(_spr == spr.GoldTeleportGun) return spr.BatTeleportGun;
+			if(_spr == spr.GoldTrident    ) return spr.BatTrident;
+			if(_spr == spr.GoldTunneller  ) return spr.BatTunneller;
+	}
+	return _spr;
+	
+#define skin_weapon_sprite_hud(_wep, _spr)
+	if(_spr == spr.TunnellerHUD) return spr.BatTunnellerHUD;
+	return skin_weapon_sprite(_wep, _spr);
+	
+#define skin_weapon_swap(_wep, _swap)
+	sound_play_pitchvol(sndSwapHammer, 1.2, 2/3);
+	return _swap;
 	
 	
 /// SCRIPTS

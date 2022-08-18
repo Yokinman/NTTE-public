@@ -7,7 +7,8 @@
 	 // Store Script References:
 	with([
 		weapon_set_temerge, weapon_deactivate_temerge, weapon_activate_temerge, weapon_add_temerge, weapon_delete_temerge, weapon_has_temerge, weapon_has_temerge_weapon, weapon_is_temerge_part, weapon_get_temerge_weapon, weapon_set_temerge_weapon, weapon_add_temerge_weapon, temerge_decide_weapon, temerge_weapon_event_set_script,
-		projectile_add_temerge_event, projectile_add_temerge_effect, projectile_has_temerge_effect, projectile_add_temerge_scale, projectile_add_temerge_bloom, projectile_add_temerge_damage, projectile_add_temerge_force, projectile_can_temerge_hit, projectile_temerge_wall_bounce, projectile_temerge_destroy
+		projectile_add_temerge_event, projectile_add_temerge_effect, projectile_has_temerge_effect, projectile_add_temerge_scale, projectile_add_temerge_bloom, projectile_add_temerge_damage, projectile_add_temerge_force, projectile_can_temerge_hit, projectile_temerge_wall_bounce, projectile_temerge_destroy,
+		temerge_effect_add_event, temerge_effect_call_event
 	]){
 		lq_set(scr, script_get_name(self), script_ref_create(self));
 	}
@@ -1008,7 +1009,7 @@
 #define temerge_weapon_load(_wep, _stockLoad)
 	/*
 		Merged weapons use their front weapon's reload:
-		1. Multiplied by a reduced factor of the reload of their stock weapon(s)
+		1. (If they aren't melee, or if their front weapon is melee) Multiplied by a reduced factor of the reload of their stock weapon(s)
 		2. (If they cost no ammo) Increased by any surplus (>1) ammo cost from their stock weapon(s)
 	*/
 	
@@ -1021,7 +1022,7 @@
 			_mergeLoad = _frontLoad * lerp(1, _stockLoad / 8, 0.8);
 			
 		 // Less Reload Increase:
-		if(_mergeLoad > _frontLoad){
+		if(_mergeLoad > _frontLoad && (!weapon_is_melee(_wep) || weapon_is_melee(_wepXmerge_wep))){
 			_mergeLoad = lerp(_mergeLoad, _frontLoad, 2/3);
 		}
 		
@@ -1389,6 +1390,7 @@
 			"shot_replace_min"           : max(1, _wepMergeStockCost),
 			"shot_replace_base"          : power(1.5, 1 + max(0, (_wepMergeFrontCost - 1) / 9)),
 			"shot_replace_cost_interval" : ((_wepMergeStockCost == 0) ? 1 : abs(_wepMergeStockCost)),
+			"shot_is_delayed"            : false,
 			"frame"                      : current_frame,
 			"x"                          : x,
 			"y"                          : y,
@@ -1500,7 +1502,8 @@
 				var _maxInstanceID = _fire.max_instance_id;
 				for(var _instanceID = _fire.min_instance_id; _instanceID < _maxInstanceID; _instanceID++){
 					if("team" in _instanceID){
-						_fire.has_shot = true;
+						_fire.has_shot        = true;
+						_fire.shot_is_delayed = true;
 						break;
 					}
 				}
@@ -1792,6 +1795,9 @@
 										&& _mainMergeFire.infammo == 0
 									){
 										for(var _mergeFire = _lastMergeFire; _mergeFire != undefined; _mergeFire = _mergeFire.last_vars){
+											if(_mergeFire.shot_is_delayed && _mergeFire.shot_replace_count == 1){
+												break;
+											}
 											if(((_mergeFire.shot_replace_count - 1) % _mergeFire.shot_replace_cost_interval) >= 1){
 												_canCost = false;
 												break;
@@ -4571,7 +4577,7 @@
 	with(_instanceList){
 		if(chance_ct(1, 4)){
 			with(call(scr.projectile_create, x, y, Lightning, random(360))){
-				ammo = min(irandom(other.damage), 28);
+				ammo = min(irandom(other.damage), 27);
 				event_perform(ev_alarm, 0);
 				
 				 // Spawn Effect:
@@ -4590,7 +4596,7 @@
 	
 	if(projectile_can_temerge_hit(other) && current_frame_active){
 		with(call(scr.projectile_create, x, y, Lightning, point_direction(x, y, other.x, other.y) + orandom(45))){
-			ammo = min(3 + irandom(other.damage), 28);
+			ammo = min(3 + irandom(other.damage), 27);
 			event_perform(ev_alarm, 0);
 			
 			 // Spawn Effect:
@@ -5319,7 +5325,9 @@
 	projectile_add_temerge_bloom(_instanceList, 0.2);
 	
 	 // Pierces Walls:
-	projectile_add_temerge_effect(_instanceList, "wall_piercing", [damage / 6]);
+	with(_instanceList){
+		projectile_add_temerge_effect(self, "wall_piercing", [damage / 6]);
+	}
 	
 	 // Bolt:
 	Bolt_temerge_setup(_instanceList);
@@ -5741,17 +5749,37 @@
 	projectile_add_temerge_effect(_instanceList, "plasma", [1]);
 	
 	
-#define Slash_temerge_fire(_at)                       temerge_can_delete = false;
-#define Shank_temerge_fire(_at)                       temerge_can_delete = false;
-#define EnergySlash_temerge_fire(_instanceList)       temerge_can_delete = false;
-#define EnergyHammerSlash_temerge_fire(_instanceList) temerge_can_delete = false;
-#define EnergyShank_temerge_fire(_instanceList)       temerge_can_delete = false;
-#define LightningSlash_temerge_fire(_instanceList)    temerge_can_delete = false;
-#define BloodSlash_temerge_fire(_instanceList)        temerge_can_delete = false;
-#define GuitarSlash_temerge_fire(_instanceList)       temerge_can_delete = false;
-#define CustomSlash_temerge_fire(_instanceList)       temerge_can_delete = false;
-
-
+#define Slash_temerge_fire(_at)
+	temerge_can_delete = false;
+	projectile_add_temerge_scale(self, -0.25);
+	
+#define EnergySlash_temerge_fire(_at)
+	Slash_temerge_fire(_at);
+	
+#define EnergyHammerSlash_temerge_fire(_at)
+	Slash_temerge_fire(_at);
+	
+#define LightningSlash_temerge_fire(_at)
+	Slash_temerge_fire(_at);
+	
+#define BloodSlash_temerge_fire(_at)
+	Slash_temerge_fire(_at);
+	
+#define GuitarSlash_temerge_fire(_at)
+	Slash_temerge_fire(_at);
+	
+#define CustomSlash_temerge_fire(_at)
+	Slash_temerge_fire(_at);
+	
+	
+#define Shank_temerge_fire(_at)
+	temerge_can_delete = false;
+	projectile_add_temerge_scale(self, -0.1);
+	
+#define EnergyShank_temerge_fire(_at)
+	Shank_temerge_fire(_at);
+	
+	
 #define ThrownWep_temerge_fire(_at)
 	 // Merge Weapon:
 	wep                = weapon_add_temerge(wep, _at.wep);

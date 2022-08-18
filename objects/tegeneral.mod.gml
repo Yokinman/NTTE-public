@@ -4949,7 +4949,7 @@
 		
 		 // Sounds:
 		if(!call(scr.area_get_underwater, GameCont.area)){
-			if(instance_is(self, hitme)){
+			if(instance_is(self, hitme) || instance_is(self, CampChar)){
 				call(scr.sound_play_at, x, y, sndAssassinHit, 1 + orandom(0.3), abs(other.zspeed) / 4);
 			}
 			else if(instance_is(self, chestprop)){
@@ -4982,7 +4982,7 @@
 				mask_index = ((mask_index < 0) ? sprite_index : mask_index);
 				
 				 // Visual:
-				sprite_index = spr.TopTiny[? sprite_index][(_x >= x + 8), (_y >= y + 8)];
+				sprite_index = spr.TopTiny[? sprite_index][_x >= x + 8][_y >= y + 8];
 				image_index  = irandom(image_number - 1);
 				
 				 // Fix Drawing Order:

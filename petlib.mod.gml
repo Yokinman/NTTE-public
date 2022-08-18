@@ -4914,6 +4914,7 @@
 #define ntte_setup_LastDie(_inst)
 	 // Spawn Guardian Pet:
 	with(_inst){
+		team = 0;
 		with(call(scr.pet_create, x, y, "Guardian")){
 			sprite_index = spr_appear;
 			team         = other.team;

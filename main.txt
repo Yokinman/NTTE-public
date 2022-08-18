@@ -1,2 +1,3 @@
 /loadmod teloader
+/timeout 600
 /load main2

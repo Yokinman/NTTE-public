@@ -102,7 +102,7 @@
 		sprite_index = spr_idle;
 		
 		 // Vars:
-		meleedamage = 2;
+	//	meleedamage = 2;
 		white       = true;
 		area        = null;
 		

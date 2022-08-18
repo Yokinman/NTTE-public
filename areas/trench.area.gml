@@ -48,7 +48,8 @@
 #define area_goal              return 150;
 #define area_next              return [area_city, 1];
 #define area_music             return ((GameCont.proto == true) ? mus.TrenchB : mus.Trench);
-#define area_music_boss        return mus.PitSquid;
+#define area_music_boss        return (array_length(instances_matching_le(instances_matching(instances_matching(obj.PitSquid, "intro", false), "can_intro", true), "rise_delay", 0)) ? mus.PitSquidIntroLoop  : mus.PitSquid);
+#define area_music_boss_intro  return (array_length(instances_matching_le(instances_matching(instances_matching(obj.PitSquid, "intro", false), "can_intro", true), "rise_delay", 0)) ? mus.PitSquidIntroStart : mus.PitSquidIntro);
 #define area_ambient           return amb101;
 #define area_background_color  return make_color_rgb(100, 114, 127);
 #define area_shadow_color      return c_black;

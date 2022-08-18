@@ -1,3 +1,36 @@
+2.06 ~ Encore
+	
+	         @(sprite:menu/banners/sprEncoreMain.png:1)
+	+ New music for @yLair@s, @(sprite:areas/Crystal/sprRedText.png:12:-0.8), and NT:TE's bosses. @(sprite:pets/Coast/sprPetParrotNote.png:5:2)
+	+ New unlockable skins for @bRobot@s, @wEyes@s, & @yY.V.
+	+ New sounds for NT:TE's characters & the @wBig Shots.
+	+ New campfire visuals for NT:TE's characters. @(sprite:races/Parrot/sprParrotMenu.png:40:-0.4:12:12)
+	+ Improved visuals @sfor various enemies, menu icons, & @rCrystal's @sunlockable skin. @(sprite:enemies/Gull/sprGullIdle.png:4:-0.4:12:8)
+	+ @yMerged Golden Weapons @ssupport weapon skins.
+	+ @bBonus Ammo & HP @schests give an extra point of actual @wAmmo & HP @sper bonus point. @w@(sprite:chests/sprBonusAmmoPickup.png:1:0)+@(sprite:sprAmmo:0:0)
+	+ @bBonus Ammo & HP @ssupport @yGun Bond @s& @rBlood Bond.
+	+ @bCrown of Bonus @saffects each level's initial chests.
+	+ NT:TE now autosaves progress on loading screens.
+	~ @bI.D.P.D. Chests @sno longer close the portal instantly.
+	~ The @yCrown Vault's @schest room spawns in lore vaults if the first @wArtifact @swas already collected.
+	~ Reduced the slash size & reload of merged weapons with melee stocks. @w@(sprite:sprWrench:0:0)+@(sprite:sprNader:0:0)
+	~ Increased @wSeal King's @rHP @sand falling self-damage.
+	~ Reduced the @wSeal King @sstatue's @rHP.
+	~ Reworded Beetle's @pThrone Butt @sdescription.
+	~ @wChaos Hearts @sno longer deal contact damage.
+	* Loading NT:TE sets the co-op timeout to 10 minutes.
+	* Fixed pets executing @bCaptain @sby themselves.
+	* Fixed @bOasis's @sweapon chests not being clams.
+	* Fixed errors from firing some merged @bLightning @s& @gUltra Crossbow @sweapons.
+	* Fixed some merged @bLaser Cannons @scosting no ammo.
+	* Fixed @yLair's @sentrance permanently destroying the game over buttons when it opens.
+	* Fixed NT:TE's characters animating if random was selected at the campfire. @(sprite:races/Parrot/sprParrotMenuSelected.png:30:-0.4:16:12)
+	* Fixed NT:TE's mutation HUD icons being offset if a modded mutation was obtained using @gPatience.
+	* Fixed @bCoast @sheart chunks having no walls in @r@(sprite:areas/Crystal/sprRedText.png:12:-0.8).
+	* Fixed the @wCrown of Crime's @smax bounty event appearing in special areas.
+	* Fixed artifacts being used as @wScythe @sammo.
+	* Fixed the game freezing from crafting the @wScythe.
+	
 2.05 ~ Final Provisions
 	
 	       @(sprite:menu/banners/sprFinalMain.png:1)
