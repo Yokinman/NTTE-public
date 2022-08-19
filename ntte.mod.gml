@@ -12,9 +12,9 @@
 	script_bind(CustomDraw,    draw_top_shadows, -6, true);
 	global.map_bind = ds_map_create();
 	global.map_bind[? "pause"] = noone;
-	global.map_bind[? "load" ] = script_bind(CustomDraw, script_ref_create(ntte_map,  -70, 7, null), object_get_depth(GenCont) - 1, false);
-	global.map_bind[? "dead" ] = script_bind(CustomDraw, script_ref_create(ntte_map, -120, 4, 0),    -16, false);
-	global.hud_bind            = script_bind(CustomDraw, script_ref_create(ntte_hud, false, 0),      -16, true);
+	global.map_bind[? "load" ] = script_bind(CustomDraw, script_ref_create(ntte_map,  -70, 7, null), -1001, false);
+	global.map_bind[? "dead" ] = script_bind(CustomDraw, script_ref_create(ntte_map, -120, 4, 0),    -16,   false);
+	global.hud_bind            = script_bind(CustomDraw, script_ref_create(ntte_hud, false, 0),      -16,   true);
 	if("bind_setup_depth_list" not in ntte){
 		ntte.bind_setup_depth_list = [];
 		with([
@@ -81,8 +81,13 @@
 		ntte_active = true;
 		if(instance_exists(Menu)){
 			with(SubTopCont){
-				with(instance_create(0, 0, GameObject)){
-					instance_change(SubTopCont, true);
+				try{
+					instance_create(0, 0, SubTopCont);
+				}
+				catch(_error){
+					with(instance_create(0, 0, GameObject)){
+						instance_change(SubTopCont, true);
+					}
 				}
 				instance_destroy();
 			}
@@ -3981,7 +3986,7 @@
 		
 		 // Make Flying Ravens/Lil Hunter Draw Themselves:
 		if(instance_exists(RavenFly) || instance_exists(LilHunterFly)){
-			with(instances_matching_gt([RavenFly, LilHunterFly], "depth", object_get_depth(SubTopCont))){
+			with(instances_matching_gt([RavenFly, LilHunterFly], "depth", -6)){
 				depth   = -9;
 				visible = true;
 			}
@@ -3991,14 +3996,14 @@
 			if(array_length(_inst)){
 				with(_inst){
 					if(anim_end){
-						depth = object_get_depth(Raven);
+						depth = -2;
 					}
 				}
 			}
 			_inst = instances_matching(instances_matching_ge(instances_matching(LilHunterFly, "sprite_index", sprLilHunterLand), "z", -10 * current_time_scale), "depth", -9);
 			if(array_length(_inst)){
 				with(_inst){
-					depth = object_get_depth(LilHunter);
+					depth = -2;
 				}
 			}
 		}

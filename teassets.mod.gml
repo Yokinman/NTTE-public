@@ -4159,6 +4159,7 @@ var _shine = argument_count > 4 ? argument[4] : shnNone;
 	}
 	
 	 // Ensure Script Bindings Exist:
+	var _canResetSubTopCont = false;
 	with(ds_map_values(global.bind)){
 		with(self){
 			if(!instance_exists(id)){
@@ -4168,21 +4169,25 @@ var _shine = argument_count > 4 ? argument[4] : shnNone;
 					depth      = other.depth;
 					visible    = other.visible;
 					persistent = true;
-					if(depth == object_get_depth(SubTopCont)){
-						if(fork()){
-							wait 0;
-							with(SubTopCont){
-								with(instance_create(0, 0, GameObject)){
-									instance_change(SubTopCont, true);
-								}
-								instance_destroy();
-							}
-							exit;
-						}
+					if(depth == -6){
+						_canResetSubTopCont = true;
 					}
 				}
 			}
 		}
+	}
+	if(_canResetSubTopCont && fork()){
+		wait 0;
+		with(SubTopCont){
+			if(global.is_gms2){
+				instance_create(0, 0, SubTopCont);
+			}
+			else with(instance_create(0, 0, GameObject)){
+				instance_change(SubTopCont, true);
+			}
+			instance_destroy();
+		}
+		exit;
 	}
 	
 	 // Autosave (Return to Character Select):
@@ -4948,12 +4953,12 @@ var _shine = argument_count > 4 ? argument[4] : shnNone;
 	
 	var	_sprList = [[0, 0], [0, 0]],
 		_sprImg  = sprite_get_number(_spr),
-		_sprW    = sprite_get_width(_spr),
-		_sprH    = sprite_get_height(_spr),
+		_sprW    = sprite_get_width(_spr) / 2,
+		_sprH    = sprite_get_height(_spr) / 2,
 		_sprX    = sprite_get_xoffset(_spr),
 		_sprY    = sprite_get_yoffset(_spr);
 		
-	with(surface_setup("sprTopTiny", (_sprW / 2) * _sprImg, (_sprH / 2), 1)){
+	with(surface_setup("sprTopTiny", _sprW * _sprImg, _sprH, 1)){
 		free = true;
 		
 		for(var _x = 0; _x < 2; _x++){
@@ -4966,11 +4971,11 @@ var _shine = argument_count > 4 ? argument[4] : shnNone;
 						draw_sprite_part(
 							_spr,
 							_img,
-							(_sprW / 2) * (1 - _x),
-							(_sprH / 2) * (1 - _y),
-							(_sprW / 2),
-							(_sprH / 2),
-							(_sprW / 2) * _img,
+							_sprW * (1 - _x),
+							_sprH * (1 - _y),
+							_sprW,
+							_sprH,
+							_sprW * _img,
 							0
 						);
 					}
