@@ -7,14 +7,14 @@
 	}
 	
 	 // Bind Events:
-	script_bind(CustomStep,    ntte_step,        0,                            true);
-	script_bind(CustomEndStep, ntte_end_step,    0,                            true);
-	script_bind(CustomDraw,    draw_top_shadows, object_get_depth(SubTopCont), true);
+	script_bind(CustomStep,    ntte_step,         0, true);
+	script_bind(CustomEndStep, ntte_end_step,     0, true);
+	script_bind(CustomDraw,    draw_top_shadows, -6, true);
 	global.map_bind = ds_map_create();
 	global.map_bind[? "pause"] = noone;
 	global.map_bind[? "load" ] = script_bind(CustomDraw, script_ref_create(ntte_map,  -70, 7, null), object_get_depth(GenCont) - 1, false);
-	global.map_bind[? "dead" ] = script_bind(CustomDraw, script_ref_create(ntte_map, -120, 4, 0),    object_get_depth(TopCont) - 1, false);
-	global.hud_bind            = script_bind(CustomDraw, script_ref_create(ntte_hud, false, 0),      object_get_depth(TopCont) - 1, true);
+	global.map_bind[? "dead" ] = script_bind(CustomDraw, script_ref_create(ntte_map, -120, 4, 0),    -16, false);
+	global.hud_bind            = script_bind(CustomDraw, script_ref_create(ntte_hud, false, 0),      -16, true);
 	if("bind_setup_depth_list" not in ntte){
 		ntte.bind_setup_depth_list = [];
 		with([
@@ -81,7 +81,9 @@
 		ntte_active = true;
 		if(instance_exists(Menu)){
 			with(SubTopCont){
-				instance_create(0, 0, SubTopCont);
+				with(instance_create(0, 0, GameObject)){
+					instance_change(SubTopCont, true);
+				}
 				instance_destroy();
 			}
 		}

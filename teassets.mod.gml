@@ -1753,12 +1753,12 @@
 			BackpackDebris     = spr_add("sprBackpackDebris",     30, 6, 6);
 			
 			 // Backpacker (Deceased):
-			BackpackerIdle = [spr_add("sprBackpacker0", 1, 12, 12),
-			                  spr_add("sprBackpacker1", 1, 12, 12),
-			                  spr_add("sprBackpacker2", 1, 12, 12)];
-			BackpackerHurt = [spr_add("sprBackpacker0", 1, 12, 12, shnHurt),
-			                  spr_add("sprBackpacker1", 1, 12, 12, shnHurt),
-			                  spr_add("sprBackpacker2", 1, 12, 12, shnHurt)];
+			BackpackerIdle = [];
+			BackpackerHurt = [];
+			for(var i = 0; i < 3; i++){
+				array_push(BackpackerIdle, spr_add(`sprBackpacker${i}`, 1, 12, 12));
+				array_push(BackpackerHurt, spr_add(`sprBackpacker${i}`, 1, 12, 12, shnHurt));
+			}
 			
 			 // Bat Chests:
 			BatChest              = spr_add("sprBatChest",              1, 10, 10, shn20);
@@ -2894,8 +2894,11 @@
 	}
 	
 	 // Color/Alpha-Unblending Shader for Copying Drawn Stuff:
+	global.is_gms2 = false;
 	try{
-		if(!null){} // GMS1 only for now
+		if(!null){
+			global.is_gms2 = true;
+		}
 	}
 	catch(_error){
 		shader_add("Unblend",
@@ -3632,12 +3635,15 @@
 					}
 					
 					 // Game Paused:
-					else{ var i = 0; repeat(maxp){
-						if(button_pressed(i++, "paus")){
-							reset = true;
-							break;
+					else{
+						var i = 0;
+						repeat(maxp){
+							if(button_pressed(i++, "paus")){
+								reset = true;
+								break;
+							}
 						}
-					}}
+					}
 					
 					wait 0;
 				}
@@ -3757,16 +3763,6 @@
 	
 	 // Initialize Shader:
 	if(_shad == undefined){
-		var _beta = false;
-		
-		 // Partial Beta Fix:
-		try{
-			if(!null){
-				_beta = true;
-			}
-		}
-		catch(_error){}
-		
 		 // Add:
 		_shad = {
 			"name" : _name,
@@ -3781,21 +3777,18 @@
 			with(_shad){
 				while(true){
 					 // Create Shaders:
-					if(option_get("shaders") && (!_beta || (global.shad_active == name && !instance_exists(Menu)))){
+					if(option_get("shaders") && (!global.is_gms2 || (global.shad_active == name && !instance_exists(Menu)))){
 						if(shad == -1 && !instance_exists(Menu)){
-							try{
-								// GMS2
-								shad = script_execute(
+							shad = (
+								global.is_gms2
+								? script_execute(
 									shader_create,
 									string_replace_all(string_replace_all(vert, "matrix_world_view_projection;", "_gm_Matrices[5];"), "matrix_world_view_projection", "transpose(_gm_Matrices[4])"),
 									frag,
 									shader_kind_hlsl
-								);
-							}
-							catch(_error){
-								// GMS1
-								shad = shader_create(vert, frag);
-							}
+								)
+								: shader_create(vert, frag)
+							);
 						}
 					}
 					
@@ -4179,7 +4172,9 @@ var _shine = argument_count > 4 ? argument[4] : shnNone;
 						if(fork()){
 							wait 0;
 							with(SubTopCont){
-								instance_create(0, 0, SubTopCont);
+								with(instance_create(0, 0, GameObject)){
+									instance_change(SubTopCont, true);
+								}
 								instance_destroy();
 							}
 							exit;
