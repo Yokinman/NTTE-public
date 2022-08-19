@@ -843,6 +843,7 @@
 				spr_add("sprSabre",       1, -2,  1),
 				spr_add("sprBlunderbuss", 1,  7,  1),
 				spr_add("sprRepeater",    1,  6,  2),
+				mskNone,
 				sprBanditGun
 			];
 			for(var i = 0; i <= 6; i++){
