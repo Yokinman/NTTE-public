@@ -2427,7 +2427,8 @@
 	
 	 // Biggest Weapon Chest:
 	var	_lastSeed     = random_get_seed(),
-		_lastWepDrops = GameCont.wepdrops;
+		_lastWepDrops = GameCont.wepdrops,
+		_lastNoChest  = GameCont.nochest;
 		
 	GameCont.ntte_can_spawn_ultra_quasar_rifle = true;
 	
@@ -2472,13 +2473,13 @@
 	}
 	
 	random_set_seed(_lastSeed);
+	GameCont.nochest  = _lastNoChest;
 	GameCont.wepdrops = _lastWepDrops;
 	GameCont.ntte_can_spawn_ultra_quasar_rifle = false;
 	
 	 // Flies:
 	with(MaggotSpawn){
-		var _num = irandom_range(0, 2);
-		if(_num > 0) repeat(_num){
+		repeat(irandom_range(0, 2)){
 			call(scr.obj_create, x + orandom(12), y + orandom(8), "FlySpin");
 		}
 	}
