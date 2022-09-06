@@ -216,7 +216,7 @@
 		"Scorpion" : 1,
 		"Maggot"   : 1,
 		"Skull"    : 1,
-		"Dummy"    : (instance_exists(WantBoss) && GameCont.subarea < 3)
+		"Dummy"    : ((GameCont.subarea < 3 && variable_instance_get(GameCont, "ntte_bigbandit_spawn", 0) <= 0) ? 1 : 0)
 	});
 	dummy_spawn = 1;
 	dummy_music = false;

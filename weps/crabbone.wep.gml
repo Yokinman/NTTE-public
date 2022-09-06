@@ -54,7 +54,7 @@
 			call(scr.wep_raw, bwep) == mod_current
 		){
 			var _wep = wep;
-			if(!_wepXinfo.quest_part_index < 0){
+			if(_wepXinfo.quest_part_index < 0){
 				return 4; // 1-3
 			}
 		}
@@ -65,9 +65,14 @@
 	
 #define weapon_type(_wep)
 	 // Return Other Weapon's Ammo Type:
-	if(instance_is(self, AmmoPickup) && instance_is(other, Player) && other.wep == _wep){
+	if(instance_is(self, AmmoPickup) && instance_is(other, Player)){
 		with(other){
-			return weapon_get_type(bwep);
+			var _otherWep = ((_wep == wep) ? bwep : wep);
+			with(UberCont){ // just in case infinite loop
+				with(self){
+					return weapon_get_type(_otherWep);
+				}
+			}
 		}
 	}
 	
