@@ -5066,7 +5066,7 @@
 		return self;
 	}
 	
-#define UnlockCont_step
+#define UnlockCont_end_step
 	if(instance_exists(Menu)){
 		instance_destroy();
 		exit;

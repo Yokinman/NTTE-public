@@ -5718,10 +5718,12 @@
 					 // Restore Ammo:
 					if("bonus_ammo_save" in self){
 						for(var i = min(array_length(ammo), array_length(bonus_ammo_save)) - 1; i >= 0; i--){
-							var _diff = (bonus_ammo_save[i] - ammo[i]);
+							var _diff = bonus_ammo_save[i] - ammo[i];
 							if(_diff > 0){
-								ammo[i] += _diff;
-								_ammo   += _diff;
+								if(bonus_ammo_save[i] <= typ_amax[i] || ("bonus_ammo_tick" in self && bonus_ammo_tick != 0)){
+									ammo[i] += _diff;
+									_ammo   += _diff;
+								}
 							}
 						}
 					}
